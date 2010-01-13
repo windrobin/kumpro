@@ -55,22 +55,22 @@ void CSetterDlg::OnOK() {
 	if (0 == (r = rk.Open(HKEY_LOCAL_MACHINE, _T("SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters"), KEY_WRITE))) {
 		if (m_nKA == 0) {
 			if (0 == (r = rk.DeleteValue(_T("KeepAliveTime"))) || r == ERROR_FILE_NOT_FOUND) {
-				AfxMessageBox(_T("ê›íËÇµÇ‹ÇµÇΩÅB"), MB_OK | MB_ICONINFORMATION);
+				AfxMessageBox(IDS_SET_OK, MB_OK | MB_ICONINFORMATION);
 			}
 			else {
-				AfxMessageBox(_T("é∏îsÇµÇ‹ÇµÇΩÅB"), MB_OK | MB_ICONEXCLAMATION);
+				AfxMessageBox(IDS_SET_ERR, MB_OK | MB_ICONINFORMATION);
 			}
 		}
 		else {
 			if (0 == (r = rk.SetDWORDValue(_T("KeepAliveTime"), m_nKA * 1000u * 60u))) {
-				AfxMessageBox(_T("ê›íËÇµÇ‹ÇµÇΩÅB"), MB_OK | MB_ICONINFORMATION);
+				AfxMessageBox(IDS_SET_OK, MB_OK | MB_ICONINFORMATION);
 			}
 			else {
-				AfxMessageBox(_T("é∏îsÇµÇ‹ÇµÇΩÅB"), MB_OK | MB_ICONEXCLAMATION);
+				AfxMessageBox(IDS_SET_ERR, MB_OK | MB_ICONINFORMATION);
 			}
 		}
 	}
 	else {
-		AfxMessageBox(_T("é∏îsÇµÇ‹ÇµÇΩÅB"), MB_OK | MB_ICONEXCLAMATION);
+		AfxMessageBox(IDS_SET_ERR, MB_OK | MB_ICONINFORMATION);
 	}
 }

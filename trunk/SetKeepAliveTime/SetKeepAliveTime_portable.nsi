@@ -33,6 +33,7 @@
 ;--------------------------------
 ;Pages
 
+  ${LicensePage} "License.rtf"
   ${Page} Directory
   ${Page} InstFiles
   

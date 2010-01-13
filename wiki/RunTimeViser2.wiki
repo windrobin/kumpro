@@ -1,0 +1,13 @@
+#summary RunTimeViser2についての概要
+#labels Featured,Phase-Deploy
+
+= ご紹介 =
+
+Windowsの起動した・終了した日時の可視化を助けます
+
+http://kumpro.googlecode.com/svn/trunk/RunTimeViser2/ss.jpg
+
+= 詳細 =
+
+使用例:
+  * 夜中にマシンのファイルをバックアップをするように設定している場合。バックアップが出来ていなかった場合の原因として、マシンの電源が切れていなかったかどうかを検証する事例。

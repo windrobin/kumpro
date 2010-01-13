@@ -95,7 +95,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
+ FILEVERSION 1,1,0,0
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -113,7 +113,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "HIRAOKA HYPERS TOOLS, Inc."
             VALUE "FileDescription", "TCPのキープアライブ設定を見直します"
-            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "FileVersion", "1, 1, 0, 0"
             VALUE "InternalName", "SetKeepAliveTime"
             VALUE "LegalCopyright", "Copyright (C) 2010 HIRAOKA HYPERS TOOLS, Inc."
             VALUE "OriginalFilename", "SetKeepAliveTime.exe"
@@ -125,6 +125,18 @@ BEGIN
     BEGIN
         VALUE "Translation", 0x411, 1200
     END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_SET_OK              "設定しました。\n\n設定は、再起動してから有効になります。"
+    IDS_SET_ERR             "設定に失敗しました。"
 END
 
 #endif    // 日本語 resources

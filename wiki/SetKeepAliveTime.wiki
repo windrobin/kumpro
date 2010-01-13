@@ -5,6 +5,8 @@
 
 TCPキープアライブの時間を長く設定したり、短く設定したりできます。
 
+http://kumpro.googlecode.com/svn/trunk/SetKeepAliveTime/ss.jpg
+
 = 詳細 =
 
 実用例1:

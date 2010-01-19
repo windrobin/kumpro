@@ -1,0 +1,14 @@
+#summary LANIPDiscoveryにつきまして
+#labels Featured,Phase-Design
+
+= Introduction =
+
+IPアドレスのリストを与えて、MACアドレス・NetBIOS名の情報を取得し一覧表示します。
+
+http://kumpro.googlecode.com/svn/trunk/LANIPDiscovery/ss.jpg
+
+
+= Details =
+
+効能：
+  * どこでもLAN(GMOインターネット株式会社様の商品)を使っている環境で、いまどこのPCがLANとつながっているか判らない場合に、IPアドレスからMACアドレス・NetBIOS名を得ることで、接続先の判別を助ける効能。

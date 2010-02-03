@@ -5,7 +5,7 @@
 
 マイプレースのカスタマイズを支援いたします。
 
-http://kumpro.googlecode.com/svn-history/r15/trunk/EditMyPlace2/ss.jpg
+http://kumpro.googlecode.com/svn/trunk/EditMyPlace2/ss.jpg
 
 = Download =
 

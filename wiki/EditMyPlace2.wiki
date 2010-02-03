@@ -7,6 +7,10 @@
 
 http://kumpro.googlecode.com/svn-history/r15/trunk/EditMyPlace2/ss.jpg
 
+= Download =
+
+こちらのページから入手できます: http://code.google.com/p/kumpro/downloads/list?can=2&q=EditMyPlace2
+
 = Details =
 
 効能1:

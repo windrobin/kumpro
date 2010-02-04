@@ -3,7 +3,7 @@
 
 = Introduction =
 
-マイプレースのカスタマイズを支援いたします。
+Windowsのプレースバーや、Microsoft Officeのマイプレースにつきまして、カスタマイズを支援いたします。
 
 http://kumpro.googlecode.com/svn/trunk/EditMyPlace2/ss.jpg
 

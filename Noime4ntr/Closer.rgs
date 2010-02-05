@@ -1,0 +1,44 @@
+HKCR
+{
+	Noime4ntr.Closer.1 = s 'Closer Class'
+	{
+		CLSID = s '{3A01783B-18FE-494F-AAEA-914B34CD5844}'
+	}
+	Noime4ntr.Closer = s 'Closer Class'
+	{
+		CLSID = s '{3A01783B-18FE-494F-AAEA-914B34CD5844}'
+		CurVer = s 'Noime4ntr.Closer.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {3A01783B-18FE-494F-AAEA-914B34CD5844} = s 'Noime4ntr BHO'
+		{
+			ProgID = s 'Noime4ntr.Closer.1'
+			VersionIndependentProgID = s 'Noime4ntr.Closer'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{9EAF3694-AC41-4559-976F-F4B1D66FC039}'
+		}
+	}
+}
+HKLM {
+  NoRemove SOFTWARE {
+    NoRemove Microsoft {   
+      NoRemove Windows {
+        NoRemove CurrentVersion {
+          NoRemove Explorer {
+            NoRemove 'Browser Helper Objects' {
+              ForceRemove '{3A01783B-18FE-494F-AAEA-914B34CD5844}' = s 'Noime4ntr' {
+                val 'NoExplorer' = d '1'
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

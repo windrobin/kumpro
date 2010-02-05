@@ -1,0 +1,61 @@
+#summary Noime4ntrご説明
+#labels Featured,Phase-Design,Phase-Deploy,Phase-Support
+
+= Introduction =
+
+Noime4ntrは、INTERWORK様ご提供の商品、NTRサポートに対する非公式の補助ツールです。
+
+= 課題等 =
+
+遠隔操作の実施中、漢字キーを押下した後、文字・数字などの入力がオペレータ側のIMEに取得され、変換され、遠隔操作が困難になる問題が確認されました。
+
+サポートチャットにて報告・相談致しました所、本現象に対する解消策は提示されませんでした。
+
+そこで、独自で解決する方法を検討致しました:
+  * 漢字キーを押下した際に、
+  * IMEが開かないような細工師をしのばせる事により、
+  * 問題の発生を防ぐことができる旨の調査結果が得られました。
+
+また、次のような方法で実装致しました:
+  * ATLを採用、
+  * Browser Helper Object (ActiveX DLL)を構築し、
+  * NavigateComplete2イベントを受け付けるようにし、受け付けますタイミングにて、
+  * 対象となります遠隔操作の部品に対して`ImmAssociateContext(hwnd, NULL);`を実施致します。
+
+私製の部品Noime4ntr.dllを配布する方法としまして、nsisを採用致しました。
+
+= 動作環境 =
+
+Internet Explorerをご利用の環境でのみ効力を発揮致します。
+
+= 導入方法 =
+
+セットアップ方法を、ご案内致します:
+  * 上部のメニュー段から、[http://code.google.com/p/kumpro/downloads/list?can=2&q=Noime4ntr Downloads]を開きます。
+  * Noime4ntrに関するプログラムをダウンロードし、
+  * 実行致します。
+  * 続きまして、 *License Agreement* 画面が出て参ります。
+  * ご一読頂きまして、ご同意頂けましたら *I Agree* ボタンをクリック致します。
+  * 続きまして、 *Select Installation Folder* 画面が出て参ります。
+  * そのまま *Install* ボタンをクリック致します。
+  * セットアップが始まります。
+  * 完了いたしましたら、 *Close* ボタンで、終了致します。
+
+削除方法を、ご案内いたします:
+  * プログラムの追加と削除の画面を開きます。例： *スタート* → *ファイル名を指定して実行* → *appwiz.cpl* → *OK* クリック
+  * インストールされているプログラムの一覧から、 *Noime4ntr* を探し出します。
+  * *削除* 致します。
+  * 続きまして、 *Uninstall* 画面が出てまいります。
+  * *Next* ボタンをクリック致します。
+  * 続きまして、 *Confirm Uninstall* 画面が出てまいります。
+  * *Uninstall* ボタンをクリック致します。
+  * 最後に、 *Completed* 画面に切り替わります。
+  * *Close* ボタンをクリックし、終了致します。
+
+= サポート =
+
+Noime4ntrに関するサポートは提供されません。
+
+修正BSDライセンス(New BSD License)を適用し、ご提供致します。
+
+無保証でございますので、自己責任でご利用ください。

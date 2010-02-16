@@ -1,5 +1,5 @@
-#summary SetKeepAliveTime使い方
-#labels Featured,Phase-Deploy
+#summary SetKeepAliveTimeご紹介
+#labels Featured,Phase-Design
 
 = ご紹介 =
 

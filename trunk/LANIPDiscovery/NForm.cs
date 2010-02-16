@@ -12,6 +12,7 @@ using System.Xml;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using LANIPDiscovery.Properties;
 
 namespace LANIPDiscovery {
     public partial class NForm : Form {
@@ -99,7 +100,10 @@ namespace LANIPDiscovery {
         void UpdateText(String key, int i, String val) {
             if (InvokeRequired) { Invoke(new _UpdateText(UpdateText), key, i, val); return; }
 
-            lvl.Items[key].SubItems[i].Text = val;
+            try {
+                lvl.Items[key].SubItems[i].Text = val;
+            }
+            catch (NullReferenceException) { }
         }
 
         class Quest {
@@ -274,6 +278,53 @@ namespace LANIPDiscovery {
             Location = Screen.PrimaryScreen.WorkingArea.Location + Screen.PrimaryScreen.WorkingArea.Size
                 - Size;
         }
+
+        private void lvl_MouseDown(object sender, MouseEventArgs e) { }
+
+        void App(String exe, String arg) {
+            foreach (ListViewItem lvi in lvl.SelectedItems) {
+                try {
+                    ProcessStartInfo psi = new ProcessStartInfo(exe, arg.Replace("*", lvi.Text));
+                    psi.UseShellExecute = false;
+                    Process.Start(psi);
+                }
+                catch (Exception err) {
+                    MessageBox.Show(this, "失敗しました。\n\n" + err, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+                break;
+            }
+        }
+
+        private void mstscadminToolStripMenuItem_Click(object sender, EventArgs e) { App("mstsc.exe", "/admin /v:*"); }
+
+        private void mstscconsoleToolStripMenuItem_Click(object sender, EventArgs e) { App("mstsc.exe", "/console /v:*"); }
+
+        private void mstscToolStripMenuItem_Click(object sender, EventArgs e) { App("mstsc.exe", " /v:*"); }
+
+        string VncViewer {
+            get {
+                String fpexe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"RealVNC\vncviewer.exe");
+
+                if (Settings.Default.VNCViewer.Length != 0 && File.Exists(Settings.Default.VNCViewer)) {
+                    fpexe = Settings.Default.VNCViewer;
+                }
+
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.FileName = fpexe;
+                ofd.Filter = "*.exe|*.exe||";
+                ofd.Title = "vnc viewerを選んでください。";
+
+                if (ofd.ShowDialog(this) == DialogResult.OK) {
+                    Settings.Default.VNCViewer = fpexe;
+                    Settings.Default.Save();
+                    return fpexe;
+                }
+
+                return "";
+            }
+        }
+
+        private void vncviewerToolStripMenuItem_Click(object sender, EventArgs e) { App(VncViewer, " *"); }
 
     }
 }

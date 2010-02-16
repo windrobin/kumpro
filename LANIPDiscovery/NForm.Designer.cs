@@ -23,6 +23,7 @@
         /// コード エディタで変更しないでください。
         /// </summary>
         private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NForm));
             this.tsc = new System.Windows.Forms.ToolStripContainer();
             this.lvl = new System.Windows.Forms.ListView();
@@ -32,10 +33,16 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsbEdit = new System.Windows.Forms.ToolStripButton();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
+            this.menu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mstscadminToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mstscconsoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mstscToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.vncviewerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsc.ContentPanel.SuspendLayout();
             this.tsc.TopToolStripPanel.SuspendLayout();
             this.tsc.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
             // tsc
@@ -62,6 +69,7 @@
             this.chAddr,
             this.chStat,
             this.chName});
+            this.lvl.ContextMenuStrip = this.menu;
             this.lvl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lvl.Font = new System.Drawing.Font("メイリオ", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lvl.FullRowSelect = true;
@@ -73,6 +81,7 @@
             this.lvl.TabIndex = 0;
             this.lvl.UseCompatibleStateImageBehavior = false;
             this.lvl.View = System.Windows.Forms.View.Details;
+            this.lvl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lvl_MouseDown);
             // 
             // chAddr
             // 
@@ -118,6 +127,44 @@
             this.tsbRefresh.Text = "更新 Alt+&R";
             this.tsbRefresh.Click += new System.EventHandler(this.tsbRefresh_Click);
             // 
+            // menu
+            // 
+            this.menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mstscadminToolStripMenuItem,
+            this.mstscconsoleToolStripMenuItem,
+            this.mstscToolStripMenuItem,
+            this.vncviewerToolStripMenuItem});
+            this.menu.Name = "menu";
+            this.menu.Size = new System.Drawing.Size(153, 114);
+            // 
+            // mstscadminToolStripMenuItem
+            // 
+            this.mstscadminToolStripMenuItem.Name = "mstscadminToolStripMenuItem";
+            this.mstscadminToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mstscadminToolStripMenuItem.Text = "mstsc /&admin";
+            this.mstscadminToolStripMenuItem.Click += new System.EventHandler(this.mstscadminToolStripMenuItem_Click);
+            // 
+            // mstscconsoleToolStripMenuItem
+            // 
+            this.mstscconsoleToolStripMenuItem.Name = "mstscconsoleToolStripMenuItem";
+            this.mstscconsoleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mstscconsoleToolStripMenuItem.Text = "mstsc /&console";
+            this.mstscconsoleToolStripMenuItem.Click += new System.EventHandler(this.mstscconsoleToolStripMenuItem_Click);
+            // 
+            // mstscToolStripMenuItem
+            // 
+            this.mstscToolStripMenuItem.Name = "mstscToolStripMenuItem";
+            this.mstscToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mstscToolStripMenuItem.Text = "mst&sc";
+            this.mstscToolStripMenuItem.Click += new System.EventHandler(this.mstscToolStripMenuItem_Click);
+            // 
+            // vncviewerToolStripMenuItem
+            // 
+            this.vncviewerToolStripMenuItem.Name = "vncviewerToolStripMenuItem";
+            this.vncviewerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.vncviewerToolStripMenuItem.Text = "vncviewer";
+            this.vncviewerToolStripMenuItem.Click += new System.EventHandler(this.vncviewerToolStripMenuItem_Click);
+            // 
             // NForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -135,6 +182,7 @@
             this.tsc.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.menu.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -149,6 +197,11 @@
         private System.Windows.Forms.ColumnHeader chAddr;
         private System.Windows.Forms.ColumnHeader chStat;
         private System.Windows.Forms.ColumnHeader chName;
+        private System.Windows.Forms.ContextMenuStrip menu;
+        private System.Windows.Forms.ToolStripMenuItem mstscadminToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mstscconsoleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mstscToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem vncviewerToolStripMenuItem;
     }
 }
 

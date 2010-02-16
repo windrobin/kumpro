@@ -7,6 +7,10 @@ TCPキープアライブの時間を長く設定したり、短く設定した�
 
 http://kumpro.googlecode.com/svn/trunk/SetKeepAliveTime/ss.jpg
 
+= 手順 =
+
+導入・設置方法につきまして、手順をご用意致しました。PDFファイルを入手できます。http://kumpro.googlecode.com/files/SetKeepAliveTimeHowto.pdf
+
 = 詳細 =
 
 実用例1:

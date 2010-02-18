@@ -3,7 +3,11 @@
 
 = Introduction =
 
-Noime4ntrは、INTERWORK様ご提供の商品、NTRサポートに対する非公式の補助ツールです。
+Noime4ntrは、NTRサポートに対する、非公式の補助ツールです。
+
+※ NTRサポートは、INTERWORK様ご提供の商品です。
+
+※ 本件につきましては、INTERWORK様による協力・評価・承認等を含む関与は *一切ございません* 旨をご了解ください。
 
 = 課題等 =
 
@@ -19,12 +23,13 @@ Noime4ntrは、INTERWORK様ご提供の商品、NTRサポートに対する非�
   * 問題を回避できる旨。
 
 実現するために、次のような方法で実装致しました:
-  * ATLを採用、
   * Browser Helper Object (ActiveX DLL)を構築し、
   * NavigateComplete2イベントを受け付けるようにし、受け付けますタイミングにて、
   * 対象となります遠隔操作の部品に対して`ImmAssociateContext(hwnd, NULL);`を実施致します。
 
-実装致しました私製の部品 Noime4ntr.dll を配布する方法としまして、Nullsoft様ご提供の nsis を採用致しました。
+実装しました所、うまく作用することが確認できました。
+
+また、この度実装しました私製の部品 Noime4ntr.dll を配布する方法としまして、Nullsoft様ご提供の nsis を採用致しました。
 
 = 動作環境 =
 

@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+  <title>監査内容をセキュリティログに記録する方法</title>
+</head>
+<body>
+    <h1>監査内容をセキュリティログに記録する方法</h1>概要：<br /><ul>
+      <li>監査の結果は、初期状態でセキュリティログに記録するようになっていません。</li>
+      <li>削除等のファイル操作を追跡するためにファイル・フォルダを監査対象に設定した後、監査の結果をセキュリティログに記録する方法をご案内致します。</li>
+    </ul>対象環境：<br /><ul>
+      <li>Microsoft Windows 2000又はWindows XP Pro</li><li>Windowsの管理者権限・Administrators権限が必要です</li>
+    </ul>手順：<br /><ol>
+      <li>
+        「スタート」→「ファイル名を指定して実行」<br />→「<code style="font-weight: bold;">SECPOL.MSC</code>」実行。「ローカル セキュリティ設定」が立ち上がって参ります。
+      </li>
+      <li>左側にて、「セキュリティの設定」選択、</li>
+      <li>「ローカル ポリシー」選択、</li>
+      <li>「監査ポリシー」選択、</li>
+      <li>右側にて、「オブジェクト アクセスの監査」のプロパティを開く、「成功」をチェックし有効にします。</li><li>「アカウント ログオン イベントの監査」と「ログオン イベントの監査」も同様にします。</li>
+      <li>「セキュリティの設定」を右クリックし、「再読み込み」を選択します。</li>
+    </ol><img style="width: 647px; height: 315px;" alt="" src="sssecpol.png" />
+  </body></html>

@@ -12,7 +12,7 @@
 ;--------------------------------
 ;General
   !define APP "Jikaki"
-  !define VER "1.0.0"
+  !define VER "1.1.0"
 
   ;Name and file
   Name "${APP} - ${VER}"
@@ -64,4 +64,8 @@ Section "Add to Start menu"
   CreateShortcut "$SMPROGRAMS\jikaki.lnk" "$INSTDIR\jikaki.exe"
 
   Exec 'explorer.exe /select,"$SMPROGRAMS\jikaki.lnk"'
+SectionEnd
+
+Section "Launch"
+  Exec '"$INSTDIR\jikaki.exe"'
 SectionEnd

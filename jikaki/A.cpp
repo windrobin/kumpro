@@ -146,7 +146,9 @@ LRESULT CALLBACK WindowProc(
 					0, 0, 0, 0, hwnd, NULL, s_hInstApp, NULL);
 				if (s_hWndRich == NULL)
 					return (LRESULT)-1;
-				DoInit();
+				if (!DoLoad()) {
+					DoInit();
+				}
 				goto _resize;
 			}
 		case WM_SIZE:
@@ -158,6 +160,11 @@ _resize:
 				}
 				break;
 			}
+		case WM_CLOSE:
+			{
+				DoSave();
+				break;
+			}
 		case WM_DESTROY:
 			{
 				PostQuitMessage(0);
@@ -165,12 +172,27 @@ _resize:
 			}
 		case WM_COMMAND:
 			{
-				if (wParam == ID_NEW)
+				switch (wParam) {
+				case ID_NEW:
 					DoInit();
-				if (wParam == ID_SAVE)
+					break;
+				case ID_SAVE:
 					DoSave();
-				if (wParam == ID_LOAD)
+					break;
+				case ID_LOAD:
 					DoLoad();
+					break;
+				}
+				break;
+			}
+		case WM_ACTIVATE:
+			{
+				switch (wParam) {
+				case WA_ACTIVE:
+				case WA_CLICKACTIVE:
+					SetFocus(s_hWndRich);
+					return 0;
+				}
 				break;
 			}
 	}

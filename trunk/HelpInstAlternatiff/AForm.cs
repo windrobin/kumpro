@@ -92,6 +92,15 @@ namespace HelpInstAlternatiff {
             Application.Exit();
         }
 
+        private void bQtcpl_Click(object sender, EventArgs e) {
+            try {
+                Process.Start("control.exe", " quicktime.cpl");
+            }
+            catch (Exception err) {
+                MessageBox.Show(this, "ãNìÆÇ…é∏îsÇµÇ‹ÇµÇΩÅB\n\n" + err.ToString(), Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+        }
+
 
     }
 }

@@ -14,7 +14,7 @@
 
   !define APP "HelpInstAlternatiff"
   !define COM "HIRAOKA HYPERS TOOLS, Inc."
-  !define VER "1.0.0"
+  !define VER "1.1.0"
 
   ;Name and file
   Name "${APP} ${VER}"
@@ -60,8 +60,8 @@ Section "Dummy Section" SecDummy
   !insertmacro CheckDotNET ${DOTNET_VERSION}
 
   ;ADD YOUR OWN FILES HERE...
-  File "bin\release\HelpInstAlternatiff.exe"
-  File "bin\release\HelpInstAlternatiff.pdb"
+  File "bin\x86\release\HelpInstAlternatiff.exe"
+  File "bin\x86\release\HelpInstAlternatiff.pdb"
   
   ;Store installation folder
   WriteRegStr HKCU "Software\${COM}\${APP}" "" $INSTDIR

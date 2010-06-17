@@ -30,6 +30,8 @@
             this.tsslUACRaised = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.tsslIL = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tsslIsAdmin = new System.Windows.Forms.ToolStripStatusLabel();
             this.wb = new System.Windows.Forms.WebBrowser();
             this.tstop = new System.Windows.Forms.ToolStrip();
             this.bRaise = new System.Windows.Forms.ToolStripButton();
@@ -37,8 +39,8 @@
             this.bInst = new System.Windows.Forms.ToolStripButton();
             this.bTest = new System.Windows.Forms.ToolStripButton();
             this.bReact = new System.Windows.Forms.ToolStripButton();
-            this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.tsslIsAdmin = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.bQtcpl = new System.Windows.Forms.ToolStripButton();
             this.tsc.BottomToolStripPanel.SuspendLayout();
             this.tsc.ContentPanel.SuspendLayout();
             this.tsc.TopToolStripPanel.SuspendLayout();
@@ -109,6 +111,19 @@
             this.tsslIL.Size = new System.Drawing.Size(10, 17);
             this.tsslIL.Text = "?";
             // 
+            // toolStripStatusLabel3
+            // 
+            this.toolStripStatusLabel3.Margin = new System.Windows.Forms.Padding(12, 3, 0, 2);
+            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
+            this.toolStripStatusLabel3.Size = new System.Drawing.Size(52, 17);
+            this.toolStripStatusLabel3.Text = "IsAdmin：";
+            // 
+            // tsslIsAdmin
+            // 
+            this.tsslIsAdmin.Name = "tsslIsAdmin";
+            this.tsslIsAdmin.Size = new System.Drawing.Size(10, 17);
+            this.tsslIsAdmin.Text = "?";
+            // 
             // wb
             // 
             this.wb.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -126,10 +141,12 @@
             this.toolStripSeparator1,
             this.bInst,
             this.bTest,
-            this.bReact});
+            this.bReact,
+            this.toolStripSeparator2,
+            this.bQtcpl});
             this.tstop.Location = new System.Drawing.Point(3, 0);
             this.tstop.Name = "tstop";
-            this.tstop.Size = new System.Drawing.Size(342, 25);
+            this.tstop.Size = new System.Drawing.Size(480, 25);
             this.tstop.TabIndex = 0;
             // 
             // bRaise
@@ -173,18 +190,19 @@
             this.bReact.Text = "Reactivate";
             this.bReact.Click += new System.EventHandler(this.bReact_Click);
             // 
-            // toolStripStatusLabel3
+            // toolStripSeparator2
             // 
-            this.toolStripStatusLabel3.Margin = new System.Windows.Forms.Padding(12, 3, 0, 2);
-            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
-            this.toolStripStatusLabel3.Size = new System.Drawing.Size(52, 17);
-            this.toolStripStatusLabel3.Text = "IsAdmin：";
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
-            // tsslIsAdmin
+            // bQtcpl
             // 
-            this.tsslIsAdmin.Name = "tsslIsAdmin";
-            this.tsslIsAdmin.Size = new System.Drawing.Size(10, 17);
-            this.tsslIsAdmin.Text = "?";
+            this.bQtcpl.Image = ((System.Drawing.Image)(resources.GetObject("bQtcpl.Image")));
+            this.bQtcpl.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.bQtcpl.Name = "bQtcpl";
+            this.bQtcpl.Size = new System.Drawing.Size(101, 22);
+            this.bQtcpl.Text = "Quicktime CPL";
+            this.bQtcpl.Click += new System.EventHandler(this.bQtcpl_Click);
             // 
             // AForm
             // 
@@ -228,6 +246,8 @@
         private System.Windows.Forms.ToolStripStatusLabel tsslIL;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
         private System.Windows.Forms.ToolStripStatusLabel tsslIsAdmin;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripButton bQtcpl;
     }
 }
 

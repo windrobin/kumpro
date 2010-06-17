@@ -9,12 +9,14 @@
 
   !include "XPUI.nsh"
 
+  !execute "InsertManifest.bat"
+
 ;--------------------------------
 ;General
 
   !define APP "HelpInstAlternatiff"
   !define COM "HIRAOKA HYPERS TOOLS, Inc."
-  !define VER "1.1.0"
+  !define VER "1.1.1"
 
   ;Name and file
   Name "${APP} ${VER}"

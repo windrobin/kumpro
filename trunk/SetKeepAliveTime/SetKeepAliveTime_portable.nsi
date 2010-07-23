@@ -12,10 +12,13 @@
 ;--------------------------------
 ;General
   !define APP "SetKeepAliveTime"
+  
+  !define MAJ 1
+  !define MIN 2
 
   ;Name and file
-  Name "${APP}"
-  OutFile "${APP}_portable.exe"
+  Name "${APP} ${MAJ}.${MIN}"
+  OutFile "${APP}_${MAJ}_${MIN}_portable.exe"
 
   ;Default installation folder
   InstallDir "$APPDATA\${APP}"

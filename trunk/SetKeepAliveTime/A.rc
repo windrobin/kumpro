@@ -8,7 +8,6 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
-#include "a.rc2"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -36,7 +35,6 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
-    "#include ""a.rc2""\r\n"
     "\0"
 END
 
@@ -54,7 +52,7 @@ END
 // Dialog
 //
 
-IDD_SETTER DIALOGEX 0, 0, 279, 127
+IDD_SETTER DIALOGEX 0, 0, 308, 179
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "SetKeepAliveTime"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -64,9 +62,14 @@ BEGIN
     EDITTEXT        IDC_KA,25,44,40,14,ES_AUTOHSCROLL | ES_NUMBER,WS_EX_RIGHT
     LTEXT           "分",IDC_STATIC,67,46,9,8
     LTEXT           "0 を指定しますと、標準の設定(2時間)に復元いたします。",IDC_STATIC,26,63,181,8
-    LTEXT           "例：\r\n2時間 ・・・ 7200\r\n15分　・・・ 900\r\n10分　・・・ 600",IDC_STATIC,26,76,75,37
-    DEFPUSHBUTTON   "設定",IDOK,222,7,50,14
-    PUSHBUTTON      "閉じる",IDCANCEL,222,24,50,14
+    LTEXT           "例：",IDC_STATIC,26,76,13,8
+    PUSHBUTTON      "9時間",IDC_H9,26,90,33,22
+    PUSHBUTTON      "6時間",IDC_H6,65,90,33,22
+    PUSHBUTTON      "2時間",IDC_H2,104,90,33,22
+    PUSHBUTTON      "15分間",IDC_M15,143,90,33,22
+    DEFPUSHBUTTON   "設定",IDOK,251,7,50,14
+    PUSHBUTTON      "閉じる",IDCANCEL,251,24,50,14
+    LTEXT           "レジストリの位置：\r\n\r\nHKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\r\nKeepAliveTime",IDC_STATIC,26,121,271,40
 END
 
 
@@ -81,9 +84,9 @@ BEGIN
     IDD_SETTER, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 272
+        RIGHTMARGIN, 301
         TOPMARGIN, 7
-        BOTTOMMARGIN, 120
+        BOTTOMMARGIN, 168
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -95,7 +98,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,0,0
+ FILEVERSION 1,2,0,0
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -113,7 +116,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "HIRAOKA HYPERS TOOLS, Inc."
             VALUE "FileDescription", "TCPのキープアライブ設定を見直します"
-            VALUE "FileVersion", "1, 1, 0, 0"
+            VALUE "FileVersion", "1, 2, 0, 0"
             VALUE "InternalName", "SetKeepAliveTime"
             VALUE "LegalCopyright", "Copyright (C) 2010 HIRAOKA HYPERS TOOLS, Inc."
             VALUE "OriginalFilename", "SetKeepAliveTime.exe"

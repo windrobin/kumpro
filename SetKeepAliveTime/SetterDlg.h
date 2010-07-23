@@ -21,4 +21,5 @@ protected:
 public:
 	int m_nKA;
 	virtual BOOL OnInitDialog();
+	afx_msg void OnBnClickedH9(UINT nID);
 };

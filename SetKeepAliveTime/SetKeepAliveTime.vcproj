@@ -236,10 +236,6 @@
 				RelativePath=".\A.rc"
 				>
 			</File>
-			<File
-				RelativePath=".\A.rc2"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

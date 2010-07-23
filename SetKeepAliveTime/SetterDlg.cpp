@@ -25,6 +25,7 @@ void CSetterDlg::DoDataExchange(CDataExchange* pDX) {
 }
 
 BEGIN_MESSAGE_MAP(CSetterDlg, CDialog)
+	ON_COMMAND_RANGE(IDC_H9, IDC_M15, &CSetterDlg::OnBnClickedH9)
 END_MESSAGE_MAP()
 
 // CSetterDlg メッセージ ハンドラ
@@ -73,4 +74,15 @@ void CSetterDlg::OnOK() {
 	else {
 		AfxMessageBox(IDS_SET_ERR, MB_OK | MB_ICONINFORMATION);
 	}
+}
+
+void CSetterDlg::OnBnClickedH9(UINT nID) {
+	switch (nID) {
+		case IDC_H9: m_nKA = 60 * 9; break;
+		case IDC_H6: m_nKA = 60 * 6; break;
+		case IDC_H2: m_nKA = 60 * 2; break;
+		case IDC_M15: m_nKA = 15; break;
+		default: return;
+	}
+	VERIFY(UpdateData(false));
 }

@@ -53,7 +53,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,18,1,0
+ FILEVERSION 3,18,2,0
  PRODUCTVERSION 3,18,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -74,7 +74,7 @@ BEGIN
             VALUE "InternalName", "SlimFTPd"
             VALUE "LegalCopyright", "Copyright (C) 2001-2006 WhitSoft Development \r\n2010, HIRAOKA HYPERS TOOLS, Inc."
             VALUE "OriginalFilename", "SlimFTPd.exe"
-            VALUE "ProductVersion", "3.18r1"
+            VALUE "ProductVersion", "3.18r2"
         END
     END
     BLOCK "VarFileInfo"

@@ -8,7 +8,7 @@
 ;--------------------------------
 
 !define APP "Tablega"
-!define VER "1.0"
+!define VER "1.1"
 
 ; The name of the installer
 Name "${APP}  ${VER}"
@@ -56,7 +56,7 @@ Section "" ;No components page, name is not important
   !insertmacro CheckDotNET ${DOTNET_VERSION}
 
   ; Put file there
-  File "bin\release\*.*"
+  File "bin\x86\release\*.*"
   
 !ifdef URL
   Exec '"$INSTDIR\${APP}.exe" "${URL}"'

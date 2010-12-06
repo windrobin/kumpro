@@ -40,11 +40,21 @@ namespace Tablega {
         }
 
         private void bExport_Click(object sender, EventArgs e) {
+            if (wb.Document == null) {
+                MessageBox.Show(this, "失敗しました。", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
             List<HtmlElement> alTable = new List<HtmlElement>();
             foreach (HtmlElement el in wb.Document.All) {
                 if (String.Compare(el.TagName, "table", true) == 0) {
                     alTable.Add(el);
                 }
+            }
+
+            if (alTable.Count == 0) {
+                MessageBox.Show(this, "Tableが見付かりませんでした。", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
             }
 
             using (SelTblForm form = new SelTblForm(alTable)) {

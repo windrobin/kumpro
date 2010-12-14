@@ -52,12 +52,5 @@ namespace SP2Infection {
             }
             Console.WriteLine("Ok");
         }
-
-        void Infection() {
-            System.Threading.ManualResetEvent ev = new System.Threading.ManualResetEvent(false);
-            ev.WaitOne(new TimeSpan(0, 0, 0, 0, 300));
-            ev.WaitOne(300);
-
-        }
     }
 }

@@ -191,7 +191,7 @@ namespace LANIPDiscovery {
                         {
                             IPEndPoint ipr = new IPEndPoint(0, 0);
                             IAsyncResult ar = client.BeginReceive(CbReceived, null);
-                            if (false == ar.AsyncWaitHandle.WaitOne(millisecs)) {
+                            if (false == ar.AsyncWaitHandle.WaitOne(millisecs, false)) {
                                 client.Close();
                             }
                             bin = client.EndReceive(ar, ref ipr);

@@ -13,11 +13,12 @@
 ;General
 
   !define APP "LANIPDiscovery"
-  !define VER "1.1.0"
+  !define VER "1.1.1"
+  !define APV "1_1_1"
 
   ;Name and file
   Name "${APP} ${VER}"
-  OutFile "Setup_${APP}_portable.exe"
+  OutFile "Setup_${APP}_${APV}_portable.exe"
 
   ;Default installation folder
   InstallDir "$APPDATA\${APP}"

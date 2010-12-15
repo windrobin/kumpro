@@ -1,15 +1,13 @@
 #summary EditMyPlace2ご利用方法
 #labels Featured,Phase-Design
 
-= Introduction =
+= Introduction/Download =
 
 Windowsのプレースバーや、Microsoft Officeのマイプレースにつきまして、カスタマイズを支援いたします。
 
-http://kumpro.googlecode.com/svn/trunk/EditMyPlace2/ss.jpg
-
-= Download =
-
 こちらのページから入手できます: http://code.google.com/p/kumpro/downloads/list?can=2&q=EditMyPlace2
+
+http://kumpro.googlecode.com/svn/trunk/EditMyPlace2/ss.jpg
 
 = Details =
 

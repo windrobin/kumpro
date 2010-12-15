@@ -5,6 +5,8 @@
 
 Windowsの起動した・終了した日時の可視化を助けます
 
+入手: http://code.google.com/p/kumpro/downloads/list?can=2&q=RunTimeViser2
+
 http://kumpro.googlecode.com/svn/trunk/RunTimeViser2/ss.jpg
 
 = 詳細 =

@@ -5,6 +5,12 @@
 
 AlternaTIFFのセットアップを支援致します。
 
+= Getting started =
+
+入手は、こちらから：http://code.google.com/p/kumpro/downloads/list?can=2&q=HelpInstAlternatiff
+
+= Screen shots =
+
 画面写真(XP)：
 
 http://kumpro.googlecode.com/svn/trunk/HelpInstAlternatiff/ssxp.jpg
@@ -12,10 +18,6 @@ http://kumpro.googlecode.com/svn/trunk/HelpInstAlternatiff/ssxp.jpg
 画面写真(Windows Server 2008 R2 Foundation 64bits)：
 
 http://kumpro.googlecode.com/svn/trunk/HelpInstAlternatiff/ssw8.jpg
-
-= Getting started =
-
-入手は、こちらから：http://code.google.com/p/kumpro/downloads/list?can=2&q=HelpInstAlternatiff
 
 = Details =
 

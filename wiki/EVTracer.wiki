@@ -5,6 +5,8 @@
 
 セキュリティのイベントログを読み解いて、削除されたオブジェクトの一覧を追跡します。
 
+入手: http://code.google.com/p/kumpro/downloads/list?can=2&q=EVTracer
+
 http://kumpro.googlecode.com/svn/trunk/EVTracer/ss.jpg
 
 = Details =

@@ -7,6 +7,8 @@ IPアドレスのリストを与えて、MACアドレス・NetBIOS名の情報�
 
 *New!* リモート接続技術を活用できるようになりました。
 
+入手: http://code.google.com/p/kumpro/downloads/list?can=2&q=LANIPDiscovery
+
 http://kumpro.googlecode.com/svn/trunk/LANIPDiscovery/ss.jpg
 
 

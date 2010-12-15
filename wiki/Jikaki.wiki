@@ -3,6 +3,8 @@
 
 = Introduction =
 
+入手: http://code.google.com/p/kumpro/downloads/list?can=2&q=Jikaki
+
 http://kumpro.googlecode.com/svn/trunk/jikaki/ss.jpg
 
 大きな字を書いてみます。

@@ -393,8 +393,8 @@ BOOL CAxTIF5Ctrl::OnEraseBkgnd(CDC* pDC) {
 
 BOOL CAxTIF5Ctrl::OnSetExtent(LPSIZEL lpSizeL)
 {
-	if (m_frame.GetSafeHwnd() != NULL)
-		m_frame.SetWindowPos(NULL, 0, 0, lpSizeL->cx, lpSizeL->cy, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
+//	if (m_frame.GetSafeHwnd() != NULL)
+//		m_frame.SetWindowPos(NULL, 0, 0, lpSizeL->cx, lpSizeL->cy, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
 
 	return COleControl::OnSetExtent(lpSizeL);
 }

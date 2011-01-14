@@ -6,10 +6,10 @@
 ; there. 
 
 !define APP   "AxTIF5"
-!define TITLE "ActiveX TIFF Viewer five"
+!define TITLE "Ax TIFF Viewer five"
 
-!define VER    "1.0.0"
-!define APPVER "1_0_0"
+!define VER    "1.0.1"
+!define APPVER "1_0_1"
 
 !define MIME "image/tiff"
 
@@ -108,7 +108,7 @@ Section "${APP}" ;No components page, name is not important
   WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\TypeLib" "" "${TYPELIB}"
   WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\Version" "" "${VER}"
 
-  WriteRegStr HKCU "Software\Classes\TypeLib\${TYPELIB}\1.0" "" "AxTIF5 ActiveX コントロール モジュール"
+  WriteRegStr HKCU "Software\Classes\TypeLib\${TYPELIB}\1.0" "" "AxTIF5 control module"
   WriteRegStr HKCU "Software\Classes\TypeLib\${TYPELIB}\1.0\0\win32" "" "$INSTDIR\AxTIF5.ocx"
   WriteRegStr HKCU "Software\Classes\TypeLib\${TYPELIB}\1.0\FLAGS" "" "2"
   WriteRegStr HKCU "Software\Classes\TypeLib\${TYPELIB}\1.0\HELPDIR" "" ""

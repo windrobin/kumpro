@@ -336,6 +336,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\fitw.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\fitwh.bmp"
+				>
+			</File>
+			<File
 				RelativePath=".\res\gear.bmp"
 				>
 			</File>

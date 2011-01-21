@@ -74,8 +74,9 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 
 	CxImage *p = GetPic();
 	if (p != NULL && pDC->RectVisible(m_rcPaint)) {
-		int cx = (m_fZoom != 1) ? (int)(p->GetWidth() * m_fZoom) : (p->GetWidth());
-		int cy = (m_fZoom != 1) ? (int)(p->GetHeight() * m_fZoom) : (p->GetHeight());
+		CSize size = GetZoomedSize();
+		int cx = size.cx;
+		int cy = size.cy;
 
 		int xp = -m_siH.nPos;
 		int yp = -m_siV.nPos;
@@ -121,6 +122,24 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 		if (!m_toolZoom) pDC->InvertRect(m_rcMove);
 		dc.SelectObject(pOrg);
 		pDC->ExcludeClipRect(m_rcMove);
+	}
+	if (pDC->RectVisible(m_rcFitWH)) {
+		CDC dc;
+		dc.CreateCompatibleDC(pDC);
+		CBitmap* pOrg = dc.SelectObject(&m_bmFitWH);
+		pDC->BitBlt(m_rcFitWH.left, m_rcFitWH.top, m_rcFitWH.Width(), m_rcFitWH.Height(), &dc, 0, 0, SRCCOPY);
+		if (m_fit == FitWH) pDC->InvertRect(m_rcFitWH);
+		dc.SelectObject(pOrg);
+		pDC->ExcludeClipRect(m_rcFitWH);
+	}
+	if (pDC->RectVisible(m_rcFitW)) {
+		CDC dc;
+		dc.CreateCompatibleDC(pDC);
+		CBitmap* pOrg = dc.SelectObject(&m_bmFitW);
+		pDC->BitBlt(m_rcFitW.left, m_rcFitW.top, m_rcFitW.Width(), m_rcFitW.Height(), &dc, 0, 0, SRCCOPY);
+		if (m_fit == FitW) pDC->InvertRect(m_rcFitW);
+		dc.SelectObject(pOrg);
+		pDC->ExcludeClipRect(m_rcFitW);
 	}
 	if (pDC->RectVisible(m_rcGear)) {
 		CDC dc;
@@ -244,6 +263,8 @@ int CAxTIF3View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		|| !m_bmPrev.LoadBitmap(IDB_PREV)
 		|| !m_bmNext.LoadBitmap(IDB_NEXT)
 		|| !m_bmAbout.LoadBitmap(IDB_ABOUT)
+		|| !m_bmFitWH.LoadBitmap(IDB_FITWH)
+		|| !m_bmFitW.LoadBitmap(IDB_FITW)
 		)
 		return -1;
 
@@ -256,6 +277,7 @@ int CAxTIF3View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_trickPos = z2tp(m_fZoom);
 	m_fDrag = false;
 	m_iPage = 0;
+	m_fit = FitNo;
 
 	LayoutClient();
 
@@ -266,6 +288,7 @@ void CAxTIF3View::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 
+	DoFit();
 	LayoutClient();
 }
 
@@ -342,6 +365,8 @@ void CAxTIF3View::OnRButtonDown(UINT nFlags, CPoint point) {
 	CView::OnRButtonDown(nFlags, point);
 }
 
+#define SW2(val, A, B) ((val == (A)) ? (B) : (A))
+
 void CAxTIF3View::OnLButtonDown(UINT nFlags, CPoint point) {
 	if (GetFocus() == this) {
 		if (m_rcGlass.PtInRect(point)) {
@@ -352,6 +377,20 @@ void CAxTIF3View::OnLButtonDown(UINT nFlags, CPoint point) {
 			m_toolZoom = false;
 			InvalidateRect(m_rcGlass,false);InvalidateRect(m_rcMove,false);
 		}
+		else if (m_rcFitWH.PtInRect(point)) {
+			SetFit(SW2(m_fit, FitWH, FitNo));
+
+			DoFit();
+			LayoutClient();
+			InvalidateRect(m_rcPaint,false);
+		}
+		else if (m_rcFitW.PtInRect(point)) {
+			SetFit(SW2(m_fit, FitW, FitNo));
+
+			DoFit();
+			LayoutClient();
+			InvalidateRect(m_rcPaint,false);
+		}
 		else if (m_toolZoom && m_rcPaint.PtInRect(point)) {
 			Zoomat(true, point);
 		}
@@ -359,6 +398,7 @@ void CAxTIF3View::OnLButtonDown(UINT nFlags, CPoint point) {
 			CPoint posat = GetAbsPosAt(m_rcPaint.CenterPoint() + GetScrollOff());
 			int x = point.x - m_rcGearOn.left;
 			m_fZoom = tp2z(x);
+			SetFit(FitNo);
 			m_trickPos = z2tp(m_fZoom);
 			InvalidateRect(m_rcGear,false);
 			LayoutClient();
@@ -405,6 +445,7 @@ void CAxTIF3View::Zoomat(bool fIn, CPoint mouseat) {
 	else {
 		m_fZoom = max(0.0625f, m_fZoom / 2);
 	}
+	SetFit(FitNo);
 	m_trickPos = z2tp(m_fZoom);
 	InvalidateRect(m_rcGear,false);
 	LayoutClient();
@@ -423,17 +464,27 @@ void CAxTIF3View::LayoutClient() {
 	int curx=0;
 	m_rcGlass.left = 0;
 	m_rcGlass.bottom = rc.bottom;
-	m_rcGlass.right = curx = m_rcGlass.left + 24;
+	m_rcGlass.right = (curx += 24);
 	m_rcGlass.top = m_rcGlass.bottom - cyBar;
 
 	m_rcMove.left = curx;
 	m_rcMove.bottom = rc.bottom;
-	m_rcMove.right = curx = m_rcMove.left + 24;
+	m_rcMove.right = (curx += 24);
 	m_rcMove.top = m_rcMove.bottom - cyBar;
+
+	m_rcFitW.left = curx;
+	m_rcFitW.bottom = rc.bottom;
+	m_rcFitW.right = (curx += 24);
+	m_rcFitW.top = m_rcFitW.bottom - cyBar;
+
+	m_rcFitWH.left = curx;
+	m_rcFitWH.bottom = rc.bottom;
+	m_rcFitWH.right = (curx += 24);
+	m_rcFitWH.top = m_rcFitWH.bottom - cyBar;
 
 	m_rcGear.left = curx;
 	m_rcGear.bottom = rc.bottom;
-	m_rcGear.right = curx = m_rcGear.left + cxBMGear;
+	m_rcGear.right = (curx += cxBMGear);
 	m_rcGear.top = m_rcGear.bottom - cyBar;
 
 	m_rcGearOn = m_rcGear;
@@ -442,22 +493,22 @@ void CAxTIF3View::LayoutClient() {
 
 	m_rcPrev.left = curx;
 	m_rcPrev.bottom = rc.bottom;
-	m_rcPrev.right = curx = m_rcPrev.left + cxBMPrev;
+	m_rcPrev.right = curx = (curx += cxBMPrev);
 	m_rcPrev.top = rc.bottom - cyBar;
 
 	m_rcNext.left = curx;
 	m_rcNext.bottom = rc.bottom;
-	m_rcNext.right = curx = m_rcNext.left + cxBMNext;
+	m_rcNext.right = curx = (curx += cxBMNext);
 	m_rcNext.top = rc.bottom - cyBar;
 
 	m_rcDisp.left = curx ;
 	m_rcDisp.bottom = rc.bottom;
-	m_rcDisp.right = curx = m_rcDisp.left + 50;
+	m_rcDisp.right = curx = (curx += 50);
 	m_rcDisp.top = rc.bottom - cyBar;
 
 	m_rcAbout.left = curx;
 	m_rcAbout.bottom = rc.bottom;
-	m_rcAbout.right = m_rcAbout.left + 24;
+	m_rcAbout.right = (curx += 24);
 	m_rcAbout.top = rc.bottom - cyBar;
 
 	rc.bottom -= cyBar;
@@ -470,13 +521,10 @@ void CAxTIF3View::LayoutClient() {
 
 	m_rcPaint = rc;
 
-	CSize size(0, 0);
-	CxImage *p = GetPic();
-	if (p != NULL)
-		size = CSize(p->GetWidth(), p->GetHeight());
+	CSize size = GetZoomedSize();
 
-	int cxpic = (int)(size.cx * m_fZoom);
-	int cypic = (int)(size.cy * m_fZoom);
+	int cxpic = (int)(size.cx);
+	int cypic = (int)(size.cy);
 
 	m_siH.fMask = SIF_PAGE|SIF_RANGE|SIF_DISABLENOSCROLL|SIF_POS;
 	m_siH.nMin = 0;
@@ -618,4 +666,31 @@ LRESULT CAxTIF3View::OnMouseHWheel(WPARAM wp, LPARAM) {
 
 int CAxTIF3View::OnMouseActivate(CWnd* pDesktopWnd, UINT nHitTest, UINT message) {
 	return CView::OnMouseActivate(pDesktopWnd, nHitTest, message);
+}
+
+CSize CAxTIF3View::GetZoomedSize() {
+	CxImage *p = GetPic();
+	if (p != NULL) {
+		CSize size = CSize(p->GetWidth(), p->GetHeight());
+		switch (m_fit) {
+		case FitNo:
+			return CSize((int)(size.cx * m_fZoom), (int)(size.cy * m_fZoom));
+		case FitW:
+			if (m_rcPaint.Width() < size.cx) {
+				return CSize(
+					m_rcPaint.Width(),
+					(size.cx != 0)
+						? (int)(size.cy * (m_rcPaint.Width() / (float)size.cx))
+						: 0
+					);
+			}
+			return size;
+		case FitWH:
+			if (m_rcPaint.Width() < size.cx || m_rcPaint.Height() < size.cy) {
+				return Fitrect::Fit(m_rcPaint, size).Size();
+			}
+			return size;
+		}
+	}
+	return CSize(0,0);
 }

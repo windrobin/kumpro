@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 6.00.0366 */
-/* at Thu Jan 13 13:40:34 2011
+/* at Thu Jan 20 10:18:32 2011
  */
 /* Compiler settings for .\AxTIF5.idl:
     Oicf, W1, Zp8, env=Win32 (32b run)

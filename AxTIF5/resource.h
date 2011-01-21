@@ -19,6 +19,9 @@
 #define IDC_CREDITS                     201
 #define IDR_CREDITS                     201
 #define IDC_VER                         202
+#define IDB_FITWH                       202
+#define IDB_BITMAP1                     203
+#define IDB_FITW                        203
 #define IDC_HORZ                        998
 #define IDC_VERT                        999
 
@@ -26,7 +29,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        202
+#define _APS_NEXT_RESOURCE_VALUE        204
 #define _APS_NEXT_COMMAND_VALUE         32768
 #define _APS_NEXT_CONTROL_VALUE         203
 #define _APS_NEXT_SYMED_VALUE           101

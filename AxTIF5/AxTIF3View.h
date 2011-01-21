@@ -44,13 +44,13 @@ public:
 public:
 	CScrollBar m_sbH, m_sbV;
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	CRect m_rcPaint, m_rcGlass, m_rcMove, m_rcGear, m_rcGearOn, m_rcPrev, m_rcNext, m_rcDisp, m_rcAbout;
+	CRect m_rcPaint, m_rcGlass, m_rcMove, m_rcGear, m_rcGearOn, m_rcPrev, m_rcNext, m_rcDisp, m_rcAbout, m_rcFitWH, m_rcFitW;
 	CxImage *GetPic(int frame = -1);
 	float m_fZoom;
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	SCROLLINFO m_siH, m_siV;
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	CBitmap m_bmMag, m_bmMove, m_bmGear, m_bmTrick, m_bmPrev, m_bmNext, m_bmAbout;
+	CBitmap m_bmMag, m_bmMove, m_bmGear, m_bmTrick, m_bmPrev, m_bmNext, m_bmAbout, m_bmFitWH, m_bmFitW;
 	bool m_toolZoom;
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	void LayoutClient();
@@ -73,6 +73,48 @@ public:
 	bool m_fDrag;
 	int m_iPage;
 	int CntPages();
+	enum FitMode {
+		FitNo, FitW, FitWH,
+	};
+	FitMode m_fit;
+	void DoFit() { }
+	class Fitrect {
+	public:
+		static CRect Fit(CRect rcMax, CSize rcBox) {
+            if (rcMax.Height() == 0 || rcBox.cy == 0)
+                return rcMax;
+            float frMax = rcMax.Width() / (float)rcMax.Height();
+            float frBox = rcBox.cx / (float)rcBox.cy;
+            float centerx = ((float)rcMax.left + rcMax.right) / 2;
+			float centery = ((float)rcMax.top + rcMax.bottom) / 2;
+            if (frMax >= frBox) {
+                // 縦長
+                float v = rcBox.cx * rcMax.Height() / rcBox.cy / 2;
+                return CRect(
+                    int(centerx - v),
+                    int(rcMax.top),
+                    int(centerx + v),
+                    int(rcMax.bottom)
+                    );
+            }
+            else {
+                // 横長
+                float v = rcBox.cy * rcMax.Width() / rcBox.cx / 2;
+                return CRect(
+                    int(rcMax.left),
+                    int(centery - v),
+                    int(rcMax.right),
+                    int(centery + v)
+                    );
+            }
+        }
+	};
+	CSize GetZoomedSize();
+	void SetFit(FitMode fit) {
+		m_fit = fit;
+		InvalidateRect(m_rcFitW);
+		InvalidateRect(m_rcFitWH);
+	}
 
 	int z2tp(float f) {
 #if 1

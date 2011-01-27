@@ -45,7 +45,13 @@ public:
 	CScrollBar m_sbH, m_sbV;
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	CRect m_rcPaint, m_rcGlass, m_rcMove, m_rcGear, m_rcGearOn, m_rcPrev, m_rcNext, m_rcDisp, m_rcAbout, m_rcFitWH, m_rcFitW;
-	CxImage *GetPic(int frame = -1);
+	CxImage *getPic(int frame = -1) const;
+	CxImage *GetPic(int frame = -1) {
+		return getPic(frame);
+	}
+	const CxImage *GetPic(int frame = -1) const {
+		return getPic(frame);
+	}
 	float m_fZoom;
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	SCROLLINFO m_siH, m_siV;
@@ -56,7 +62,7 @@ public:
 	void LayoutClient();
 	void Zoomat(bool fIn, CPoint at);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
-	int m_trickPos; // (7,7)-(247,7) 0to240.
+	//int m_trickPos; // (7,7)-(247,7) 0to240.
 	CPoint GetCenterPos() const;
 	CPoint GetAbsPosAt(CPoint pt) const;
 	void SetCenterAt(CPoint pt, CPoint clientpt);
@@ -114,9 +120,21 @@ public:
 		m_fit = fit;
 		InvalidateRect(m_rcFitW);
 		InvalidateRect(m_rcFitWH);
+
+		InvalidateRect(m_rcGear,false);
+	}
+	float Getzf() const;
+	void Setzf(float zf) {
+		m_fZoom = zf;
+		SetFit(FitNo);
+		InvalidateRect(m_rcGear,false);
+	}
+	int GetTrickPos() {
+		int v = z2tp(Getzf());
+		return max(0, min(240, v));
 	}
 
-	int z2tp(float f) {
+	int z2tp(float f) const {
 #if 1
 		return (int)(log(f / 0.0625f) / log(2.0f) / 8 * 240);
 #else
@@ -132,7 +150,7 @@ public:
 #endif
 	}
 
-	float tp2z(int t) {
+	float tp2z(int t) const {
 		return pow(2, t/30.0f) * 0.0625f;
 	}
 

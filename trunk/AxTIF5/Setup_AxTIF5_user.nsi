@@ -8,8 +8,8 @@
 !define APP   "AxTIF5"
 !define TITLE "Ax TIFF Viewer five"
 
-!define VER    "1.0.2"
-!define APPVER "1_0_2"
+!define VER    "1.0.3"
+!define APPVER "1_0_3"
 
 !define MIME "image/tiff"
 
@@ -30,7 +30,7 @@ Name "${TITLE} -- ${VER}"
 OutFile "Setup_${APP}_${APPVER}_user.exe"
 
 ; The default installation directory
-InstallDir "$APPDATA\${APP}"
+InstallDir "$APPDATA\${APP}\"
 
 ; Registry key to check for directory (so if you install again, it will
 ; overwrite the old one automatically)

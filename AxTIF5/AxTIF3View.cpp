@@ -147,7 +147,7 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 		CBitmap* pOrg = dc.SelectObject(&m_bmGear);
 		pDC->BitBlt(m_rcGear.left, m_rcGear.top, m_rcGear.Width(), m_rcGear.Height(), &dc, 0, 0, SRCCOPY);
 		dc.SelectObject(m_bmTrick);
-		pDC->BitBlt(m_rcGear.left + 7 + m_trickPos - 7/2, m_rcGear.top + 7 - 12/2 + (cyBar-16)/2, 7, 12, &dc, 0, 0, SRCCOPY);
+		pDC->BitBlt(m_rcGear.left + 7 + GetTrickPos() - 7/2, m_rcGear.top + 7 - 12/2 + (cyBar-16)/2, 7, 12, &dc, 0, 0, SRCCOPY);
 		dc.SelectObject(pOrg);
 		pDC->ExcludeClipRect(m_rcGear);
 	}
@@ -202,7 +202,7 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 }
 
 
-CxImage *CAxTIF3View::GetPic(int frame) {
+CxImage *CAxTIF3View::getPic(int frame) const {
 	if (frame < 0)
 		frame = m_iPage;
 	CAxTIF3Doc* pDoc = GetDocument();
@@ -274,7 +274,6 @@ int CAxTIF3View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ZeroMemory(&m_siV, sizeof(m_siV));
 	m_siV.cbSize = sizeof(m_siV);
 	m_toolZoom = true;
-	m_trickPos = z2tp(m_fZoom);
 	m_fDrag = false;
 	m_iPage = 0;
 	m_fit = FitNo;
@@ -397,10 +396,7 @@ void CAxTIF3View::OnLButtonDown(UINT nFlags, CPoint point) {
 		else if (m_rcGearOn.PtInRect(point)) {
 			CPoint posat = GetAbsPosAt(m_rcPaint.CenterPoint() + GetScrollOff());
 			int x = point.x - m_rcGearOn.left;
-			m_fZoom = tp2z(x);
-			SetFit(FitNo);
-			m_trickPos = z2tp(m_fZoom);
-			InvalidateRect(m_rcGear,false);
+			Setzf(tp2z(x));
 			LayoutClient();
 			SetCenterAt(posat, m_rcPaint.CenterPoint());
 			InvalidateRect(m_rcPaint,false);
@@ -439,15 +435,13 @@ void CAxTIF3View::OnLButtonDown(UINT nFlags, CPoint point) {
 void CAxTIF3View::Zoomat(bool fIn, CPoint mouseat) {
 	CPoint clientpt = mouseat;
 	CPoint posat = GetAbsPosAt(GetScrollOff() + clientpt);
+	float zf = Getzf();
 	if (fIn) {
-		m_fZoom = min(16.0f, m_fZoom * 2);
+		Setzf(min(16.0f, zf * 2));
 	}
 	else {
-		m_fZoom = max(0.0625f, m_fZoom / 2);
+		Setzf(max(0.0625f, zf / 2));
 	}
-	SetFit(FitNo);
-	m_trickPos = z2tp(m_fZoom);
-	InvalidateRect(m_rcGear,false);
 	LayoutClient();
 	SetCenterAt(posat, clientpt);
 	InvalidateRect(m_rcPaint,false);
@@ -559,27 +553,30 @@ void CAxTIF3View::OnRButtonDblClk(UINT nFlags, CPoint point)
 
 CPoint CAxTIF3View::GetCenterPos() const {
 	CPoint pt = m_rcPaint.CenterPoint();
+	float zf = Getzf();
 	return CPoint(
-		(int)(pt.x / m_fZoom),
-		(int)(pt.y / m_fZoom)
+		(int)(pt.x / zf),
+		(int)(pt.y / zf)
 		);
 }
 
 CPoint CAxTIF3View::GetAbsPosAt(CPoint pt) const {
+	float zf = Getzf();
 	return CPoint(
-		(int)(pt.x / m_fZoom),
-		(int)(pt.y / m_fZoom)
+		(int)(pt.x / zf),
+		(int)(pt.y / zf)
 		);
 }
 
 void CAxTIF3View::SetCenterAt(CPoint pt, CPoint clientpt) {
+	float zf = Getzf();
 	{
-		int xp = Newxp((int)(pt.x * m_fZoom - m_rcPaint.Width()/2 + (m_rcPaint.Width()/2 - clientpt.x) ));
+		int xp = Newxp((int)(pt.x * zf - m_rcPaint.Width()/2 + (m_rcPaint.Width()/2 - clientpt.x) ));
 		if (xp != m_siH.nPos)
 			m_sbH.SetScrollPos(m_siH.nPos = xp);
 	}
 	{
-		int yp = Newyp((int)(pt.y * m_fZoom - m_rcPaint.Height()/2 + (m_rcPaint.Height()/2 - clientpt.y) ));
+		int yp = Newyp((int)(pt.y * zf - m_rcPaint.Height()/2 + (m_rcPaint.Height()/2 - clientpt.y) ));
 		if (yp != m_siV.nPos)
 			m_sbV.SetScrollPos(m_siV.nPos = yp);
 	}
@@ -693,4 +690,35 @@ CSize CAxTIF3View::GetZoomedSize() {
 		}
 	}
 	return CSize(0,0);
+}
+
+float CAxTIF3View::Getzf() const {
+	const CxImage *p = GetPic();
+	if (p != NULL) {
+		CSize size = CSize(p->GetWidth(), p->GetHeight());
+		switch (m_fit) {
+		default:
+		case FitNo:
+			return m_fZoom;
+		case FitW:
+			if (m_rcPaint.Width() < size.cx) {
+				return (size.cx != 0)
+					? (m_rcPaint.Width() / (float)size.cx)
+					: 1
+					;
+			}
+			return 1;
+		case FitWH:
+			if (m_rcPaint.Width() < size.cx || m_rcPaint.Height() < size.cy) {
+				CSize newSize = Fitrect::Fit(m_rcPaint, size).Size();
+				float fx = (size.cx != 0) ? ((float)newSize.cx / size.cx) : 0;
+				float fy = (size.cy != 0) ? ((float)newSize.cy / size.cy) : 0;
+				if (fx != 0) return fx;
+				if (fy != 0) return fy;
+				return 1;
+			}
+			return 1;
+		}
+	}
+	return 1;
 }

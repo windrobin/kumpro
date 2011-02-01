@@ -1,0 +1,16 @@
+#summary Ax TIFF Viewer five ご紹介
+#labels Featured,Phase-Deploy
+
+= Introduction =
+
+入手はこちらから： http://code.google.com/p/kumpro/downloads/list?can=2&q=Ax+TIFF+Viewer+five
+
+http://kumpro.googlecode.com/svn-history/trunk/AxTIF5/ss.jpg
+
+= Details =
+
+.TIF/.TIFFファイルの簡単な閲覧を支援致します。
+  * Internet Explorer 32ビット版で、動作するように設計いたしました。
+  * 修正BSDライセンスにて、ご提供いたします。
+  * セットアッププログラム(.exe)の形でご提供いたします。コードサイニング証明書を取得する余力がなく、.CABでのインスタント配布につきましては、対応できません。ご容赦ください。
+  * アカウント単位・制限アカウント等でのご利用も想定しています。HKCUのみに登録操作し、HKCRやHKLMは書き換えしないようになっています。(書き換えていたら、ごめんなさい)

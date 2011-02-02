@@ -59,11 +59,27 @@ BOOL CAxTIF3View::PreCreateWindow(CREATESTRUCT& cs)
 	if (!CView::PreCreateWindow(cs))
 		return false;
 
+	cs.style |= WS_CLIPCHILDREN|WS_CLIPSIBLINGS;
 	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 	return true;
 }
 
 // CAxTIF3View 描画
+
+inline int RUTo4(int v) {
+	return (v+3)&(~3);
+}
+
+inline BYTE Lerp255(BYTE v0, BYTE v1, int f) {
+	if (v0 == v1 || f == 0)
+		return v0;
+	return v0 + (v1 - v0) / 255 * f;
+}
+
+typedef struct BI256 {
+	BITMAPINFOHEADER bmiHeader;
+	RGBQUAD bmiColors[256];
+}	BI256;
 
 void CAxTIF3View::OnDraw(CDC* pDC)
 {
@@ -89,18 +105,137 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 		}
 
 		ASSERT(p != NULL);
-		p->Draw(pDC->GetSafeHdc(), xp, yp, cx, cy, m_rcPaint);
+		if (p->GetBpp() == 1 && size.cx < p->GetWidth() && size.cy < p->GetHeight()) {
+			BI256 bi;
+			bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+			bi.bmiHeader.biWidth = cx;
+			bi.bmiHeader.biHeight = cy;
+			bi.bmiHeader.biPlanes = 1;
+			bi.bmiHeader.biBitCount = 8;
+			bi.bmiHeader.biCompression = BI_RGB;
+			bi.bmiHeader.biClrUsed = 256;
+			bi.bmiHeader.biClrImportant = 256;
+			RGBQUAD c0 = p->GetPaletteColor(0);
+			RGBQUAD c1 = p->GetPaletteColor(1);
+			for (int c=0; c<256; c++) {
+				bi.bmiColors[c].rgbReserved = 0;
+				bi.bmiColors[c].rgbRed   = Lerp255(c0.rgbRed  , c1.rgbRed  , c);
+				bi.bmiColors[c].rgbGreen = Lerp255(c0.rgbGreen, c1.rgbGreen, c);
+				bi.bmiColors[c].rgbBlue  = Lerp255(c0.rgbBlue , c1.rgbBlue , c);
+			}
 
-		CRgn rgnWaku;
-		rgnWaku.CreateRectRgnIndirect(&m_rcPaint);
-		CRgn rgnPic;
-		rgnPic.CreateRectRgnIndirect(CRect(xp, yp, xp +cx, yp +cy));
+			const int ocx = p->GetWidth();
+			const int ocy = p->GetHeight();
 
-		rgnWaku.CombineRgn(&rgnWaku, &rgnPic, RGN_DIFF);
+			CRect rcDrawBox(
+				xp,
+				yp,
+				xp +cx,
+				yp +cy
+				);
+
+			CRect rcClip = m_rcPaint;
+			if (pDC->IsKindOf(RUNTIME_CLASS(CPaintDC))) {
+				CRect rcNeedPaint = STATIC_DOWNCAST(CPaintDC, pDC)->m_ps.rcPaint;
+				if (!rcClip.IntersectRect(rcClip, &rcNeedPaint)) {
+					rcClip.SetRectEmpty();
+				}
+			}
+
+			const int ox = std::max<int>(0, rcClip.left -rcDrawBox.left);
+			const int oy = std::max<int>(0, rcClip.top -rcDrawBox.top);
+			const int ox1 = std::min<int>(cx, ox +rcClip.Width());
+			const int oy1 = std::min<int>(cy, oy +rcClip.Height());
+
+			CByteArray bits;
+			int pitchSrc = RUTo4(cx);
+			bits.SetSize(pitchSrc * cy);
+			CUIntArray vecx;
+			for (int x=0; x<cx; x++) vecx.Add(int(x / (float)cx * ocx));
+			vecx.Add(ocx);
+			CUIntArray vecy;
+			for (int y=0; y<cy; y++) vecy.Add(int(y / (float)cy * ocy));
+			vecy.Add(ocy);
+
+			const int basx = vecx[ox];
+
+			CUIntArray veca, vecc;
+			veca.SetSize(cx);
+			vecc.SetSize(cx);
+
+			int cntpix = 0;
+
+			for (int y=oy; y<oy1; y++) {
+				int vy0 = vecy[y];
+				int vy1 = vecy[y +1];
+				for (; vy0<vy1; vy0++) {
+					BYTE *pbSrc = p->GetBits(ocy -vy0 -1) +(basx >> 3);
+
+					BYTE b = *pbSrc; pbSrc++;
+					BYTE rest = 8 -(basx & 7);
+					b <<= basx & 7;
+
+					for (int x=ox; x<ox1; x++) {
+						int vx0 = vecx[x];
+						int vx1 = vecx[x +1];
+						UINT va = 0, vc = 0;
+						for (; vx0<vx1; vx0++) {
+							if (rest == 0) {
+								b = *pbSrc; pbSrc++;
+								rest = 8;
+							}
+
+							if (b & 128) {
+								++va;
+							}
+							++vc;
+
+							b <<= 1;
+							--rest;
+
+							cntpix++;
+						}
+						veca[x] = va;
+						vecc[x] = vc;
+					}
+				}
+				BYTE *pbDst = bits.GetData() +pitchSrc * (cy -y -1) +ox;
+				for (int x=ox; x<ox1; x++) {
+					UINT vc = vecc[x];
+					if (vc == 0) vc = 1;
+					*pbDst = veca[x] * 255 / vc;
+					pbDst++;
+				}
+			}
+			_RPT1(_CRT_WARN, "# %d \n", cntpix);
+			int r = SetDIBitsToDevice(
+				pDC->GetSafeHdc(),
+				xp,
+				yp,
+				cx,
+				cy,
+				0,
+				0,
+				0,
+				cy,
+				bits.GetData(),
+				reinterpret_cast<PBITMAPINFO>(&bi),
+				DIB_RGB_COLORS
+				);
+			printf("");
+		}
+		else {
+			p->Draw(pDC->GetSafeHdc(), xp, yp, cx, cy, m_rcPaint);
+		}
+
+		CRect rcBox(xp, yp, xp+cx, yp+cy);
+		if (rcBox.IntersectRect(&rcBox, m_rcPaint)) {
+			pDC->ExcludeClipRect(rcBox);
+		}
 
 		CBrush br;
 		br.CreateSysColorBrush(COLOR_BTNSHADOW);
-		pDC->FillRgn(&rgnWaku, &br);
+		pDC->FillRect(m_rcPaint, &br);
 
 		pDC->ExcludeClipRect(m_rcPaint);
 	}
@@ -196,7 +331,7 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 		CBrush br;
 		br.CreateSysColorBrush(COLOR_WINDOW);
 		CRect rc;
-		pDC->GetClipBox(rc);
+		GetClientRect(rc); //pDC->GetClipBox(rc);
 		pDC->FillRect(rc, &br);
 	}
 }
@@ -276,7 +411,7 @@ int CAxTIF3View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_toolZoom = true;
 	m_fDrag = false;
 	m_iPage = 0;
-	m_fit = FitNo;
+	m_fit = FitWH;
 
 	LayoutClient();
 
@@ -313,7 +448,7 @@ void CAxTIF3View::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		if (oldpos != newpos) {
 			m_siH.nPos = newpos;
 			m_sbH.SetScrollPos(newpos);
-			this->InvalidateRect(m_rcPaint, false);
+			this->ScrollWindowEx(-(newpos -oldpos), 0, m_rcPaint, m_rcPaint, NULL, NULL, SW_INVALIDATE);
 			return;
 		}
 		return;
@@ -344,7 +479,7 @@ void CAxTIF3View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		if (oldpos != newpos) {
 			m_siV.nPos = newpos;
 			m_sbV.SetScrollPos(newpos);
-			this->InvalidateRect(m_rcPaint, false);
+			this->ScrollWindowEx(0, -(newpos -oldpos), m_rcPaint, m_rcPaint, NULL, NULL, SW_INVALIDATE);
 			return;
 		}
 		return;

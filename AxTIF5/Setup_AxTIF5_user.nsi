@@ -8,8 +8,8 @@
 !define APP   "AxTIF5"
 !define TITLE "Ax TIFF Viewer five"
 
-!define VER    "1.0.3"
-!define APPVER "1_0_3"
+!define VER    "1.0.4"
+!define APPVER "1_0_4"
 
 !define MIME "image/tiff"
 

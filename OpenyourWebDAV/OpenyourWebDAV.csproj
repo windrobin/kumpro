@@ -50,6 +50,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IfOvrwForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IfOvrwForm.Designer.cs">
+      <DependentUpon>IfOvrwForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NowUpForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NowUpForm.Designer.cs">
+      <DependentUpon>NowUpForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="VForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -58,6 +70,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="IfOvrwForm.resx">
+      <DependentUpon>IfOvrwForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NowUpForm.resx">
+      <DependentUpon>NowUpForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="VForm.resx">
       <DependentUpon>VForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -91,7 +109,10 @@
     <Content Include="ddagent.xml" />
     <Content Include="propfind.xml" />
     <None Include="Resources\HomeHS.png" />
+    <None Include="Resources\UPload_00.gif" />
+    <None Include="Resources\question.ico" />
     <Content Include="tenpu.xml" />
+    <Content Include="4649.xml" />
     <None Include="Resources\NewFolderHS.png" />
     <None Include="Resources\DeleteHS.png" />
     <None Include="Resources\RefreshDocViewHS.png" />

@@ -81,6 +81,9 @@ namespace OpenyourWebDAV {
             }
             else {
                 MessageBox.Show(this, "失敗しました：" + res.err.Message, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+                if (tbUrl.Text.Length == 0)
+                    tbUrl.Text = (firstNavi = uri).ToString();
             }
         }
 
@@ -105,6 +108,10 @@ namespace OpenyourWebDAV {
                 urib.Path = (i < 0) ? "" : s.Substring(0, i + 1);
                 return urib.Uri;
             }
+
+            public static Uri CombineFile(Uri uriDir, String href) {
+                return new Uri(uriDir.OriginalString.TrimEnd('/') + "/" + href);
+            }
         }
 
         private void bGoUp_Click(object sender, EventArgs e) {
@@ -122,50 +129,112 @@ namespace OpenyourWebDAV {
             if (alfp != null) {
                 SynchronizationContext.Current.Post(delegate(object state) {
                     UploadThem(alfp, navi);
+                    RefreshView();
                 }, null);
             }
         }
 
-        private void UploadThem(String[] alfp, Uri baseUri) {
-            foreach (String fp in alfp) {
-                Uri uriTo = new Uri(baseUri, Path.GetFileName(fp));
-                using (HeadRes head = DInfo.Head(uriTo, conn)) {
-                    head.Dispose();
-                    if (0 == (File.GetAttributes(fp) & FileAttributes.Directory)) {
-                        if (head.Exists) {
-                            switch (MessageBox.Show(this, "上書きしますか？\n\n" + head.Name, Application.ProductName, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation)) {
-                                case DialogResult.Yes:
-                                    break;
-                                case DialogResult.No:
-                                    continue;
-                                case DialogResult.Cancel:
-                                    return;
-                            }
-                        }
+        class Uploader {
+            ConnInfo conn;
+            Control win;
+            INoticeIO nio;
+            WaitHandle cancel;
+
+            public Uploader(ConnInfo conn, Control win, INoticeIO nio, WaitHandle cancel) {
+                this.conn = conn;
+                this.win = win;
+                this.nio = nio;
+                this.cancel = cancel;
+            }
+
+            delegate DialogResult MsgBoxResDelegate();
+
+            DialogResult policy = DialogResult.None;
+
+            DialogResult QueryOvwr(String fp) {
+                if (policy != DialogResult.None)
+                    return policy;
+
+                DialogResult r;
+                switch (r = (DialogResult)win.Invoke((MsgBoxResDelegate)delegate() { using (IfOvrwForm qf = new IfOvrwForm(fp)) { return qf.ShowDialog(win); } })) {
+                    case DialogResult.Yes:
+                        return DialogResult.Yes;
+                    case DialogResult.No:
+                        return DialogResult.No;
+                    case DialogResult.OK:
+                        return policy = DialogResult.Yes;
+                    case DialogResult.Cancel:
+                        return policy = DialogResult.No;
+                }
+                return DialogResult.Cancel;
+            }
+
+            public UTRes UploadThem(String[] alfp, Uri baseUri) {
+                foreach (String fp in alfp) {
+                    if (cancel.WaitOne(0, false)) return UTRes.Cancel;
+                    Uri uriTo = UUt.CombineFile(baseUri, Path.GetFileName(fp));
+                    using (HeadRes head = DInfo.Head(uriTo, conn)) {
                         head.Dispose();
-                        using (GenRes uploaded = DInfo.Upload(uriTo, fp, conn)) {
-
-                        }
-                        using (GenRes set = DInfo.SetMt(uriTo, fp, conn)) {
-
-                        }
-                    }
-                    else {
-                        Uri uriDir = new Uri(baseUri, Path.GetFileName(fp) + "/");
-
-                        if (!head.Exists) {
-                            using (GenRes newf = DInfo.NewFolder(uriTo, conn)) {
-                                if (!newf.Success) {
-                                    continue;
+                        if (0 == (File.GetAttributes(fp) & FileAttributes.Directory)) {
+                            if (head.Exists) {
+                                switch (QueryOvwr(head.baseUri.ToString())) {
+                                    case DialogResult.Yes:
+                                        break;
+                                    case DialogResult.No:
+                                        continue;
+                                    case DialogResult.Cancel:
+                                        return UTRes.Cancel;
                                 }
                             }
-                        }
+                            head.Dispose();
+                            using (GenRes uploaded = DInfo.Upload2(uriTo, fp, conn, nio, cancel)) {
+                                if (cancel.WaitOne(0, true)) {
+                                    using (GenRes rest = DInfo.Delete(uriTo, conn)) {
+                                    }
+                                }
+                            }
+                            using (GenRes set = DInfo.SetMt(uriTo, fp, conn)) {
 
-                        UploadThem(Directory.GetFileSystemEntries(fp), uriDir);
+                            }
+                        }
+                        else {
+                            Uri uriDir = UUt.CombineFile(baseUri, Path.GetFileName(fp));
+
+                            if (!head.Exists) {
+                                using (GenRes newf = DInfo.NewFolder(uriTo, conn)) {
+                                    if (!newf.Success) {
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            switch (UploadThem(Directory.GetFileSystemEntries(fp), uriDir)) {
+                                case UTRes.Cancel:
+                                    return UTRes.Cancel;
+                            }
+                        }
                     }
                 }
+                return UTRes.Ok;
             }
-            RefreshView();
+        }
+
+        enum UTRes {
+            Ok, Cancel,
+        }
+
+        private void UploadThem(String[] alfp, Uri baseUri) {
+            BackgroundWorker bwIO = new BackgroundWorker();
+
+            ManualResetEvent cancel = new ManualResetEvent(false);
+            using (NowUpForm form = new NowUpForm(bwIO, cancel)) {
+                Uploader io = new Uploader(conn, this, form, cancel);
+                bwIO.DoWork += delegate(object sender, DoWorkEventArgs e) {
+                    io.UploadThem(alfp, baseUri);
+                };
+
+                form.ShowDialog(this);
+            }
         }
 
         private void RefreshView() {
@@ -205,7 +274,7 @@ namespace OpenyourWebDAV {
             String name = Interaction.InputBox("フォルダ名称", "", "", -1, -1);
             if (name.Length == 0) return;
 
-            using (GenRes newf = DInfo.NewFolder(new Uri(navi, name), conn)) {
+            using (GenRes newf = DInfo.NewFolder(UUt.CombineFile(navi, name), conn)) {
                 if (!newf.Success) {
                     MessageBox.Show(this, "フォルダの作成に失敗しました：" + newf.err.Message, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
@@ -334,6 +403,12 @@ namespace OpenyourWebDAV {
 
         private void bGoHome_Click(object sender, EventArgs e) {
             Open(firstNavi);
+        }
+
+        private void tbUrl_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Enter) {
+                Open(new Uri(tbUrl.Text));
+            }
         }
     }
 
@@ -531,6 +606,42 @@ namespace OpenyourWebDAV {
 
         static string UA { get { return "OpenyourWebDAV/" + Application.ProductVersion; } }
 
+        public static GenRes Upload2(Uri uri, String fp, ConnInfo conn, INoticeIO nio, WaitHandle cancel) {
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri ?? conn.Url);
+            req.Credentials = conn.Auth;
+            req.UserAgent = UA;
+            req.Method = "PUT";
+            req.PreAuthenticate = true;
+            using (FileStream si = File.OpenRead(fp)) {
+                req.ContentLength = si.Length;
+                req.ContentType = "application/octet-stream";
+                req.SendChunked = true;
+                req.Pipelined = true;
+                req.AllowWriteStreamBuffering = true;
+                using (Stream os = req.GetRequestStream()) {
+                    byte[] bin = new byte[4096];
+                    while (true) {
+                        nio.Notice(fp, si.Position, si.Length);
+                        if (cancel.WaitOne(0, false)) break;
+
+                        int r = si.Read(bin, 0, bin.Length);
+                        if (r < 1) break;
+                        os.Write(bin, 0, r);
+                    }
+                }
+
+                GenRes ret = new GenRes();
+                ret.baseUri = req.RequestUri;
+                try {
+                    ret.res = (HttpWebResponse)req.GetResponse();
+                }
+                catch (WebException err) {
+                    ret.err = err;
+                }
+                return ret;
+            }
+        }
+
         public static GenRes Upload(Uri uri, String fp, ConnInfo conn) {
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri ?? conn.Url);
             req.Credentials = conn.Auth;
@@ -706,5 +817,9 @@ namespace OpenyourWebDAV {
                 return null;
             }
         }
+    }
+
+    public interface INoticeIO {
+        void Notice(String fp, Int64 cur, Int64 max);
     }
 }

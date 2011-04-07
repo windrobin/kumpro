@@ -95,9 +95,23 @@ namespace OpenyourWebDAV.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap question {
+            get {
+                object obj = ResourceManager.GetObject("question", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap RefreshDocViewHS {
             get {
                 object obj = ResourceManager.GetObject("RefreshDocViewHS", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap UPload_00 {
+            get {
+                object obj = ResourceManager.GetObject("UPload_00", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

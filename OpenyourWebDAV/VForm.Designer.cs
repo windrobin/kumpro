@@ -40,12 +40,12 @@
             this.tstop = new System.Windows.Forms.ToolStrip();
             this.bNewFolder = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.bGoHome = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.bGoUp = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.bRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.bGoHome = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ddbView = new System.Windows.Forms.ToolStripSplitButton();
             this.bViewTile = new System.Windows.Forms.ToolStripMenuItem();
             this.bViewIcon = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,6 +55,7 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tbUrl = new System.Windows.Forms.ToolStripTextBox();
             this.bNavi = new System.Windows.Forms.ToolStripButton();
+            this.bwUpload = new System.ComponentModel.BackgroundWorker();
             this.tsc.BottomToolStripPanel.SuspendLayout();
             this.tsc.ContentPanel.SuspendLayout();
             this.tsc.TopToolStripPanel.SuspendLayout();
@@ -197,7 +198,7 @@
             this.ddbView});
             this.tstop.Location = new System.Drawing.Point(3, 0);
             this.tstop.Name = "tstop";
-            this.tstop.Size = new System.Drawing.Size(478, 35);
+            this.tstop.Size = new System.Drawing.Size(447, 35);
             this.tstop.TabIndex = 0;
             this.tstop.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.tstop_ItemClicked);
             // 
@@ -215,21 +216,6 @@
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
             this.toolStripSeparator5.Size = new System.Drawing.Size(6, 35);
-            // 
-            // bGoHome
-            // 
-            this.bGoHome.Image = global::OpenyourWebDAV.Properties.Resources.HomeHS;
-            this.bGoHome.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.bGoHome.Name = "bGoHome";
-            this.bGoHome.Size = new System.Drawing.Size(108, 32);
-            this.bGoHome.Text = "最初のフォルダに戻る";
-            this.bGoHome.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.bGoHome.Click += new System.EventHandler(this.bGoHome_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 35);
             // 
             // bGoUp
             // 
@@ -260,6 +246,21 @@
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 35);
+            // 
+            // bGoHome
+            // 
+            this.bGoHome.Image = global::OpenyourWebDAV.Properties.Resources.HomeHS;
+            this.bGoHome.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.bGoHome.Name = "bGoHome";
+            this.bGoHome.Size = new System.Drawing.Size(108, 32);
+            this.bGoHome.Text = "最初のフォルダに戻る";
+            this.bGoHome.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.bGoHome.Click += new System.EventHandler(this.bGoHome_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 35);
             // 
             // ddbView
             // 
@@ -315,7 +316,7 @@
             this.bNavi});
             this.tsnav.Location = new System.Drawing.Point(3, 35);
             this.tsnav.Name = "tsnav";
-            this.tsnav.Size = new System.Drawing.Size(460, 25);
+            this.tsnav.Size = new System.Drawing.Size(491, 25);
             this.tsnav.TabIndex = 1;
             // 
             // toolStripLabel1
@@ -332,6 +333,7 @@
             this.tbUrl.HideSelection = false;
             this.tbUrl.Name = "tbUrl";
             this.tbUrl.Size = new System.Drawing.Size(313, 25);
+            this.tbUrl.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbUrl_KeyDown);
             // 
             // bNavi
             // 
@@ -400,6 +402,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton bGoHome;
+        private System.ComponentModel.BackgroundWorker bwUpload;
     }
 }
 

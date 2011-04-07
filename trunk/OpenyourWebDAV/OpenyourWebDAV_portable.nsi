@@ -14,7 +14,7 @@
 
   !define APP "OpenyourWebDAV"
   !define COM "HIRAOKA HYPERS TOOLS, Inc."
-  !define VER "1.0"
+  !define VER "1.1"
 
   ;Name and file
   Name "${APP} ${VER}"

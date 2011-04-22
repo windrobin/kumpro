@@ -1,0 +1,40 @@
+﻿// CmdThumbGen.idl : CmdThumbGen の IDL ソース
+//
+
+// このファイルは、タイプ ライブラリ (CmdThumbGen.tlb) およびマーシャリング コードを
+// 作成するために MIDL ツールによって処理されます。
+
+import "oaidl.idl";
+import "ocidl.idl";
+import "ShObjIdl.idl";
+
+[
+	object,
+	uuid(60E422E5-E50D-4C9C-91F3-D2810E7F2E9A),
+	helpstring("IGene インターフェイス"),
+	pointer_default(unique)
+]
+interface IGene : IUnknown{
+};
+[
+	uuid(7DF507D7-46CD-43FF-A591-4CB7E9D5BE63),
+	version(1.0),
+	helpstring("CmdThumbGen 1.0 タイプ ライブラリ")
+]
+library CmdThumbGenLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(93FB1A02-084D-43B4-A69F-65D8B86F2AB3),
+		helpstring("Gene Class")
+	]
+	coclass Gene
+	{
+		[default] interface IGene;
+		interface IPersist;
+		interface IPersistFile;
+		interface IExtractImage;
+		interface IExtractImage2;
+		interface IRunnableTask; // Not included in PlatformSDK of VS8, use Windows SDK v7.1 or later.
+	};
+};

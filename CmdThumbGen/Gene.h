@@ -181,6 +181,9 @@ public:
 			if (phBmpThumbnail == NULL)
 				return E_POINTER;
 
+			if (m_targetPath.IsEmpty())
+				return E_FAIL;
+
 			LPCTSTR pszExt = PathFindExtension(m_targetPath);
 			if (pszExt == NULL)
 				pszExt = _T(".");

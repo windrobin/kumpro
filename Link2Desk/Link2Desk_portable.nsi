@@ -9,7 +9,7 @@
 
 !define APP "Link2Desk"
 
-!define APV "1_0"
+!define APV "1_1"
 
 ; The name of the installer
 Name "${APP}"

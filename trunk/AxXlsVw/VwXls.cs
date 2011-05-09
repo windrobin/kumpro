@@ -23,7 +23,7 @@ http://www.apache.org/licenses/
 
 namespace AxXlsVw {
     [ComVisible(true), Guid("73ef63ff-c109-40a8-bc58-0bd79e719a38")]
-    public partial class VwXls : UserControl {
+    public partial class VwXls : UserControl, IObjectSafety {
         public VwXls() {
             InitializeComponent();
 
@@ -100,6 +100,9 @@ namespace AxXlsVw {
         public void LoadFile(String s) {
             if (s == null || s.Trim().Length == 0) {
                 navi = "";
+            }
+            else if (Site == null) {
+                bwLoader.RunWorkerAsync(s);
             }
             else {
                 IOleClientSite pClientSite = (IOleClientSite)Site.GetService(new AntiMoniker().GetType());
@@ -260,8 +263,11 @@ namespace AxXlsVw {
         private void VwXls_Load(object sender, EventArgs e) {
             Application.EnableVisualStyles();
 
+#if DEBUG
             //LoadFile(@"file:///C:/A/Book1.xls");
-            //LoadFile(@"C:\A\検査項目2004とSQL-xls　00119532.xls");
+            //LoadFile(@"C:\Proj\gc-chkiearea\trunk\chkiearea\f\動作チェック用テストデータ.xls");
+            //LoadFile(@"http://www.google.co.jp/url?sa=t&source=web&cd=3&ved=0CEAQFjAC&url=http%3A%2F%2Fwww.eccj.or.jp%2Flaw06%2Fxls%2F03_00.xls&ei=Vn_HTZDGBYekuAOLt_CxAQ&usg=AFQjCNEpsAumW_rOJM-Vz38ha7lIZgvSsQ&sig2=e9Do4XcfPYtkrh2t2PB1zA");
+#endif
         }
 
         private void bwLoader_DoWork(object sender, DoWorkEventArgs e) {
@@ -291,5 +297,86 @@ namespace AxXlsVw {
                 SetErr(e.Error);
             }
         }
+
+        #region IObjectSafety メンバ
+
+        private const int INTERFACESAFE_FOR_UNTRUSTED_CALLER = 0x00000001;
+        private const int INTERFACESAFE_FOR_UNTRUSTED_DATA = 0x00000002;
+        private const int S_OK = 0;
+        private const int E_FAIL = unchecked((int)0x80004005);
+        private const int E_NOINTERFACE = unchecked((int)0x80004002);
+
+        private readonly Guid IID_IDispatch = new Guid("{00020400-0000-0000-C000-000000000046}");
+        private readonly Guid IID_IDispatchEx = new Guid("{a6ef9860-c720-11d0-9337-00a0c90dcaa9}");
+        private readonly Guid IID_IPersistStorage = new Guid("{0000010A-0000-0000-C000-000000000046}");
+        private readonly Guid IID_IPersistStream = new Guid("{00000109-0000-0000-C000-000000000046}");
+        private readonly Guid IID_IPersistPropertyBag = new Guid("{37D84F60-42CB-11CE-8135-00AA004BB851}");
+
+        private bool _fSafeForScripting = true;
+        private bool _fSafeForInitializing = true;
+
+        public int GetInterfaceSafetyOptions(ref Guid riid,
+                             ref int pdwSupportedOptions,
+                             ref int pdwEnabledOptions) {
+            int Rslt = E_FAIL;
+
+            pdwSupportedOptions = INTERFACESAFE_FOR_UNTRUSTED_CALLER | INTERFACESAFE_FOR_UNTRUSTED_DATA;
+            if (riid == IID_IDispatch || riid == IID_IDispatchEx) {
+                Rslt = S_OK;
+                pdwEnabledOptions = 0;
+                if (_fSafeForScripting == true)
+                    pdwEnabledOptions = INTERFACESAFE_FOR_UNTRUSTED_CALLER;
+            }
+            else if (riid == IID_IPersistStorage || riid == IID_IPersistStream || riid == IID_IPersistPropertyBag) {
+                Rslt = S_OK;
+                pdwEnabledOptions = 0;
+                if (_fSafeForInitializing == true)
+                    pdwEnabledOptions = INTERFACESAFE_FOR_UNTRUSTED_DATA;
+            }
+            else {
+                Rslt = E_NOINTERFACE;
+            }
+
+            return Rslt;
+        }
+
+        public int SetInterfaceSafetyOptions(ref Guid riid,
+                             int dwOptionSetMask,
+                             int dwEnabledOptions) {
+            int Rslt = E_FAIL;
+
+            if (riid == IID_IDispatch || riid == IID_IDispatchEx) {
+                if (((dwEnabledOptions & dwOptionSetMask) == INTERFACESAFE_FOR_UNTRUSTED_CALLER) &&
+                     (_fSafeForScripting == true))
+                    Rslt = S_OK;
+            }
+            else if (riid == IID_IPersistStorage || riid == IID_IPersistStream || riid == IID_IPersistPropertyBag) {
+                if (((dwEnabledOptions & dwOptionSetMask) == INTERFACESAFE_FOR_UNTRUSTED_DATA) &&
+                     (_fSafeForInitializing == true))
+                    Rslt = S_OK;
+            }
+            else {
+                Rslt = E_NOINTERFACE;
+            }
+
+            return Rslt;
+        }
+
+
+        #endregion
+    }
+
+    [ComImport, GuidAttribute("CB5BDC81-93C1-11CF-8F20-00805F2CD064")]
+    [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IObjectSafety {
+        [PreserveSig]
+        int GetInterfaceSafetyOptions(ref Guid riid,
+                      [MarshalAs(UnmanagedType.U4)] ref int pdwSupportedOptions,
+                      [MarshalAs(UnmanagedType.U4)] ref int pdwEnabledOptions);
+
+        [PreserveSig()]
+        int SetInterfaceSafetyOptions(ref Guid riid,
+                      [MarshalAs(UnmanagedType.U4)] int dwOptionSetMask,
+                      [MarshalAs(UnmanagedType.U4)] int dwEnabledOptions);
     }
 }

@@ -39,4 +39,6 @@
 #include <atlfile.h>
 #include <algorithm>
 
+#include <thumbcache.h>
+
 using namespace ATL;

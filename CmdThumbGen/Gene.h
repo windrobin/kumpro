@@ -13,6 +13,8 @@ class ATL_NO_VTABLE CGene :
 	public IPersistFile,
 	public IExtractImage2,
 	public IRunnableTask,
+	public IInitializeWithFile,
+	public IThumbnailProvider,
 	public IGene
 {
 public:
@@ -27,6 +29,8 @@ BEGIN_COM_MAP(CGene)
 	COM_INTERFACE_ENTRY(IPersistFile)
 	COM_INTERFACE_ENTRY(IExtractImage)
 	COM_INTERFACE_ENTRY(IExtractImage2)
+	COM_INTERFACE_ENTRY(IInitializeWithFile)
+	COM_INTERFACE_ENTRY(IThumbnailProvider)
 	COM_INTERFACE_ENTRY(IRunnableTask)
 
 	COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, m_pFTM)
@@ -54,8 +58,8 @@ END_COM_MAP()
 
 public:
 	// IPersist
-        virtual HRESULT STDMETHODCALLTYPE GetClassID( 
-            /* [out] */ CLSID *pClassID)
+		virtual HRESULT STDMETHODCALLTYPE GetClassID( 
+			/* [out] */ CLSID *pClassID)
 		{
 			if (pClassID == NULL)
 				return E_POINTER;
@@ -65,14 +69,14 @@ public:
 		}
 
 	// IPersistFile
-        virtual HRESULT STDMETHODCALLTYPE IsDirty( void)
+		virtual HRESULT STDMETHODCALLTYPE IsDirty( void)
 		{
 			return S_FALSE;
 		}
-        
-        virtual HRESULT STDMETHODCALLTYPE Load( 
-            /* [in] */ LPCOLESTR pszFileName,
-            /* [in] */ DWORD dwMode)
+		
+		virtual HRESULT STDMETHODCALLTYPE Load( 
+			/* [in] */ LPCOLESTR pszFileName,
+			/* [in] */ DWORD dwMode)
 		{
 			ObjectLock lck(this);
 
@@ -86,22 +90,22 @@ public:
 		}
 
 		CString m_targetPath;
-        
-        virtual HRESULT STDMETHODCALLTYPE Save( 
-            /* [unique][in] */ LPCOLESTR pszFileName,
-            /* [in] */ BOOL fRemember) 
+		
+		virtual HRESULT STDMETHODCALLTYPE Save( 
+			/* [unique][in] */ LPCOLESTR pszFileName,
+			/* [in] */ BOOL fRemember) 
 		{
 			return E_NOTIMPL;
 		}
-        
-        virtual HRESULT STDMETHODCALLTYPE SaveCompleted( 
-            /* [unique][in] */ LPCOLESTR pszFileName)
+		
+		virtual HRESULT STDMETHODCALLTYPE SaveCompleted( 
+			/* [unique][in] */ LPCOLESTR pszFileName)
 		{
 			return S_OK;
 		}
-        
-        virtual HRESULT STDMETHODCALLTYPE GetCurFile( 
-            /* [out] */ LPOLESTR *ppszFileName)
+		
+		virtual HRESULT STDMETHODCALLTYPE GetCurFile( 
+			/* [out] */ LPOLESTR *ppszFileName)
 		{
 			ObjectLock lck(this);
 
@@ -136,14 +140,31 @@ public:
 		SIZE m_size;
 		DWORD m_flags;
 
+	// IInitializeWithFile : public IUnknown
+	public:
+		virtual HRESULT STDMETHODCALLTYPE Initialize( 
+			/* [string][in] */ __RPC__in_string LPCWSTR pszFilePath,
+			/* [in] */ DWORD grfMode)
+		{
+			ObjectLock lck(this);
+
+			if (pszFilePath == NULL)
+				return E_POINTER;
+
+			m_targetPath = pszFilePath;
+			m_state = Waiting;
+
+			return S_OK;
+		}
+
 	// IExtractImage
-        virtual HRESULT STDMETHODCALLTYPE GetLocation( 
-            /* [size_is][out] */ LPWSTR pszPathBuffer,
-            /* [in] */ DWORD cch,
-            /* [unique][out][in] */ DWORD *pdwPriority,
-            /* [in] */ const SIZE *prgSize,
-            /* [in] */ DWORD dwRecClrDepth,
-            /* [out][in] */ DWORD *pdwFlags)
+		virtual HRESULT STDMETHODCALLTYPE GetLocation( 
+			/* [size_is][out] */ LPWSTR pszPathBuffer,
+			/* [in] */ DWORD cch,
+			/* [unique][out][in] */ DWORD *pdwPriority,
+			/* [in] */ const SIZE *prgSize,
+			/* [in] */ DWORD dwRecClrDepth,
+			/* [out][in] */ DWORD *pdwFlags)
 		{
 			ObjectLock lck(this);
 
@@ -170,9 +191,9 @@ public:
 		} State;
 
 		State m_state;
-        
-        virtual HRESULT STDMETHODCALLTYPE Extract( 
-            /* [out] */ HBITMAP *phBmpThumbnail)
+		
+		virtual HRESULT STDMETHODCALLTYPE Extract( 
+			/* [out] */ HBITMAP *phBmpThumbnail)
 		{
 			ObjectLock lck(this);
 			HRESULT hr;
@@ -312,8 +333,8 @@ public:
 		};
 
 	// IExtractImage2
-        virtual HRESULT STDMETHODCALLTYPE GetDateStamp( 
-            /* [out] */ FILETIME *pDateStamp)
+		virtual HRESULT STDMETHODCALLTYPE GetDateStamp( 
+			/* [out] */ FILETIME *pDateStamp)
 		{
 			ObjectLock lck(this);
 			HRESULT hr;
@@ -330,29 +351,29 @@ public:
 		}
 
 	// IRunnableTask
-        virtual HRESULT STDMETHODCALLTYPE Run( void)
+		virtual HRESULT STDMETHODCALLTYPE Run( void)
 		{
 			return NOERROR;
 		}
-        
-        virtual HRESULT STDMETHODCALLTYPE Kill( 
-            /* [annotation][in] */ 
-            __in  BOOL bWait)
+		
+		virtual HRESULT STDMETHODCALLTYPE Kill( 
+			/* [annotation][in] */ 
+			__in  BOOL bWait)
 		{
 			return E_NOTIMPL;
 		}
-        
-        virtual HRESULT STDMETHODCALLTYPE Suspend( void)
+		
+		virtual HRESULT STDMETHODCALLTYPE Suspend( void)
 		{
 			return E_NOTIMPL;
 		}
-        
-        virtual HRESULT STDMETHODCALLTYPE Resume( void)
+		
+		virtual HRESULT STDMETHODCALLTYPE Resume( void)
 		{
 			return E_NOTIMPL;
 		}
-        
-        virtual ULONG STDMETHODCALLTYPE IsRunning( void)
+		
+		virtual ULONG STDMETHODCALLTYPE IsRunning( void)
 		{
 			switch (m_state) {
 				case Running:
@@ -362,6 +383,121 @@ public:
 			}
 
 			return IRTIR_TASK_NOT_RUNNING;
+		}
+
+	// IThumbnailProvider : public IUnknown
+	public:
+		virtual HRESULT STDMETHODCALLTYPE GetThumbnail( 
+			/* [in] */ UINT cx,
+			/* [out] */ __RPC__deref_out_opt HBITMAP *phbmp,
+			/* [out] */ __RPC__out WTS_ALPHATYPE *pdwAlpha)
+		{
+			ObjectLock lck(this);
+			HRESULT hr;
+			int errc;
+
+			if (phbmp == NULL)
+				return E_POINTER;
+
+			if (m_targetPath.IsEmpty())
+				return E_FAIL;
+
+			LPCTSTR pszExt = PathFindExtension(m_targetPath);
+			if (pszExt == NULL)
+				pszExt = _T(".");
+			CString strCmdlForm;
+			if (FAILED(hr = RUt::GetCommandLineForm(pszExt, strCmdlForm)))
+				return hr;
+			CString strTempFile;
+			if (FAILED(hr = RUt::GetTempFilePath(strTempFile)))
+				return hr;
+
+			TCHAR tcWorkdir[MAX_PATH] = {0};
+			if (0 == GetTempPath(MAX_PATH, tcWorkdir))
+				return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
+
+			DWORD_PTR pvArgs[] = {
+				reinterpret_cast<DWORD_PTR>(static_cast<LPCTSTR>(m_targetPath)),
+				reinterpret_cast<DWORD_PTR>(static_cast<LPCTSTR>(strTempFile)),
+				cx,
+				cx,
+				0, // m_flags
+				0,
+				0,
+				0,
+				0,
+				0,
+			};
+
+			TCHAR szCmdRun[2000 +1] = {0};
+			if (0 == (FormatMessage(FORMAT_MESSAGE_FROM_STRING|FORMAT_MESSAGE_ARGUMENT_ARRAY, strCmdlForm, 0, 0, szCmdRun, 2000, (va_list *)pvArgs)))
+				return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
+
+			STARTUPINFO si;
+			ZeroMemory(&si, sizeof(si));
+			si.cb = sizeof(si);
+			si.dwFlags = STARTF_USESHOWWINDOW;
+			si.wShowWindow = SW_SHOWMINNOACTIVE;
+
+			PROCESS_INFORMATION pi;
+			ZeroMemory(&pi, sizeof(pi));
+
+			BOOL fCreated = CreateProcess(
+				NULL,
+				szCmdRun,
+				NULL,
+				NULL,
+				false,
+				0 |IDLE_PRIORITY_CLASS |CREATE_NO_WINDOW,
+				NULL,
+				tcWorkdir,
+				&si,
+				&pi
+				);
+			if (!fCreated)
+				return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
+
+			m_state = Running;
+
+			WaitForSingleObject(pi.hProcess, INFINITE);
+
+			m_state = Done;
+
+			DWORD errlv = 0;
+			if (!GetExitCodeProcess(pi.hProcess, &errlv))
+				errlv = 1;
+
+			CloseHandle(pi.hProcess);
+			CloseHandle(pi.hThread);
+
+			HBITMAP hbm = NULL;
+
+			if (errlv == 0) {
+				hbm = reinterpret_cast<HBITMAP>(LoadImage(NULL, strTempFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION|LR_LOADFROMFILE|LR_VGACOLOR));
+
+			}
+
+			if (pdwAlpha != NULL) {
+				*pdwAlpha = WTSAT_UNKNOWN;
+
+				if (hbm != NULL) {
+					DIBSECTION dib;
+					ZeroMemory(&dib, sizeof(dib));
+					if (GetObject(hbm, sizeof(dib), &dib) == sizeof(dib)) {
+						switch (dib.dsBmih.biBitCount) {
+							case 32:
+								*pdwAlpha = WTSAT_ARGB;
+								break;
+							default:
+								*pdwAlpha = WTSAT_RGB;
+								break;
+						}
+					}
+				}
+			}
+
+			*phbmp = hbm;
+			return (*phbmp != NULL) ? S_OK : E_FAIL;
 		}
 };
 

@@ -8,8 +8,8 @@
 !define APP   "AxXlsVw"
 !define TITLE "Ax Excel Workbook Viewer"
 
-!define VER    "1.0.0"
-!define APPVER "1_0_0"
+!define VER    "1.1.0"
+!define APPVER "1_1_0"
 
 !define MIME "application/vnd.ms-excel"
 
@@ -115,7 +115,7 @@ Section "${APP}" ;No components page, name is not important
   WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\EnableFullPage\${EXT}" "" ""
   WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\Implemented Categories\{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}" "" ""
   WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\InprocServer32" "" "mscoree.dll"
-  WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\InprocServer32" "Assembly" "AxXlsVw, Version=1.0.0.0, Culture=neutral, PublicKeyToken=ab20999cc208234b"
+  WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\InprocServer32" "Assembly" "AxXlsVw, Version=1.1.0.0, Culture=neutral, PublicKeyToken=ab20999cc208234b"
   WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\InprocServer32" "Class" "AxXlsVw.VwXls"
   WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\InprocServer32" "CodeBase" "file://$INSTDIR\AxXlsVw.dll"
   WriteRegStr HKCU "Software\Classes\CLSID\${CLSID}\InprocServer32" "RuntimeVersion" "v2.0.50727"

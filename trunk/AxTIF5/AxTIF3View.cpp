@@ -19,7 +19,7 @@ const int cyBar = 24;
 
 // CAxTIF3View
 
-IMPLEMENT_DYNCREATE(CAxTIF3View, CView)
+IMPLEMENT_DYNAMIC(CAxTIF3View, CView)
 
 #ifndef WM_MOUSEHWHEEL
 #define WM_MOUSEHWHEEL 0x020E
@@ -40,14 +40,23 @@ BEGIN_MESSAGE_MAP(CAxTIF3View, CView)
 	ON_WM_MOUSEWHEEL()
 	ON_MESSAGE(WM_MOUSEHWHEEL, OnMouseHWheel)
 	ON_WM_MOUSEACTIVATE()
+	ON_COMMAND_RANGE(IDC_P6, IDC_MOVE, OnSelCmd)
+	ON_UPDATE_COMMAND_UI_RANGE(IDC_MAG, IDC_MOVE, OnUpdateSelCmd)
 END_MESSAGE_MAP()
 
 // CAxTIF3View コンストラクション/デストラクション
 
 CAxTIF3View::CAxTIF3View()
+: m_ddcompat(0)
 {
-	// TODO: 構築コードをここに追加します。
-
+	CRegKey rk;
+	LONG r;
+	if (0 == (r = rk.Open(HKEY_CURRENT_USER, _T("Software\\HIRAOKA HYPERS TOOLS, Inc.\\AxTIF5")))) {
+		DWORD ddcompat = 0;
+		if (0 == (r = rk.QueryDWORDValue(_T("ddcompat"), ddcompat))) {
+			m_ddcompat = ddcompat;
+		}
+	}
 }
 
 CAxTIF3View::~CAxTIF3View()
@@ -326,6 +335,38 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 		dc.SelectObject(pOrg);
 		pDC->ExcludeClipRect(m_rcAbout);
 	}
+	if (pDC->RectVisible(m_rcMMSel)) {
+		CDC dc;
+		dc.CreateCompatibleDC(pDC);
+		CBitmap* pOrg = dc.SelectObject(m_toolZoom ? &m_bmMagBtn : &m_bmMoveBtn);
+		pDC->BitBlt(m_rcMMSel.left, m_rcMMSel.top, m_rcMMSel.Width(), m_rcMMSel.Height(), &dc, 0, 0, SRCCOPY);
+		dc.SelectObject(pOrg);
+		pDC->ExcludeClipRect(m_rcMMSel);
+	}
+	if (pDC->RectVisible(m_rcZoomVal)) {
+		CDC dc;
+		dc.CreateCompatibleDC(pDC);
+		CBitmap* pOrg = dc.SelectObject(&m_bmZoomVal);
+		pDC->BitBlt(m_rcZoomVal.left, m_rcZoomVal.top, m_rcZoomVal.Width(), m_rcZoomVal.Height(), &dc, 0, 0, SRCCOPY);
+		dc.SelectObject(pOrg);
+
+		pDC->SelectStockObject(DEFAULT_GUI_FONT);
+		CString str;
+		str.Format(_T("%u %%"), (int)(100 * m_fZoom));
+
+		//COLORREF lastBkClr = pDC->SetBkColor(GetSysColor(COLOR_WINDOW));
+		UINT lastMode = pDC->SetTextAlign(TA_CENTER|TA_TOP);
+		COLORREF lastTextClr = pDC->SetTextColor(RGB(0, 0, 0));
+		CSize size =  pDC->GetTextExtent(str);
+		CPoint pt = m_rcZoomVal.CenterPoint() - CPoint(0, size.cy / 2);
+		pDC->ExtTextOut(pt.x, pt.y, ETO_CLIPPED, m_rcZoomVal, str, str.GetLength(), NULL);
+		pDC->SetTextColor(lastTextClr);
+		pDC->SetTextAlign(lastMode);
+		//pDC->SetBkColor(lastBkClr);
+
+		pDC->ExcludeClipRect(m_rcZoomVal);
+	}
+
 
 	{
 		CBrush br;
@@ -400,6 +441,9 @@ int CAxTIF3View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		|| !m_bmAbout.LoadBitmap(IDB_ABOUT)
 		|| !m_bmFitWH.LoadBitmap(IDB_FITWH)
 		|| !m_bmFitW.LoadBitmap(IDB_FITW)
+		|| !m_bmMagBtn.LoadBitmap(IDB_MAGBTN)
+		|| !m_bmMoveBtn.LoadBitmap(IDB_MOVEBTN)
+		|| !m_bmZoomVal.LoadBitmap(IDB_ZOOMVAL)
 		)
 		return -1;
 
@@ -529,12 +573,8 @@ void CAxTIF3View::OnLButtonDown(UINT nFlags, CPoint point) {
 			Zoomat(true, point);
 		}
 		else if (m_rcGearOn.PtInRect(point)) {
-			CPoint posat = GetAbsPosAt(m_rcPaint.CenterPoint() + GetScrollOff());
 			int x = point.x - m_rcGearOn.left;
-			Setzf(tp2z(x));
-			LayoutClient();
-			SetCenterAt(posat, m_rcPaint.CenterPoint());
-			InvalidateRect(m_rcPaint,false);
+			SetzoomR(tp2z(x));
 		}
 		else if (!m_toolZoom && m_rcPaint.PtInRect(point)) {
 			m_ptBegin = point;
@@ -562,21 +602,46 @@ void CAxTIF3View::OnLButtonDown(UINT nFlags, CPoint point) {
 		else if (m_rcAbout.PtInRect(point)) {
 			AfxGetApp()->OnCmdMsg(ID_APP_ABOUT, 0, NULL, NULL);
 		}
+		else if (m_rcMMSel.PtInRect(point)) {
+			CMenu aSel;
+			aSel.CreatePopupMenu();
+			aSel.AppendMenu(MF_BITMAP, IDC_MAG, &m_bmMag);
+			aSel.AppendMenu(MF_BITMAP, IDC_MOVE, &m_bmMove);
+			CPoint ptMenu = m_rcMMSel.TopLeft();
+			ClientToScreen(&ptMenu);
+			aSel.TrackPopupMenu(TPM_LEFTALIGN, ptMenu.x, ptMenu.y, GetParentFrame());
+		}
+		else if (m_rcZoomVal.PtInRect(point)) {
+			CMenu aSel;
+			aSel.LoadMenu(IDR_MENU_P);
+			CMenu *pMenu = aSel.GetSubMenu(0);
+			CPoint ptMenu = m_rcZoomVal.TopLeft();
+			ClientToScreen(&ptMenu);
+			if (pMenu != NULL)
+				pMenu->TrackPopupMenu(TPM_LEFTALIGN, ptMenu.x, ptMenu.y, GetParentFrame());
+		}
 	}
 
 	CView::OnLButtonDown(nFlags, point);
 }
 
+void CAxTIF3View::SetzoomR(float zf) {
+	CPoint posat = GetAbsPosAt(m_rcPaint.CenterPoint() + GetScrollOff());
+	Setzf(zf);
+	LayoutClient();
+	SetCenterAt(posat, m_rcPaint.CenterPoint());
+	InvalidateRect(m_rcPaint,false);
+}
+
 void CAxTIF3View::Zoomat(bool fIn, CPoint mouseat) {
+	float zf = Getzf();
+	ZoomatR(fIn ? zf * 2 : zf / 2, mouseat);
+}
+
+void CAxTIF3View::ZoomatR(float zf, CPoint mouseat) {
 	CPoint clientpt = mouseat;
 	CPoint posat = GetAbsPosAt(GetScrollOff() + clientpt);
-	float zf = Getzf();
-	if (fIn) {
-		Setzf(min(16.0f, zf * 2));
-	}
-	else {
-		Setzf(max(0.0625f, zf / 2));
-	}
+	Setzf(max(0.0625f, min(16.0f, zf)));
 	LayoutClient();
 	SetCenterAt(posat, clientpt);
 	InvalidateRect(m_rcPaint,false);
@@ -588,57 +653,105 @@ void CAxTIF3View::LayoutClient() {
 	CRect rcV;
 	m_sbV.GetWindowRect(rcV);
 
+	{
+		m_rcGlass = 
+		m_rcMove = 
+		m_rcFitW = 
+		m_rcFitWH =
+		m_rcGear =
+		m_rcGearOn =
+		m_rcPrev =
+		m_rcNext =
+		m_rcDisp =
+		m_rcAbout = 
+		m_rcMMSel =
+		m_rcZoomVal =
+			CRect();
+	}
 	CRect rc;
 	GetClientRect(&rc);
 	int curx=0;
-	m_rcGlass.left = 0;
-	m_rcGlass.bottom = rc.bottom;
-	m_rcGlass.right = (curx += 24);
-	m_rcGlass.top = m_rcGlass.bottom - cyBar;
+	if (m_ddcompat == 0) {
+		m_rcGlass.left = 0;
+		m_rcGlass.bottom = rc.bottom;
+		m_rcGlass.right = (curx += 24);
+		m_rcGlass.top = m_rcGlass.bottom - cyBar;
 
-	m_rcMove.left = curx;
-	m_rcMove.bottom = rc.bottom;
-	m_rcMove.right = (curx += 24);
-	m_rcMove.top = m_rcMove.bottom - cyBar;
+		m_rcMove.left = curx;
+		m_rcMove.bottom = rc.bottom;
+		m_rcMove.right = (curx += 24);
+		m_rcMove.top = m_rcMove.bottom - cyBar;
 
-	m_rcFitW.left = curx;
-	m_rcFitW.bottom = rc.bottom;
-	m_rcFitW.right = (curx += 24);
-	m_rcFitW.top = m_rcFitW.bottom - cyBar;
+		m_rcFitW.left = curx;
+		m_rcFitW.bottom = rc.bottom;
+		m_rcFitW.right = (curx += 24);
+		m_rcFitW.top = m_rcFitW.bottom - cyBar;
 
-	m_rcFitWH.left = curx;
-	m_rcFitWH.bottom = rc.bottom;
-	m_rcFitWH.right = (curx += 24);
-	m_rcFitWH.top = m_rcFitWH.bottom - cyBar;
+		m_rcFitWH.left = curx;
+		m_rcFitWH.bottom = rc.bottom;
+		m_rcFitWH.right = (curx += 24);
+		m_rcFitWH.top = m_rcFitWH.bottom - cyBar;
 
-	m_rcGear.left = curx;
-	m_rcGear.bottom = rc.bottom;
-	m_rcGear.right = (curx += cxBMGear);
-	m_rcGear.top = m_rcGear.bottom - cyBar;
+		m_rcGear.left = curx;
+		m_rcGear.bottom = rc.bottom;
+		m_rcGear.right = (curx += cxBMGear);
+		m_rcGear.top = m_rcGear.bottom - cyBar;
 
-	m_rcGearOn = m_rcGear;
-	m_rcGearOn.left += 7;
-	m_rcGearOn.right -= 7;
+		m_rcGearOn = m_rcGear;
+		m_rcGearOn.left += 7;
+		m_rcGearOn.right -= 7;
 
-	m_rcPrev.left = curx;
-	m_rcPrev.bottom = rc.bottom;
-	m_rcPrev.right = curx = (curx += cxBMPrev);
-	m_rcPrev.top = rc.bottom - cyBar;
+		m_rcPrev.left = curx;
+		m_rcPrev.bottom = rc.bottom;
+		m_rcPrev.right = curx = (curx += cxBMPrev);
+		m_rcPrev.top = rc.bottom - cyBar;
 
-	m_rcNext.left = curx;
-	m_rcNext.bottom = rc.bottom;
-	m_rcNext.right = curx = (curx += cxBMNext);
-	m_rcNext.top = rc.bottom - cyBar;
+		m_rcNext.left = curx;
+		m_rcNext.bottom = rc.bottom;
+		m_rcNext.right = curx = (curx += cxBMNext);
+		m_rcNext.top = rc.bottom - cyBar;
 
-	m_rcDisp.left = curx ;
-	m_rcDisp.bottom = rc.bottom;
-	m_rcDisp.right = curx = (curx += 50);
-	m_rcDisp.top = rc.bottom - cyBar;
+		m_rcDisp.left = curx ;
+		m_rcDisp.bottom = rc.bottom;
+		m_rcDisp.right = curx = (curx += 50);
+		m_rcDisp.top = rc.bottom - cyBar;
 
-	m_rcAbout.left = curx;
-	m_rcAbout.bottom = rc.bottom;
-	m_rcAbout.right = (curx += 24);
-	m_rcAbout.top = rc.bottom - cyBar;
+		m_rcAbout.left = curx;
+		m_rcAbout.bottom = rc.bottom;
+		m_rcAbout.right = (curx += 24);
+		m_rcAbout.top = rc.bottom - cyBar;
+	}
+	else {
+		m_rcMMSel.left = curx;
+		m_rcMMSel.bottom = rc.bottom;
+		m_rcMMSel.right = (curx += 24);
+		m_rcMMSel.top = rc.bottom - cyBar;
+
+		m_rcZoomVal.left = curx;
+		m_rcZoomVal.bottom = rc.bottom;
+		m_rcZoomVal.right = (curx += 48);
+		m_rcZoomVal.top = rc.bottom - cyBar;
+
+		m_rcPrev.left = curx;
+		m_rcPrev.bottom = rc.bottom;
+		m_rcPrev.right = curx = (curx += cxBMPrev);
+		m_rcPrev.top = rc.bottom - cyBar;
+
+		m_rcDisp.left = curx ;
+		m_rcDisp.bottom = rc.bottom;
+		m_rcDisp.right = curx = (curx += 50);
+		m_rcDisp.top = rc.bottom - cyBar;
+
+		m_rcNext.left = curx;
+		m_rcNext.bottom = rc.bottom;
+		m_rcNext.right = curx = (curx += cxBMNext);
+		m_rcNext.top = rc.bottom - cyBar;
+
+		m_rcAbout.left = curx;
+		m_rcAbout.bottom = rc.bottom;
+		m_rcAbout.right = (curx += 24);
+		m_rcAbout.top = rc.bottom - cyBar;
+	}
 
 	rc.bottom -= cyBar;
 
@@ -856,4 +969,36 @@ float CAxTIF3View::Getzf() const {
 		}
 	}
 	return 1;
+}
+
+void CAxTIF3View::PostNcDestroy() {
+	return;
+//	CView::PostNcDestroy();
+}
+
+void CAxTIF3View::OnSelCmd(UINT nID) {
+	switch (nID) {
+		case IDC_MAG: m_toolZoom = true; break;
+		case IDC_MOVE: m_toolZoom = false; break;
+
+		case IDC_P6   : SetzoomR(0.06f); return;
+		case IDC_P12  : SetzoomR(0.12f); return;
+		case IDC_P25  : SetzoomR(0.25f); return;
+		case IDC_P50  : SetzoomR(0.5f); return;
+		case IDC_P100 : SetzoomR(1); return;
+		case IDC_P200 : SetzoomR(2); return;
+		case IDC_P400 : SetzoomR(4); return;
+		case IDC_P800 : SetzoomR(8); return;
+		case IDC_P1600: SetzoomR(16); return;
+
+		default: return;
+	}
+	InvalidateRect(m_rcMMSel,false);
+}
+
+void CAxTIF3View::OnUpdateSelCmd(CCmdUI *pUI) {
+	switch (pUI->m_nID) {
+		case IDC_MAG: pUI->SetCheck(m_toolZoom); break;
+		case IDC_MOVE: pUI->SetCheck(!m_toolZoom); break;
+	}
 }

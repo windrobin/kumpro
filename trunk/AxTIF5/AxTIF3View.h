@@ -4,15 +4,16 @@
 
 #pragma once
 
+class CAxTIF3Doc;
 
 class CAxTIF3View : public CView
 {
 protected: // シリアル化からのみ作成します。
-	CAxTIF3View();
-	DECLARE_DYNCREATE(CAxTIF3View)
+	DECLARE_DYNAMIC(CAxTIF3View)
 
 // 属性
 public:
+	CAxTIF3View();
 	CAxTIF3Doc* GetDocument() const;
 
 // 操作
@@ -45,6 +46,7 @@ public:
 	CScrollBar m_sbH, m_sbV;
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	CRect m_rcPaint, m_rcGlass, m_rcMove, m_rcGear, m_rcGearOn, m_rcPrev, m_rcNext, m_rcDisp, m_rcAbout, m_rcFitWH, m_rcFitW;
+	CRect m_rcMMSel, m_rcZoomVal;
 	CxImage *getPic(int frame = -1) const;
 	CxImage *GetPic(int frame = -1) {
 		return getPic(frame);
@@ -56,11 +58,14 @@ public:
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	SCROLLINFO m_siH, m_siV;
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	CBitmap m_bmMag, m_bmMove, m_bmGear, m_bmTrick, m_bmPrev, m_bmNext, m_bmAbout, m_bmFitWH, m_bmFitW;
+	CBitmap m_bmMag, m_bmMove, m_bmGear, m_bmTrick, m_bmPrev, m_bmNext, m_bmAbout, m_bmFitWH, m_bmFitW, m_bmMagBtn, m_bmMoveBtn;
+	CBitmap m_bmZoomVal;
 	bool m_toolZoom;
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	void LayoutClient();
 	void Zoomat(bool fIn, CPoint at);
+	void ZoomatR(float zf, CPoint at);
+	void SetzoomR(float zf);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	//int m_trickPos; // (7,7)-(247,7) 0to240.
 	CPoint GetCenterPos() const;
@@ -128,11 +133,13 @@ public:
 		m_fZoom = zf;
 		SetFit(FitNo);
 		InvalidateRect(m_rcGear,false);
+		InvalidateRect(m_rcZoomVal,false);
 	}
 	int GetTrickPos() {
 		int v = z2tp(Getzf());
 		return max(0, min(240, v));
 	}
+	long m_ddcompat;
 
 	int z2tp(float f) const {
 #if 1
@@ -162,6 +169,10 @@ public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg LRESULT OnMouseHWheel(WPARAM, LPARAM);
 	afx_msg int OnMouseActivate(CWnd* pDesktopWnd, UINT nHitTest, UINT message);
+	afx_msg void OnSelCmd(UINT nID);
+	afx_msg void OnUpdateSelCmd(CCmdUI *pUI);
+protected:
+	virtual void PostNcDestroy();
 };
 
 #ifndef _DEBUG  // AxTIF3View.cpp のデバッグ バージョン

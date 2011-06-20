@@ -15,13 +15,27 @@
 #define IDB_NEXT                        136
 #define IDB_ABOUT                       137
 #define IDS_AXTIF5_PPG_CAPTION          200
-#define IDD_PROPPAGE_AXTIF5             200
-#define IDC_CREDITS                     201
-#define IDR_CREDITS                     201
-#define IDC_VER                         202
-#define IDB_FITWH                       202
-#define IDB_BITMAP1                     203
-#define IDB_FITW                        203
+#define IDD_PROPPAGE_AXTIF5             201
+#define IDC_CREDITS                     202
+#define IDR_CREDITS                     203
+#define IDC_VER                         204
+#define IDB_FITWH                       205
+#define IDB_FITW                        206
+#define IDB_MAGBTN                      207
+#define IDB_MOVEBTN                     208
+#define IDR_MENU_P                      209
+#define IDB_ZOOMVAL                     210
+#define IDC_P6                          987
+#define IDC_P12                         988
+#define IDC_P25                         989
+#define IDC_P50                         990
+#define IDC_P100                        991
+#define IDC_P200                        992
+#define IDC_P400                        993
+#define IDC_P800                        994
+#define IDC_P1600                       995
+#define IDC_MAG                         996
+#define IDC_MOVE                        997
 #define IDC_HORZ                        998
 #define IDC_VERT                        999
 
@@ -29,8 +43,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        204
-#define _APS_NEXT_COMMAND_VALUE         32768
+#define _APS_NEXT_RESOURCE_VALUE        211
+#define _APS_NEXT_COMMAND_VALUE         32795
 #define _APS_NEXT_CONTROL_VALUE         203
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

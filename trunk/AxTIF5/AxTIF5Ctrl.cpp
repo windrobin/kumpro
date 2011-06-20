@@ -240,6 +240,7 @@ void CAxTIF5Ctrl::DoPropExchange(CPropExchange* pPX)
 	COleControl::DoPropExchange(pPX);
 
 	PX_String(pPX, _T("src"), m_src);
+	PX_Long(pPX, _T("ddcompat"), m_frame.m_vw.m_ddcompat);
 
 	HRESULT hr;
 
@@ -340,7 +341,7 @@ int CAxTIF5Ctrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 		HRESULT hr;
 		CComPtr<IBindCtx> pibc;
-		if (SUCCEEDED(hr =CreateBindCtx(0, &pibc))) {
+		if (SUCCEEDED(hr = CreateBindCtx(0, &pibc))) {
 			LoadFromMoniker(pibc, m_pimkDL);
 		}
 	}

@@ -30,9 +30,11 @@ END_MESSAGE_MAP()
 // CInnerFrame メッセージ ハンドラ
 
 BOOL CInnerFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) {
-	// TODO: ここに特定なコードを追加するか、もしくは基本クラスを呼び出してください。
+	if (m_vw.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,CRect(0,0,0,0), this, AFX_IDW_PANE_FIRST, pContext))
+		return true;
 
-	return CFrameWnd::OnCreateClient(lpcs, pContext);
+	return false;
+//	return CFrameWnd::OnCreateClient(lpcs, pContext);
 }
 
 void CInnerFrame::PostNcDestroy() {

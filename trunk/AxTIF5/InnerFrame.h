@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "AxTIF3View.h"
+
 // CInnerFrame フレーム
 
 class CInnerFrame : public CFrameWnd
@@ -10,6 +12,8 @@ protected:
 public:
 	CInnerFrame();           // 動的生成で使用される protected コンストラクタ
 	virtual ~CInnerFrame();
+
+	CAxTIF3View m_vw;
 
 protected:
 	DECLARE_MESSAGE_MAP()

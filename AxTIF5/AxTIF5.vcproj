@@ -336,6 +336,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\ddown.bmp"
+				>
+			</File>
+			<File
 				RelativePath=".\res\fitw.bmp"
 				>
 			</File>
@@ -352,7 +356,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\magbtn.bmp"
+				>
+			</File>
+			<File
 				RelativePath=".\res\move.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\movebtn.bmp"
 				>
 			</File>
 			<File
@@ -365,6 +377,14 @@
 			</File>
 			<File
 				RelativePath=".\res\trick.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\zoompbar.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\zoomval.bmp"
 				>
 			</File>
 		</Filter>

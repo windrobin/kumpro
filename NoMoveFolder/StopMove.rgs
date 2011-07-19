@@ -1,0 +1,39 @@
+HKCR
+{
+	NoMoveFolder.StopMove.1 = s 'StopMove Class'
+	{
+		CLSID = s '{D0B183F6-10EA-443A-A428-8D433A318CD1}'
+	}
+	NoMoveFolder.StopMove = s 'StopMove Class'
+	{
+		CLSID = s '{D0B183F6-10EA-443A-A428-8D433A318CD1}'
+		CurVer = s 'NoMoveFolder.StopMove.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {D0B183F6-10EA-443A-A428-8D433A318CD1} = s 'StopMove Class'
+		{
+			ProgID = s 'NoMoveFolder.StopMove.1'
+			VersionIndependentProgID = s 'NoMoveFolder.StopMove'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{572050F9-DD3D-41E4-BE6E-5AF3FF2D101C}'
+		}
+	}
+	NoRemove Directory
+	{
+		NoRemove Shellex
+		{
+			NoRemove CopyHookHandlers
+			{
+				ForceRemove NoMoveFolder = s '{D0B183F6-10EA-443A-A428-8D433A318CD1}'
+				{
+				}
+			}
+		}
+	}
+}

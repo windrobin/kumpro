@@ -1,0 +1,35 @@
+// NoMoveFolder.idl : NoMoveFolder の IDL ソース
+//
+
+// このファイルは、タイプ ライブラリ (NoMoveFolder.tlb) およびマーシャリング コードを
+// 作成するために MIDL ツールによって処理されます。
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(E3D82BF9-AE47-4ED9-A09A-9B1733DC6D0E),
+	nonextensible,
+	helpstring("IStopMove インターフェイス"),
+	pointer_default(unique)
+]
+interface IStopMove : IUnknown {
+};
+[
+	uuid(572050F9-DD3D-41E4-BE6E-5AF3FF2D101C),
+	version(1.0),
+	helpstring("NoMoveFolder 1.0 タイプ ライブラリ")
+]
+library NoMoveFolderLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(D0B183F6-10EA-443A-A428-8D433A318CD1),
+		helpstring("StopMove Class")
+	]
+	coclass StopMove
+	{
+		[default] interface IStopMove;
+	};
+};

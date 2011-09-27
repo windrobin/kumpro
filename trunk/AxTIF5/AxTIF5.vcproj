@@ -306,6 +306,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RUt.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SrvrItem.h"
 				>
 			</File>

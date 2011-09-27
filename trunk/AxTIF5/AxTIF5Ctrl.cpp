@@ -240,7 +240,8 @@ void CAxTIF5Ctrl::DoPropExchange(CPropExchange* pPX)
 	COleControl::DoPropExchange(pPX);
 
 	PX_String(pPX, _T("src"), m_src);
-	PX_Long(pPX, _T("ddcompat"), m_frame.m_vw.m_ddcompat);
+	PX_Long(pPX, _T("ddcompat"), m_frame.m_vw.m_ddcompat, 0);
+	PX_Long(pPX, _T("slowzoom"), m_frame.m_vw.m_slowzoom, 0);
 
 	HRESULT hr;
 

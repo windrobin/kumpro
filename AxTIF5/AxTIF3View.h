@@ -100,7 +100,7 @@ public:
 			float centery = ((float)rcMax.top + rcMax.bottom) / 2;
             if (frMax >= frBox) {
                 // 縦長
-                float v = rcBox.cx * rcMax.Height() / rcBox.cy / 2;
+                float v = float(rcBox.cx) * rcMax.Height() / rcBox.cy / 2;
                 return CRect(
                     int(centerx - v),
                     int(rcMax.top),
@@ -110,7 +110,7 @@ public:
             }
             else {
                 // 横長
-                float v = rcBox.cy * rcMax.Width() / rcBox.cx / 2;
+                float v = float(rcBox.cy) * rcMax.Width() / rcBox.cx / 2;
                 return CRect(
                     int(rcMax.left),
                     int(centery - v),
@@ -139,7 +139,7 @@ public:
 		int v = z2tp(Getzf());
 		return max(0, min(240, v));
 	}
-	long m_ddcompat;
+	LONG m_ddcompat, m_slowzoom;
 
 	int z2tp(float f) const {
 #if 1

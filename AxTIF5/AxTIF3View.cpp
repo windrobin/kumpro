@@ -6,6 +6,7 @@
 
 #include "AxTIF3Doc.h"
 #include "AxTIF3View.h"
+#include "RUt.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -47,16 +48,10 @@ END_MESSAGE_MAP()
 // CAxTIF3View コンストラクション/デストラクション
 
 CAxTIF3View::CAxTIF3View()
-: m_ddcompat(0)
+: m_ddcompat(0), m_slowzoom(0)
 {
-	CRegKey rk;
-	LONG r;
-	if (0 == (r = rk.Open(HKEY_CURRENT_USER, _T("Software\\HIRAOKA HYPERS TOOLS, Inc.\\AxTIF5")))) {
-		DWORD ddcompat = 0;
-		if (0 == (r = rk.QueryDWORDValue(_T("ddcompat"), ddcompat))) {
-			m_ddcompat = ddcompat;
-		}
-	}
+	RUt::GetInt(_T("HIRAOKA HYPERS TOOLS, Inc."), _T("AxTIF5"), _T("ddcompat"), reinterpret_cast<DWORD &>(m_ddcompat), 0);
+	RUt::GetInt(_T("HIRAOKA HYPERS TOOLS, Inc."), _T("AxTIF5"), _T("slowzoom"), reinterpret_cast<DWORD &>(m_slowzoom), 0);
 }
 
 CAxTIF3View::~CAxTIF3View()
@@ -114,7 +109,8 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 		}
 
 		ASSERT(p != NULL);
-		if (p->GetBpp() == 1 && size.cx < p->GetWidth() && size.cy < p->GetHeight()) {
+		bool fSmallMono = p->GetBpp() == 1 && ULONG(size.cx) < p->GetWidth() && ULONG(size.cy) < p->GetHeight();
+		if (fSmallMono && m_slowzoom == 10) {
 			BI256 bi;
 			bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 			bi.bmiHeader.biWidth = cx;
@@ -232,6 +228,9 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 				DIB_RGB_COLORS
 				);
 			printf("");
+		}
+		else if (fSmallMono && m_slowzoom == 20) {
+			p->Draw(pDC->GetSafeHdc(), xp, yp, cx, cy, m_rcPaint, true);
 		}
 		else {
 			p->Draw(pDC->GetSafeHdc(), xp, yp, cx, cy, m_rcPaint);
@@ -384,8 +383,8 @@ CxImage *CAxTIF3View::getPic(int frame) const {
 	CAxTIF3Doc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (pDoc != NULL) {
-		UINT cx = pDoc->m_tifs.GetCount();
-		if ((UINT)frame < cx)
+		size_t cx = pDoc->m_tifs.GetCount();
+		if ((size_t)frame < cx)
 			return pDoc->m_tifs[frame];
 	}
 	return NULL;
@@ -864,7 +863,7 @@ void CAxTIF3View::OnMouseMove(UINT nFlags, CPoint point)
 }
 
 int CAxTIF3View::CntPages() {
-	return GetDocument()->m_tifs.GetCount();
+	return static_cast<int>(GetDocument()->m_tifs.GetCount());
 }
 
 BOOL CAxTIF3View::OnEraseBkgnd(CDC* pDC) {

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#define UPHINT_LOADED 1
 
 class CAxTIF3SrvrItem;
 

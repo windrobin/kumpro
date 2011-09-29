@@ -149,6 +149,8 @@ void CAxTIF3Doc::Serialize(CArchive& ar)
 			}
 			ar.GetFile()->SeekToBegin();
 		}
+
+		UpdateAllViews(NULL, UPHINT_LOADED);
 	}
 }
 

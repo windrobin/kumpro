@@ -10,8 +10,8 @@
 
 !define COM   "HIRAOKA HYPERS TOOLS, Inc."
 
-!define VER    "1.1.1"
-!define APPVER "1_1_1"
+!define VER    "1.1.2"
+!define APPVER "1_1_2"
 
 !define MIME "image/tiff"
 
@@ -47,6 +47,8 @@ RequestExecutionLevel admin
 AutoCloseWindow true
 
 AllowSkipFiles off
+
+XPStyle on
 
 ;--------------------------------
 
@@ -132,16 +134,16 @@ Section /o "簡易表示 Off" ddcompat0
   WriteRegDWORD HKLM "Software\${COM}\${APP}" "ddcompat" 0
 SectionEnd
 
-Section    "縮小表示 精密" slowzoom20
+Section /o "縮小表示 双線形フィルタ (20)" slowzoom20
   WriteRegDWORD HKLM "Software\${COM}\${APP}" "slowzoom" 20
 SectionEnd
 
-Section /o "縮小表示 標準" slowzoom10
-  WriteRegDWORD HKLM "Software\${COM}\${APP}" "slowzoom" 10
+Section    "縮小表示 Halftone (15)" slowzoom15
+  WriteRegDWORD HKLM "Software\${COM}\${APP}" "slowzoom" 15
 SectionEnd
 
-Section /o "縮小表示 高速" slowzoom0
-  WriteRegDWORD HKLM "Software\${COM}\${APP}" "slowzoom" 0
+Section /o "縮小表示 標準 (10)" slowzoom10
+  WriteRegDWORD HKLM "Software\${COM}\${APP}" "slowzoom" 10
 SectionEnd
 
 Section    "全サイトで起動許可(IE8-9) On" allowie1
@@ -150,6 +152,18 @@ SectionEnd
 
 Section /o "全サイトで起動許可(IE8-9) Off" allowie0
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Ext\Stats\${CLSID}\iexplore\AllowedDomains\*"
+SectionEnd
+
+Section "QuickTimeのMIME関連付け(TIF/TIFF)排除" noqt
+  DeleteRegValue HKLM "SOFTWARE\Apple Computer, Inc.\QuickTime\Installed MIME Types" "image/tiff"
+  DeleteRegValue HKLM "SOFTWARE\Apple Computer, Inc.\QuickTime\Installed MIME Types" "image/x-tiff"
+  DeleteRegValue HKLM "SOFTWARE\Apple Computer, Inc.\QuickTime\ActiveX\Installed MIME Types" "image/tiff"
+  DeleteRegValue HKLM "SOFTWARE\Apple Computer, Inc.\QuickTime\ActiveX\Installed MIME Types" "image/x-tiff"
+  DeleteRegKey   HKLM "SOFTWARE\Apple Computer, Inc.\QuickTime\Registry Backup\Content Type\image/tiff"
+  DeleteRegKey   HKLM "SOFTWARE\Apple Computer, Inc.\QuickTime\Registry Backup\Content Type\image/x-tiff"
+
+  DeleteRegValue HKLM "SOFTWARE\Microsoft\Internet Explorer\EmbedExtnToClsidMappings\.tif" ""
+  DeleteRegValue HKLM "SOFTWARE\Microsoft\Internet Explorer\EmbedExtnToClsidMappings\.tiff" ""
 SectionEnd
 
 Section "関連付け削除(アカウント単位の設定)"
@@ -195,20 +209,20 @@ Function .onInit
 
   ${GetOptions} $CMDLINE "--slowzoom=" $R2
   ${Switch} $R2
-    ${Case} "0"
-      SectionSetFlags ${slowzoom20} $R0
-      SectionSetFlags ${slowzoom10} $R0
-      SectionSetFlags  ${slowzoom0} $R1
-      ${Break}
     ${Case} "10"
       SectionSetFlags ${slowzoom20} $R0
+      SectionSetFlags ${slowzoom15} $R0
       SectionSetFlags ${slowzoom10} $R1
-      SectionSetFlags  ${slowzoom0} $R0
+      ${Break}
+    ${Case} "15"
+      SectionSetFlags ${slowzoom20} $R0
+      SectionSetFlags ${slowzoom15} $R1
+      SectionSetFlags ${slowzoom10} $R0
       ${Break}
     ${Case} "20"
       SectionSetFlags ${slowzoom20} $R1
+      SectionSetFlags ${slowzoom15} $R0
       SectionSetFlags ${slowzoom10} $R0
-      SectionSetFlags  ${slowzoom0} $R0
       ${Break}
   ${EndSwitch}
 
@@ -221,6 +235,16 @@ Function .onInit
     ${Case} "1"
       SectionSetFlags ${allowie0} $R0
       SectionSetFlags ${allowie1} $R1
+      ${Break}
+  ${EndSwitch}
+
+  ${GetOptions} $CMDLINE "--noqt=" $R2
+  ${Switch} $R2
+    ${Case} "0"
+      SectionSetFlags ${noqt} $R0
+      ${Break}
+    ${Case} "1"
+      SectionSetFlags ${noqt} $R1
       ${Break}
   ${EndSwitch}
 FunctionEnd

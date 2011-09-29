@@ -173,6 +173,7 @@ public:
 	afx_msg void OnUpdateSelCmd(CCmdUI *pUI);
 protected:
 	virtual void PostNcDestroy();
+	virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
 };
 
 #ifndef _DEBUG  // AxTIF3View.cpp のデバッグ バージョン

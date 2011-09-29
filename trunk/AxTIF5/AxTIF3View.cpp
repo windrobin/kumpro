@@ -48,10 +48,10 @@ END_MESSAGE_MAP()
 // CAxTIF3View コンストラクション/デストラクション
 
 CAxTIF3View::CAxTIF3View()
-: m_ddcompat(0), m_slowzoom(0)
+: m_ddcompat(0), m_slowzoom(15)
 {
 	RUt::GetInt(_T("HIRAOKA HYPERS TOOLS, Inc."), _T("AxTIF5"), _T("ddcompat"), reinterpret_cast<DWORD &>(m_ddcompat), 0);
-	RUt::GetInt(_T("HIRAOKA HYPERS TOOLS, Inc."), _T("AxTIF5"), _T("slowzoom"), reinterpret_cast<DWORD &>(m_slowzoom), 0);
+	RUt::GetInt(_T("HIRAOKA HYPERS TOOLS, Inc."), _T("AxTIF5"), _T("slowzoom"), reinterpret_cast<DWORD &>(m_slowzoom), 15);
 }
 
 CAxTIF3View::~CAxTIF3View()
@@ -231,6 +231,35 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 		}
 		else if (fSmallMono && m_slowzoom == 20) {
 			p->Draw(pDC->GetSafeHdc(), xp, yp, cx, cy, m_rcPaint, true);
+		}
+		else if (fSmallMono && m_slowzoom == 15) {
+			int strMode = pDC->SetStretchBltMode(HALFTONE);
+			CPoint pt = pDC->SetBrushOrg(xp, yp);
+
+			int state = pDC->SaveDC();
+
+			StretchDIBits(
+				pDC->GetSafeHdc(),
+				xp,
+				yp,
+				cx,
+				cy,
+				0,
+				0,
+				p->GetWidth(),
+				p->GetHeight(),
+				p->GetBits(),
+				reinterpret_cast<BITMAPINFO *>(p->GetDIB()),
+				DIB_RGB_COLORS,
+				SRCCOPY
+				);
+
+			pDC->IntersectClipRect(m_rcPaint);
+
+			pDC->RestoreDC(state);
+
+			pDC->SetBrushOrg(pt);
+			pDC->SetStretchBltMode(strMode);
 		}
 		else {
 			p->Draw(pDC->GetSafeHdc(), xp, yp, cx, cy, m_rcPaint);
@@ -764,8 +793,8 @@ void CAxTIF3View::LayoutClient() {
 
 	CSize size = GetZoomedSize();
 
-	int cxpic = (int)(size.cx);
-	int cypic = (int)(size.cy);
+	int cxpic = std::max<int>(1, (int)(size.cx));
+	int cypic = std::max<int>(1, (int)(size.cy));
 
 	m_siH.fMask = SIF_PAGE|SIF_RANGE|SIF_DISABLENOSCROLL|SIF_POS;
 	m_siH.nMin = 0;
@@ -773,7 +802,7 @@ void CAxTIF3View::LayoutClient() {
 	m_siH.nPage = m_rcPaint.Width();
 	m_siH.nPos = Newxp(m_siH.nPos);
 	m_sbH.SetScrollInfo(&m_siH);
-	//m_sbH.EnableScrollBar((m_siH.nMax <= (int)m_siH.nPage) ? ESB_DISABLE_BOTH : 0);
+	m_sbH.EnableScrollBar((m_siH.nMax <= (int)m_siH.nPage) ? ESB_DISABLE_BOTH : 0);
 
 	m_siV.fMask = SIF_PAGE|SIF_RANGE|SIF_DISABLENOSCROLL|SIF_POS;
 	m_siV.nMin = 0;
@@ -781,7 +810,7 @@ void CAxTIF3View::LayoutClient() {
 	m_siV.nPage = m_rcPaint.Height();
 	m_siV.nPos = Newyp(m_siV.nPos);
 	m_sbV.SetScrollInfo(&m_siV);
-	//m_sbV.EnableScrollBar((m_siV.nMax <= (int)m_siV.nPage) ? ESB_DISABLE_BOTH : 0);
+	m_sbV.EnableScrollBar((m_siV.nMax <= (int)m_siV.nPage) ? ESB_DISABLE_BOTH : 0);
 }
 
 void CAxTIF3View::OnLButtonDblClk(UINT nFlags, CPoint point)
@@ -999,5 +1028,13 @@ void CAxTIF3View::OnUpdateSelCmd(CCmdUI *pUI) {
 	switch (pUI->m_nID) {
 		case IDC_MAG: pUI->SetCheck(m_toolZoom); break;
 		case IDC_MOVE: pUI->SetCheck(!m_toolZoom); break;
+	}
+}
+
+void CAxTIF3View::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/) {
+	switch (lHint) {
+		case UPHINT_LOADED:
+			LayoutClient();
+			break;
 	}
 }

@@ -37,15 +37,16 @@
             this.label1 = new System.Windows.Forms.Label();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.linkLabel2 = new System.Windows.Forms.LinkLabel();
+            this.linkLabel3 = new System.Windows.Forms.LinkLabel();
+            this.linkLabel4 = new System.Windows.Forms.LinkLabel();
             this.tstop = new System.Windows.Forms.ToolStrip();
             this.bRefresh = new System.Windows.Forms.ToolStripButton();
             this.bCopyCsv = new System.Windows.Forms.ToolStripButton();
-            this.ttLink = new System.Windows.Forms.ToolTip(this.components);
-            this.mOpen = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.linkLabel3 = new System.Windows.Forms.LinkLabel();
-            this.linkLabel4 = new System.Windows.Forms.LinkLabel();
             this.tsact = new System.Windows.Forms.ToolStrip();
             this.bAppwiz = new System.Windows.Forms.ToolStripButton();
+            this.ttLink = new System.Windows.Forms.ToolTip(this.components);
+            this.mOpen = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.chVer = new System.Windows.Forms.ColumnHeader();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -78,11 +79,11 @@
             this.toolStripContainer1.ContentPanel.Controls.Add(this.lvR);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.flpLinks);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.llAPI);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(527, 567);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(643, 567);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(527, 592);
+            this.toolStripContainer1.Size = new System.Drawing.Size(643, 592);
             this.toolStripContainer1.TabIndex = 2;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -95,6 +96,7 @@
             // 
             this.lvR.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.chProduct,
+            this.chVer,
             this.chID,
             this.chIS,
             this.chDL});
@@ -104,7 +106,7 @@
             this.lvR.Location = new System.Drawing.Point(0, 23);
             this.lvR.MultiSelect = false;
             this.lvR.Name = "lvR";
-            this.lvR.Size = new System.Drawing.Size(527, 459);
+            this.lvR.Size = new System.Drawing.Size(643, 459);
             this.lvR.SmallImageList = this.il;
             this.lvR.TabIndex = 3;
             this.lvR.UseCompatibleStateImageBehavior = false;
@@ -114,7 +116,7 @@
             // chProduct
             // 
             this.chProduct.Text = "製品";
-            this.chProduct.Width = 220;
+            this.chProduct.Width = 230;
             // 
             // chID
             // 
@@ -149,7 +151,7 @@
             this.flpLinks.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flpLinks.Location = new System.Drawing.Point(0, 482);
             this.flpLinks.Name = "flpLinks";
-            this.flpLinks.Size = new System.Drawing.Size(527, 85);
+            this.flpLinks.Size = new System.Drawing.Size(643, 85);
             this.flpLinks.TabIndex = 1;
             // 
             // label1
@@ -191,40 +193,6 @@
             this.linkLabel2.UseCompatibleTextRendering = true;
             this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
-            // tstop
-            // 
-            this.tstop.Dock = System.Windows.Forms.DockStyle.None;
-            this.tstop.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.bRefresh,
-            this.bCopyCsv});
-            this.tstop.Location = new System.Drawing.Point(3, 0);
-            this.tstop.Name = "tstop";
-            this.tstop.Size = new System.Drawing.Size(139, 25);
-            this.tstop.TabIndex = 0;
-            // 
-            // bRefresh
-            // 
-            this.bRefresh.Image = global::CheckMSVCrt.Properties.Resources.RefreshDocViewHS;
-            this.bRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.bRefresh.Name = "bRefresh";
-            this.bRefresh.Size = new System.Drawing.Size(49, 22);
-            this.bRefresh.Text = "更新";
-            this.bRefresh.Click += new System.EventHandler(this.bRefresh_Click);
-            // 
-            // bCopyCsv
-            // 
-            this.bCopyCsv.Image = global::CheckMSVCrt.Properties.Resources.CopyHS;
-            this.bCopyCsv.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.bCopyCsv.Name = "bCopyCsv";
-            this.bCopyCsv.Size = new System.Drawing.Size(78, 22);
-            this.bCopyCsv.Text = "&Copy CSV";
-            this.bCopyCsv.Click += new System.EventHandler(this.bCopyCsv_Click);
-            // 
-            // mOpen
-            // 
-            this.mOpen.Name = "cmsOpen";
-            this.mOpen.Size = new System.Drawing.Size(61, 4);
-            // 
             // linkLabel3
             // 
             this.linkLabel3.AutoSize = true;
@@ -256,14 +224,43 @@
             this.linkLabel4.UseCompatibleTextRendering = true;
             this.linkLabel4.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
+            // tstop
+            // 
+            this.tstop.Dock = System.Windows.Forms.DockStyle.None;
+            this.tstop.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.bRefresh,
+            this.bCopyCsv});
+            this.tstop.Location = new System.Drawing.Point(175, 0);
+            this.tstop.Name = "tstop";
+            this.tstop.Size = new System.Drawing.Size(149, 25);
+            this.tstop.TabIndex = 0;
+            // 
+            // bRefresh
+            // 
+            this.bRefresh.Image = global::CheckMSVCrt.Properties.Resources.RefreshDocViewHS;
+            this.bRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.bRefresh.Name = "bRefresh";
+            this.bRefresh.Size = new System.Drawing.Size(52, 22);
+            this.bRefresh.Text = "更新";
+            this.bRefresh.Click += new System.EventHandler(this.bRefresh_Click);
+            // 
+            // bCopyCsv
+            // 
+            this.bCopyCsv.Image = global::CheckMSVCrt.Properties.Resources.CopyHS;
+            this.bCopyCsv.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.bCopyCsv.Name = "bCopyCsv";
+            this.bCopyCsv.Size = new System.Drawing.Size(85, 22);
+            this.bCopyCsv.Text = "&Copy CSV";
+            this.bCopyCsv.Click += new System.EventHandler(this.bCopyCsv_Click);
+            // 
             // tsact
             // 
             this.tsact.Dock = System.Windows.Forms.DockStyle.None;
             this.tsact.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bAppwiz});
-            this.tsact.Location = new System.Drawing.Point(142, 0);
+            this.tsact.Location = new System.Drawing.Point(3, 0);
             this.tsact.Name = "tsact";
-            this.tsact.Size = new System.Drawing.Size(179, 25);
+            this.tsact.Size = new System.Drawing.Size(172, 25);
             this.tsact.TabIndex = 1;
             // 
             // bAppwiz
@@ -271,15 +268,25 @@
             this.bAppwiz.Image = ((System.Drawing.Image)(resources.GetObject("bAppwiz.Image")));
             this.bAppwiz.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.bAppwiz.Name = "bAppwiz";
-            this.bAppwiz.Size = new System.Drawing.Size(136, 22);
+            this.bAppwiz.Size = new System.Drawing.Size(160, 22);
             this.bAppwiz.Text = "プログラムの追加と削除";
             this.bAppwiz.Click += new System.EventHandler(this.bAppwiz_Click);
+            // 
+            // mOpen
+            // 
+            this.mOpen.Name = "cmsOpen";
+            this.mOpen.Size = new System.Drawing.Size(61, 4);
+            // 
+            // chVer
+            // 
+            this.chVer.Text = "Ver";
+            this.chVer.Width = 100;
             // 
             // CForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(527, 592);
+            this.ClientSize = new System.Drawing.Size(643, 592);
             this.Controls.Add(this.toolStripContainer1);
             this.Name = "CForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -324,6 +331,7 @@
         private System.Windows.Forms.LinkLabel linkLabel4;
         private System.Windows.Forms.ToolStrip tsact;
         private System.Windows.Forms.ToolStripButton bAppwiz;
+        private System.Windows.Forms.ColumnHeader chVer;
 
     }
 }

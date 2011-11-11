@@ -161,7 +161,7 @@ public:
         /* [in] */ HRESULT hresult,
 		/* [unique][in] */ __RPC__in_opt LPCWSTR szError) {
 			pBind = NULL;
-			fprintf(stderr, "# OnStopBinding 0x%u %s \n"
+			fprintf(stderr, "# OnStopBinding 0x%08x %s \n"
 				, hresult
 				, CW2A(szError)
 				);

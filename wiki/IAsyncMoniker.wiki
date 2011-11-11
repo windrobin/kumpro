@@ -6,6 +6,10 @@
  * ダウンロードの終了を捉える時は、`OnProgress`と`BINDSTATUS_ENDDOWNLOADDATA`で確認する。
  * ダウンロードの失敗は`OnStopBinding`で確認する。
 
+= 資料 =
+
+[http://code.google.com/p/kumpro/source/browse/trunk/TestIAsyncMoniker/T.cpp C++ソースコード]
+
 = 実験結果 =
 
 一回目。ダウンロードが実行され、リアルタイムで進捗が報告されています。

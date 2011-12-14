@@ -1,0 +1,26 @@
+HKCR
+{
+	MyFav.Subf.1 = s 'Subf Class'
+	{
+		CLSID = s '{3F8AA1BB-C52A-4BAE-A635-744D7CECF9D4}'
+	}
+	MyFav.Subf = s 'Subf Class'
+	{
+		CLSID = s '{3F8AA1BB-C52A-4BAE-A635-744D7CECF9D4}'
+		CurVer = s 'MyFav.Subf.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {3F8AA1BB-C52A-4BAE-A635-744D7CECF9D4} = s 'Subf Class'
+		{
+			ProgID = s 'MyFav.Subf.1'
+			VersionIndependentProgID = s 'MyFav.Subf'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{44063A3D-1429-4580-94A8-68D6B5793290}'
+		}
+	}
+}

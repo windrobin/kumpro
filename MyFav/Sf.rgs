@@ -1,0 +1,71 @@
+HKCR
+{
+	MyFav.Sf.1 = s 'Sf Class'
+	{
+		CLSID = s '{2BC11758-C9EF-4E3B-905C-F412A6527BF5}'
+	}
+	MyFav.Sf = s 'Sf Class'
+	{
+		CLSID = s '{2BC11758-C9EF-4E3B-905C-F412A6527BF5}'
+		CurVer = s 'MyFav.Sf.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {2BC11758-C9EF-4E3B-905C-F412A6527BF5} = s 'Sf Class'
+		{
+			ProgID = s 'MyFav.Sf.1'
+			VersionIndependentProgID = s 'MyFav.Sf'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{44063A3D-1429-4580-94A8-68D6B5793290}'
+			ShellFolder
+			{
+				val Attributes = d 2684354584
+				val HideOnDesktopPerUser = s ''
+			}
+			val LocalizedString = s '‚ ‚Á‚¿‚±‚Á‚¿'
+		}
+	}
+}
+HKLM
+{
+	NoRemove SOFTWARE
+	{
+		NoRemove Microsoft
+		{
+			NoRemove Windows
+			{
+				NoRemove CurrentVersion
+				{
+					NoRemove Explorer
+					{
+						NoRemove HideDesktopIcons
+						{
+							NoRemove NewStartPanel
+							{
+								val '{2BC11758-C9EF-4E3B-905C-F412A6527BF5}' = d 1
+							}
+						}
+						NoRemove Desktop
+						{
+							NoRemove NameSpace
+							{
+								'{2BC11758-C9EF-4E3B-905C-F412A6527BF5}' = s 'MyFav.Sf'
+							}
+						}
+					}
+					NoRemove 'Shell Extensions'
+					{
+						NoRemove Approved
+						{
+							val '{2BC11758-C9EF-4E3B-905C-F412A6527BF5}' = s 'MyFav.Sf'
+						}
+					}
+				}
+			}
+		}
+	}
+}

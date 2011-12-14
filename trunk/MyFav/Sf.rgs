@@ -23,7 +23,7 @@ HKCR
 			'TypeLib' = s '{44063A3D-1429-4580-94A8-68D6B5793290}'
 			ShellFolder
 			{
-				val Attributes = d 2684354584
+				val Attributes = d 2952790040
 				val HideOnDesktopPerUser = s ''
 			}
 			val LocalizedString = s '‚ ‚Á‚¿‚±‚Á‚¿'

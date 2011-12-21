@@ -56,7 +56,7 @@
 ;Installer Sections
 
 Section "Dynamic link build" dynamic
-  SetOutPath "$INSTDIR\Dynmaic link"
+  SetOutPath "$INSTDIR\Dynamic link"
 
   ;ADD YOUR OWN FILES HERE...
   File ".\release\IEView.exe"

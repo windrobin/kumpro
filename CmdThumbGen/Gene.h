@@ -212,8 +212,9 @@ public:
 			if (FAILED(hr = RUt::GetCommandLineForm(pszExt, strCmdlForm)))
 				return hr;
 			CString strTempFile;
-			if (FAILED(hr = RUt::GetTempFilePath(strTempFile)))
+			if (FAILED(hr = RUt::GetTempFilePath2(strTempFile)))
 				return hr;
+			DelTmp dt(strTempFile);
 
 			TCHAR tcWorkdir[MAX_PATH] = {0};
 			if (0 == GetTempPath(MAX_PATH, tcWorkdir))
@@ -283,6 +284,18 @@ public:
 			return (*phBmpThumbnail != NULL) ? S_OK : E_FAIL;
 		}
 
+		class DelTmp {
+		protected:
+			CString fpTmp;
+		public:
+			DelTmp(CString fpTmp): fpTmp(fpTmp) {
+
+			}
+			~DelTmp() {
+				ATLVERIFY(DeleteFile(fpTmp));
+			}
+		};
+
 		class RUt {
 		public:
 			static HRESULT GetTempFilePath(CString &pStr) {
@@ -293,6 +306,25 @@ public:
 				TCHAR szPath[MAX_PATH] = {0};
 				if (0 == GetTempFileName(szDir, _T("tmp"), 0, szPath))
 					return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
+
+				pStr = szPath;
+				return S_OK;
+			}
+
+			static HRESULT GetTempFilePath2(CString &pStr) {
+				int errc;
+				TCHAR szDir[MAX_PATH] = {0};
+				if (0 == GetTempPath(MAX_PATH, szDir))
+					return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
+				GUID tmpId;
+				HRESULT hr;
+				if (FAILED(hr = CoCreateGuid(&tmpId)))
+					return hr;
+				WCHAR wcId[MAX_PATH] = {0};
+				if (0 == StringFromGUID2(tmpId, wcId, MAX_PATH))
+					return E_OUTOFMEMORY;
+				TCHAR szPath[MAX_PATH] = {0};
+				PathCombine(szPath, szDir, CW2T(wcId));
 
 				pStr = szPath;
 				return S_OK;
@@ -409,8 +441,9 @@ public:
 			if (FAILED(hr = RUt::GetCommandLineForm(pszExt, strCmdlForm)))
 				return hr;
 			CString strTempFile;
-			if (FAILED(hr = RUt::GetTempFilePath(strTempFile)))
+			if (FAILED(hr = RUt::GetTempFilePath2(strTempFile)))
 				return hr;
+			DelTmp dt(strTempFile);
 
 			TCHAR tcWorkdir[MAX_PATH] = {0};
 			if (0 == GetTempPath(MAX_PATH, tcWorkdir))

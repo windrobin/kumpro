@@ -1,17 +1,11 @@
-HKCU
+HKCR
 {
-	NoRemove Software
+	NoRemove AppID
 	{
-		NoRemove Classes
+		'%APPID%' = s 'CmdThumbGen'
+		'CmdThumbGen.DLL'
 		{
-			NoRemove AppID
-			{
-				'%APPID%' = s 'CmdThumbGen'
-				'CmdThumbGen.DLL'
-				{
-					val AppID = s '%APPID%'
-				}
-			}
+			val AppID = s '%APPID%'
 		}
 	}
 }

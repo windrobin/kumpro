@@ -140,6 +140,22 @@ public:
 		return max(0, min(240, v));
 	}
 	LONG m_ddcompat, m_slowzoom;
+	CRect GetZoomedRect() {
+		CSize size = GetZoomedSize();
+		int cx = size.cx;
+		int cy = size.cy;
+
+		int xp = -m_siH.nPos;
+		int yp = -m_siV.nPos;
+
+		if (cx < m_rcPaint.Width()) {
+			xp = (m_rcPaint.Width() - cx) / 2;
+		}
+		if (cy < m_rcPaint.Height()) {
+			yp = (m_rcPaint.Height() - cy) / 2;
+		}
+		return CRect(xp, yp, xp +cx, yp +cy);
+	}
 
 	int z2tp(float f) const {
 #if 1

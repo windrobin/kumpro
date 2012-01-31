@@ -396,11 +396,6 @@
 			RelativePath=".\res\Credits.rtf"
 			>
 		</File>
-		<File
-			RelativePath=".\test.htm"
-			DeploymentContent="true"
-			>
-		</File>
 	</Files>
 	<Globals>
 		<Global

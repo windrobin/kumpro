@@ -380,7 +380,7 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 
 		pDC->SelectStockObject(DEFAULT_GUI_FONT);
 		CString str;
-		str.Format(_T("%u %%"), (int)(100 * m_fZoom));
+		str.Format(_T("%u %%"), (int)(100 * Getzf()));
 
 		//COLORREF lastBkClr = pDC->SetBkColor(GetSysColor(COLOR_WINDOW));
 		UINT lastMode = pDC->SetTextAlign(TA_CENTER|TA_TOP);
@@ -668,7 +668,7 @@ void CAxTIF3View::Zoomat(bool fIn, CPoint mouseat) {
 
 void CAxTIF3View::ZoomatR(float zf, CPoint mouseat) {
 	CPoint clientpt = mouseat;
-	CPoint posat = GetAbsPosAt(GetScrollOff() + clientpt);
+	CPoint posat = GetAbsPosAt(clientpt - GetZoomedRect().TopLeft());
 	Setzf(max(0.0625f, min(16.0f, zf)));
 	LayoutClient();
 	SetCenterAt(posat, clientpt);

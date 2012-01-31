@@ -10,8 +10,8 @@
 
 !define COM   "HIRAOKA HYPERS TOOLS, Inc."
 
-!define VER    "1.1.3"
-!define APPVER "1_1_3"
+!define VER    "1.1.4"
+!define APPVER "1_1_4"
 
 !define MIME "image/tiff"
 
@@ -91,6 +91,32 @@ UninstPage instfiles
 
 ;--------------------------------
 
+Section "関連付け削除(アカウント単位の設定)"
+  StrCpy $0 0
+Loop:
+  EnumRegKey $1 HKU "" $0
+  StrCmp $1 "" Done
+
+  DetailPrint "関連付け削除: $1"
+
+  DeleteRegKey HKU "$1\Software\Classes\${PROGID}"
+  DeleteRegKey HKU "$1\Software\Classes\CLSID\${CLSID}"
+  DeleteRegKey HKU "$1\Software\Classes\TypeLib\${TYPELIB}"
+  DeleteRegKey HKU "$1\Software\${COM}\${APP}"
+
+  ;DeleteRegKey HKU "$1\Software\Classes\${EXT}"
+  ;DeleteRegKey HKU "$1\Software\Classes\${EXT2}"
+
+  DeleteRegKey HKU "$1\Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP}"
+
+  DeleteRegKey HKU "$1\Software\Classes\MIME\Database\Content Type\${MIME}"
+
+  IntOp $0 $0 + 1
+  Goto Loop
+Done:
+SectionEnd
+
+
 ; The stuff to install
 Section "${APP}" ;No components page, name is not important
   SectionIn ro
@@ -114,31 +140,6 @@ Section "${APP}" ;No components page, name is not important
   WriteUninstaller "uninstall.exe"
   
 SectionEnd ; end the section
-
-Section "関連付け削除(アカウント単位の設定)"
-  StrCpy $0 0
-Loop:
-  EnumRegKey $1 HKU "" $0
-  StrCmp $1 "" Done
-
-  DetailPrint "関連付け削除: $1"
-
-  DeleteRegKey HKU "$1\Software\Classes\${PROGID}"
-  DeleteRegKey HKU "$1\Software\Classes\CLSID\${CLSID}"
-  DeleteRegKey HKU "$1\Software\Classes\TypeLib\${TYPELIB}"
-  DeleteRegKey HKU "$1\Software\${COM}\${APP}"
-
-  DeleteRegKey HKU "$1\Software\Classes\${EXT}"
-  DeleteRegKey HKU "$1\Software\Classes\${EXT2}"
-
-  DeleteRegKey HKU "$1\Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP}"
-
-  DeleteRegKey HKU "$1\Software\Classes\MIME\Database\Content Type\${MIME}"
-
-  IntOp $0 $0 + 1
-  Goto Loop
-Done:
-SectionEnd
 
 Section "関連付け追加(コンピュータ全体の設定)"
   WriteRegStr HKCR "${EXT}" "Content Type" "${MIME}"

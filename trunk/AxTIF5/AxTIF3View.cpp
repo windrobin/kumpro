@@ -563,7 +563,17 @@ void CAxTIF3View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CAxTIF3View::OnRButtonDown(UINT nFlags, CPoint point) {
 	if (GetFocus() == this) {
 		if (m_toolZoom && m_rcPaint.PtInRect(point)) {
-			Zoomat(false, point);
+			bool fControl = 0 != (MK_CONTROL & nFlags);
+			if (fControl) {
+				SetFit(FitWH);
+
+				DoFit();
+				LayoutClient();
+				InvalidateRect(m_rcPaint,false);
+			}
+			else {
+				Zoomat(false, point);
+			}
 			return;
 		}
 	}
@@ -598,7 +608,14 @@ void CAxTIF3View::OnLButtonDown(UINT nFlags, CPoint point) {
 			InvalidateRect(m_rcPaint,false);
 		}
 		else if (m_toolZoom && m_rcPaint.PtInRect(point)) {
-			Zoomat(true, point);
+			bool fControl = 0 != (MK_CONTROL & nFlags);
+			bool fShift = 0 != (MK_SHIFT & nFlags);
+			if (fControl) {
+				Zoomat2(point);
+			}
+			else {
+				Zoomat(fShift ? false : true, point);
+			}
 		}
 		else if (m_rcGearOn.PtInRect(point)) {
 			int x = point.x - m_rcGearOn.left;
@@ -668,7 +685,34 @@ void CAxTIF3View::Zoomat(bool fIn, CPoint mouseat) {
 
 void CAxTIF3View::ZoomatR(float zf, CPoint mouseat) {
 	CPoint clientpt = mouseat;
-	CPoint posat = GetAbsPosAt(clientpt - GetZoomedRect().TopLeft());
+	CPoint dispat = GetZoomedDispRect().TopLeft();
+	CPoint posat = GetAbsPosAt(clientpt - dispat);
+	Setzf(max(0.0625f, min(16.0f, zf)));
+	LayoutClient();
+	SetCenterAt(posat, clientpt);
+	InvalidateRect(m_rcPaint,false);
+}
+
+void CAxTIF3View::Zoomat2(CPoint mouseat) {
+	CPoint clientpt = mouseat;
+	CRect rcDisp = GetZoomedDispRect();
+	CPoint dispat = rcDisp.TopLeft();
+	CSize dispSize = rcDisp.Size();
+	CPoint posat = GetAbsPosAt(clientpt - dispat);
+	float curzf = Getzf();
+	float fxl = (curzf * float(clientpt.x) / std::max<int>(clientpt.x - dispat.x, 1));
+	float fxr = (curzf * float(m_rcPaint.Width() - clientpt.x) / std::max<int>(m_rcPaint.Width() - clientpt.x - dispat.x, 1));
+	float fyt = (curzf * float(clientpt.y) / std::max<int>(clientpt.y - dispat.y, 1));
+	float fyb = (curzf * float(m_rcPaint.Height() - clientpt.y) / std::max<int>(m_rcPaint.Height() - clientpt.y - dispat.y, 1));
+	float zf = curzf;
+	zf = max(zf, fxl);
+	zf = max(zf, fxr);
+	zf = max(zf, fyt);
+	zf = max(zf, fyb);
+	if (fabs(zf - curzf) < 0.001f) {
+		zf *= 1.5f;
+	}
+
 	Setzf(max(0.0625f, min(16.0f, zf)));
 	LayoutClient();
 	SetCenterAt(posat, clientpt);

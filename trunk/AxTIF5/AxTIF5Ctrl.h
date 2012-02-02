@@ -80,5 +80,6 @@ protected:
 public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	virtual BOOL OnSetExtent(LPSIZEL lpSizeL);
+	afx_msg LRESULT OnIdleUpdateCmdUI(WPARAM, LPARAM);
 };
 

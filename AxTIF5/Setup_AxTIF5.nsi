@@ -10,8 +10,8 @@
 
 !define COM   "HIRAOKA HYPERS TOOLS, Inc."
 
-!define VER    "1.1.4"
-!define APPVER "1_1_4"
+!define VER    "1.1.5"
+!define APPVER "1_1_5"
 
 !define MIME "image/tiff"
 
@@ -91,7 +91,7 @@ UninstPage instfiles
 
 ;--------------------------------
 
-Section "関連付け削除(アカウント単位の設定)"
+Section /o "関連付け削除(アカウント単位の設定)"
   StrCpy $0 0
 Loop:
   EnumRegKey $1 HKU "" $0
@@ -104,8 +104,8 @@ Loop:
   DeleteRegKey HKU "$1\Software\Classes\TypeLib\${TYPELIB}"
   DeleteRegKey HKU "$1\Software\${COM}\${APP}"
 
-  ;DeleteRegKey HKU "$1\Software\Classes\${EXT}"
-  ;DeleteRegKey HKU "$1\Software\Classes\${EXT2}"
+  DeleteRegKey HKU "$1\Software\Classes\${EXT}"
+  DeleteRegKey HKU "$1\Software\Classes\${EXT2}"
 
   DeleteRegKey HKU "$1\Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP}"
 

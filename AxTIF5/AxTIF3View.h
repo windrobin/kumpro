@@ -64,6 +64,7 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	void LayoutClient();
 	void Zoomat(bool fIn, CPoint at);
+	void Zoomat2(CPoint at);
 	void ZoomatR(float zf, CPoint at);
 	void SetzoomR(float zf);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
@@ -140,7 +141,7 @@ public:
 		return max(0, min(240, v));
 	}
 	LONG m_ddcompat, m_slowzoom;
-	CRect GetZoomedRect() {
+	CRect GetZoomedDispRect() {
 		CSize size = GetZoomedSize();
 		int cx = size.cx;
 		int cy = size.cy;

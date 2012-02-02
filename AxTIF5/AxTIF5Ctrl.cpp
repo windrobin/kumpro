@@ -97,6 +97,8 @@ IMPLEMENT_DYNCREATE(CAxTIF5Ctrl, COleControl)
 
 
 
+#define myWM_IDLEUPDATECMDUI  0x0363  // wParam == bDisableIfNoHandler
+
 // メッセージ マップ
 
 BEGIN_MESSAGE_MAP(CAxTIF5Ctrl, COleControl)
@@ -104,6 +106,7 @@ BEGIN_MESSAGE_MAP(CAxTIF5Ctrl, COleControl)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
+//	ON_MESSAGE(myWM_IDLEUPDATECMDUI, OnIdleUpdateCmdUI)
 END_MESSAGE_MAP()
 
 
@@ -400,4 +403,13 @@ BOOL CAxTIF5Ctrl::OnSetExtent(LPSIZEL lpSizeL)
 //		m_frame.SetWindowPos(NULL, 0, 0, lpSizeL->cx, lpSizeL->cy, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
 
 	return COleControl::OnSetExtent(lpSizeL);
+}
+
+LRESULT CAxTIF5Ctrl::OnIdleUpdateCmdUI(WPARAM wParam, LPARAM) {
+	if (IsWindowVisible()) {
+		CFrameWnd* pParent = (CFrameWnd*)GetParent();
+		if (pParent)
+			AfxGetThread()->OnIdle(0);
+	}
+	return 0L;
 }

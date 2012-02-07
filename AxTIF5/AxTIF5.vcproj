@@ -47,7 +47,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="./cximage600_full/CxImage/;./cximage600_full/tiff/"
+				AdditionalIncludeDirectories="./cximage600_full/CxImage/;./cximage600_full/tiff/;&quot;gecko-sdk-win32-msvc-1.8.0.4\gecko-sdk\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="./cximage600_full/CxImage/;./cximage600_full/tiff/"
+				AdditionalIncludeDirectories="./cximage600_full/CxImage/;./cximage600_full/tiff/;&quot;gecko-sdk-win32-msvc-1.8.0.4\gecko-sdk\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_USRDLL"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -242,6 +242,26 @@
 			<File
 				RelativePath=".\InnerFrame.cpp"
 				>
+			</File>
+			<File
+				RelativePath=".\np.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\stdafx.cpp"

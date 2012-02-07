@@ -484,6 +484,7 @@ int CAxTIF3View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_fDrag = false;
 	m_iPage = 0;
 	m_fit = FitWH;
+	m_ptClip = CPoint(0, 0);
 
 	LayoutClient();
 
@@ -742,6 +743,7 @@ void CAxTIF3View::LayoutClient() {
 	}
 	CRect rc;
 	GetClientRect(&rc);
+	rc.OffsetRect(m_ptClip);
 	int curx=0;
 	if (m_ddcompat == 0) {
 		m_rcGlass.left = 0;

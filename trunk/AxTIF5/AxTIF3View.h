@@ -157,6 +157,7 @@ public:
 		}
 		return CRect(xp, yp, xp +cx, yp +cy);
 	}
+	CPoint m_ptClip;
 
 	int z2tp(float f) const {
 #if 1

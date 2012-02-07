@@ -392,6 +392,22 @@ void CAxTIF5Ctrl::LoadFromMoniker(LPBC pibc, LPMONIKER pimkDL) {
 	}
 }
 
+bool CAxTIF5Ctrl::LoadFromFile(LPCTSTR psz) {
+	CDocument *document = m_frame.GetActiveDocument();
+	if (document != NULL && m_frame.GetSafeHwnd() != NULL) {
+		CFile fIn;
+		if (fIn.Open(psz, CFile::modeRead|CFile::shareDenyWrite)) {
+			CArchive ar(&fIn, CArchive::load);
+
+			document->Serialize(ar);
+			document->UpdateAllViews(NULL, UPHINT_LOADED);
+			m_frame.m_vw.Invalidate();
+			return true;
+		}
+	}
+	return false;
+}
+
 BOOL CAxTIF5Ctrl::OnEraseBkgnd(CDC* pDC) {
 	return 1;
 //	return COleControl::OnEraseBkgnd(pDC);
@@ -412,4 +428,9 @@ LRESULT CAxTIF5Ctrl::OnIdleUpdateCmdUI(WPARAM wParam, LPARAM) {
 			AfxGetThread()->OnIdle(0);
 	}
 	return 0L;
+}
+
+void CAxTIF5Ctrl::SetClip(CRect rc) {
+	m_frame.m_vw.m_ptClip = CPoint(-rc.left, -rc.top);
+	m_frame.m_vw.LayoutClient();
 }

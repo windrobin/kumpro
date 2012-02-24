@@ -61,6 +61,15 @@
 ;--------------------------------
 ;Installer Sections
 
+Section "設定支援ソフト" EdMyFav
+  SetOutPath "$INSTDIR\EdMyFav"
+  File "EdMyFav\bin\DEBUG\*.*"
+  
+  CreateDirectory "$SMPROGRAMS\MyFav"
+  CreateShortCut  "$SMPROGRAMS\MyFav\MyFav 設定支援ソフト.lnk"   "$INSTDIR\EdMyFav\EdMyFav.exe" "$INSTDIR\EdMyFav\EdMyFav.exe"
+  CreateShortCut  "$SMPROGRAMS\MyFav\MyFav アンインストール.lnk" "$INSTDIR\uninstall.exe"       "$INSTDIR\uninstall.exe"
+SectionEnd
+
 Section "x86版(32ビット版)" x86
   SetOutPath "$INSTDIR\x86"
 
@@ -95,6 +104,10 @@ Section ""
   WriteUninstaller "$INSTDIR\uninstall.exe"
 SectionEnd
 
+Section ""
+  Exec '"$INSTDIR\EdMyFav\EdMyFav.exe"'
+SectionEnd
+
 Function .onInit
   ${If} ${RunningX64}
     SectionSetFlags ${x64} ${SF_SELECTED}
@@ -109,11 +122,13 @@ FunctionEnd
   ;Language strings
   LangString DESC_x86 ${LANG_ENGLISH} "32ビット版"
   LangString DESC_x64 ${LANG_ENGLISH} "64ビット版"
+  LangString DESC_EdMyFav ${LANG_ENGLISH} "MyFav 設定支援ソフトを導入"
 
   ;Assign language strings to sections
   !insertmacro XPUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro XPUI_DESCRIPTION_TEXT ${x86} $(DESC_x86)
     !insertmacro XPUI_DESCRIPTION_TEXT ${x64} $(DESC_x64)
+    !insertmacro XPUI_DESCRIPTION_TEXT ${EdMyFav} $(DESC_EdMyFav)
   !insertmacro XPUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
@@ -132,15 +147,22 @@ Section "Uninstall"
   Delete /REBOOTOK "$INSTDIR\x64\MyFav.dll"
   Delete /REBOOTOK "$INSTDIR\x64\MyFav.pdb"
 
+  Delete "$INSTDIR\EdMyFav\*.*"
+
+  Delete "$SMPROGRAMS\MyFav\MyFav 設定支援ソフト.lnk"
+  Delete "$SMPROGRAMS\MyFav\MyFav アンインストール.lnk"
+  RMDir  "$SMPROGRAMS\MyFav"
+
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP}"
   DeleteRegKey HKLM "Software\${COM}\${APP}"
 
   Delete "$INSTDIR\Uninstall.exe"
 
+  RMDir "$INSTDIR\EdMyFav"
   RMDir "$INSTDIR\x86"
   RMDir "$INSTDIR\x64"
   RMDir "$INSTDIR"
-
+  
   IfRebootFlag 0 noreboot
     MessageBox MB_YESNO|MB_ICONEXCLAMATION "再起動が必要です。直ちに再起動しますか?" IDNO noreboot
       Reboot

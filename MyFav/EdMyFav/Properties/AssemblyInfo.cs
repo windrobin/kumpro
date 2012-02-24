@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。 
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle("FolderBrowserDialog")]
+[assembly: AssemblyTitle("EdMyFav")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("FolderBrowserDialog")]
-[assembly: AssemblyCopyright("Copyright (C)  2011,2012")]
+[assembly: AssemblyCompany("HIRAOKA HYPERS TOOLS, Inc.")]
+[assembly: AssemblyProduct("EdMyFav")]
+[assembly: AssemblyCopyright("Copyright (C)  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 次の GUID は、このプロジェクトが COM に公開される場合の、typelib の ID です
-[assembly: Guid("8828fc74-46cf-4599-9306-b49bc3a99a91")]
+[assembly: Guid("d3c4858b-e7a3-4a86-a0e5-b4a216e81b62")]
 
 // アセンブリのバージョン情報は、以下の 4 つの値で構成されています:
 //

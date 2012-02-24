@@ -69,11 +69,11 @@ BEGIN
     BEGIN
         BLOCK "041103a4"
         BEGIN
-            VALUE "CompanyName", "KU"
+            VALUE "CompanyName", "HIRAOKA HYPERS TOOLS, Inc."
             VALUE "FileDescription", "素早いフォルダへのアクセスを可能にします"
             VALUE "FileVersion", "0, 1, 0, 0"
             VALUE "InternalName", "MyFav.dll"
-            VALUE "LegalCopyright", "2011"
+            VALUE "LegalCopyright", "2011, 2012"
             VALUE "OriginalFilename", "MyFav.dll"
             VALUE "ProductVersion", "0, 1, 0, 0"
         END

@@ -6,7 +6,7 @@
 
 
  /* File created by MIDL compiler version 7.00.0555 */
-/* at Wed Dec 14 11:18:06 2011
+/* at Fri Feb 24 11:22:07 2012
  */
 /* Compiler settings for .\MyFav.idl:
     Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 7.00.0555 

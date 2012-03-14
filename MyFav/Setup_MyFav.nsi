@@ -15,8 +15,8 @@
   !define APP "MyFav"
   !define TTL "MyFav"
   !define COM "HIRAOKA HYPERS TOOLS, Inc."
-  !define VER "0.1"
-  !define APV "0_1"
+  !define VER "0.2"
+  !define APV "0_2"
 
   ;Name and file
   Name "${APP} ${VER}"
@@ -34,6 +34,8 @@
 
   !include LogicLib.nsh
   !include x64.nsh
+  
+  SetOverwrite ifdiff
 
 ;--------------------------------
 ;Interface Settings

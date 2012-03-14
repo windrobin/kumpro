@@ -32,6 +32,8 @@
 
   !define DOTNET_VERSION "2.0"
 
+  !include "DotNET.nsh"
+
   !include LogicLib.nsh
   !include x64.nsh
   
@@ -62,6 +64,10 @@
 
 ;--------------------------------
 ;Installer Sections
+
+Section ""
+  !insertmacro CheckDotNET ${DOTNET_VERSION}
+SectionEnd
 
 Section "ê›íËéxâáÉ\ÉtÉg" EdMyFav
   SetOutPath "$INSTDIR\EdMyFav"

@@ -14,8 +14,9 @@ class ATL_NO_VTABLE CGene :
 	public IExtractImage2,
 	public IRunnableTask,
 	public IInitializeWithFile,
-	public IThumbnailProvider,
-	public IGene
+	//public IThumbnailProvider,
+	public IGene,
+	public ISetPage4ThumbnailProvider
 {
 public:
 	CGene()
@@ -32,6 +33,7 @@ BEGIN_COM_MAP(CGene)
 	COM_INTERFACE_ENTRY(IInitializeWithFile)
 	COM_INTERFACE_ENTRY(IThumbnailProvider)
 	COM_INTERFACE_ENTRY(IRunnableTask)
+	COM_INTERFACE_ENTRY(ISetPage4ThumbnailProvider)
 
 	COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, m_pFTM)
 
@@ -48,6 +50,7 @@ END_COM_MAP()
 		if (FAILED(hr = CoCreateFreeThreadedMarshaler(static_cast<IPersist *>(this), &m_pFTM)))
 			return hr;
 
+		iCurPage = 0;
 		return S_OK;
 	}
 
@@ -55,6 +58,9 @@ END_COM_MAP()
 	{
 		m_pFTM.Release();
 	}
+
+protected:
+	DWORD iCurPage;
 
 public:
 	// IPersist
@@ -330,7 +336,7 @@ public:
 				return S_OK;
 			}
 
-			static HRESULT GetCommandLineForm(LPCTSTR pszExt, CString &pStr) {
+			static HRESULT GetCommandLineForm(LPCTSTR pszExt, CString &pStr, LPCTSTR pszVerb = NULL) {
 				LONG lerr;
 				{
 					CRegKey rkExt;
@@ -339,7 +345,7 @@ public:
 					if (0 == (lerr = rkExt.Open(HKEY_CURRENT_USER, strKey, KEY_READ))) {
 						TCHAR szRet[256 +1] = {0};
 						ULONG cchRet = 256;
-						if (0 == (lerr = rkExt.QueryStringValue(NULL, szRet, &cchRet))) {
+						if (0 == (lerr = rkExt.QueryStringValue(pszVerb, szRet, &cchRet))) {
 							pStr = CString(szRet, cchRet);
 							return NOERROR;
 						}
@@ -353,7 +359,7 @@ public:
 					if (0 == (lerr = rkExt.Open(HKEY_LOCAL_MACHINE, strKey, KEY_READ))) {
 						TCHAR szRet[256 +1] = {0};
 						ULONG cchRet = 256;
-						if (0 == (lerr = rkExt.QueryStringValue(NULL, szRet, &cchRet))) {
+						if (0 == (lerr = rkExt.QueryStringValue(pszVerb, szRet, &cchRet))) {
 							pStr = CString(szRet, cchRet);
 							return NOERROR;
 						}
@@ -438,7 +444,7 @@ public:
 			if (pszExt == NULL)
 				pszExt = _T(".");
 			CString strCmdlForm;
-			if (FAILED(hr = RUt::GetCommandLineForm(pszExt, strCmdlForm)))
+			if (FAILED(hr = RUt::GetCommandLineForm(pszExt, strCmdlForm, (iCurPage == 0) ? NULL : _T("MP"))))
 				return hr;
 			CString strTempFile;
 			if (FAILED(hr = RUt::GetTempFilePath2(strTempFile)))
@@ -449,13 +455,18 @@ public:
 			if (0 == GetTempPath(MAX_PATH, tcWorkdir))
 				return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
 
+			// if iCurPage == 0, output first page with verb "".
+			// if iCurPage == 1, output first page with verb "MP".
+			// if iCurPage == 2, output second page with verb "MP".
+			// if iCurPage == 3, output third page with verb "MP".
+
 			DWORD_PTR pvArgs[] = {
 				reinterpret_cast<DWORD_PTR>(static_cast<LPCTSTR>(m_targetPath)),
 				reinterpret_cast<DWORD_PTR>(static_cast<LPCTSTR>(strTempFile)),
 				cx,
 				cx,
 				0, // m_flags
-				0,
+				iCurPage,
 				0,
 				0,
 				0,
@@ -532,6 +543,125 @@ public:
 			*phbmp = hbm;
 			return (*phbmp != NULL) ? S_OK : E_FAIL;
 		}
+
+    // ISetPage4ThumbnailProvider : public IUnknown
+    public:
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE GetPageCount( 
+            /* [out] */ DWORD *pcPages)
+		{
+			ObjectLock lck(this);
+			HRESULT hr;
+			int errc;
+
+			if (pcPages == NULL)
+				return E_POINTER;
+
+			if (m_targetPath.IsEmpty())
+				return E_FAIL;
+
+			LPCTSTR pszExt = PathFindExtension(m_targetPath);
+			if (pszExt == NULL)
+				pszExt = _T(".");
+			CString strCmdlForm;
+			if (FAILED(hr = RUt::GetCommandLineForm(pszExt, strCmdlForm, _T("GPC"))))
+				return hr;
+			CString strTempFile;
+			if (FAILED(hr = RUt::GetTempFilePath2(strTempFile)))
+				return hr;
+			DelTmp dt(strTempFile);
+
+			TCHAR tcWorkdir[MAX_PATH] = {0};
+			if (0 == GetTempPath(MAX_PATH, tcWorkdir))
+				return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
+
+			DWORD_PTR pvArgs[] = {
+				reinterpret_cast<DWORD_PTR>(static_cast<LPCTSTR>(m_targetPath)),
+				reinterpret_cast<DWORD_PTR>(static_cast<LPCTSTR>(strTempFile)), // width for output
+				0,
+				0,
+				0,
+				0,
+				0,
+				0,
+				0,
+				0,
+			};
+
+			TCHAR szCmdRun[2000 +1] = {0};
+			if (0 == (FormatMessage(FORMAT_MESSAGE_FROM_STRING|FORMAT_MESSAGE_ARGUMENT_ARRAY, strCmdlForm, 0, 0, szCmdRun, 2000, (va_list *)pvArgs)))
+				return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
+
+			STARTUPINFO si;
+			ZeroMemory(&si, sizeof(si));
+			si.cb = sizeof(si);
+			si.dwFlags = STARTF_USESHOWWINDOW;
+			si.wShowWindow = SW_SHOWMINNOACTIVE;
+
+			PROCESS_INFORMATION pi;
+			ZeroMemory(&pi, sizeof(pi));
+
+			BOOL fCreated = CreateProcess(
+				NULL,
+				szCmdRun,
+				NULL,
+				NULL,
+				false,
+				0 |IDLE_PRIORITY_CLASS |CREATE_NO_WINDOW,
+				NULL,
+				tcWorkdir,
+				&si,
+				&pi
+				);
+			if (!fCreated)
+				return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
+
+			WaitForSingleObject(pi.hProcess, INFINITE);
+
+			DWORD errlv = 0;
+			if (!GetExitCodeProcess(pi.hProcess, &errlv))
+				errlv = 1;
+
+			CloseHandle(pi.hProcess);
+			CloseHandle(pi.hThread);
+
+			if (errlv == 0) {
+				CString text = FUt::ReadFile(strTempFile, 1000);
+				if (text.GetLength() != 0) {
+					*pcPages = _ttoi(text);
+					return S_OK;
+				}
+				return E_UNEXPECTED;
+			}
+
+			return E_FAIL;
+		}
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE SetActivePage( 
+            /* [in] */ DWORD iPage)
+		{
+			iCurPage = iPage;
+			return S_OK;
+		}
+
+		class FUt {
+		public:
+			static CString ReadFile(LPCTSTR pszTemp, int cbMaxRead, LPCTSTR pszDef = NULL) {
+				FILE *f = NULL;
+				if (0 == _tfopen_s(&f, pszTemp, _T("rb"))) {
+					CHeapPtr<BYTE> buff;
+					if (buff.AllocateBytes(cbMaxRead +1)) {
+						size_t r = fread(buff, 1, cbMaxRead, f);
+						if (r != 0) {
+							buff[r] = 0;
+							fclose(f);
+							return CString(CA2T(reinterpret_cast<LPSTR>(static_cast<LPBYTE>(buff))));
+						}
+					}
+					fclose(f);
+				}
+				return pszDef;
+			}
+		};
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Gene), CGene)

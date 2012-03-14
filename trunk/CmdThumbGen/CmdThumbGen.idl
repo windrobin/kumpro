@@ -12,15 +12,27 @@ import "Thumbcache.idl";
 [
 	object,
 	uuid(60E422E5-E50D-4C9C-91F3-D2810E7F2E9A),
-	helpstring("IGene インターフェイス"),
+	helpstring("IGene if"),
 	pointer_default(unique)
 ]
 interface IGene : IUnknown{
 };
+
+[
+	object,
+	uuid(d8d5f848-8223-42fc-bbcb-c40056b71a17),
+	helpstring("ISetPage4ThumbnailProvider if"),
+	pointer_default(unique)
+]
+interface ISetPage4ThumbnailProvider : IThumbnailProvider{
+	[id(1)] HRESULT GetPageCount([out, retval] DWORD *pcPages);
+	[id(2)] HRESULT SetActivePage([in] DWORD iPage);
+};
+
 [
 	uuid(7DF507D7-46CD-43FF-A591-4CB7E9D5BE63),
-	version(1.0),
-	helpstring("CmdThumbGen 1.0 タイプ ライブラリ")
+	version(1.1),
+	helpstring("CmdThumbGen 1.1 type lib")
 ]
 library CmdThumbGenLib
 {
@@ -39,5 +51,6 @@ library CmdThumbGenLib
 		interface IInitializeWithFile; // in newer idl?
 		interface IThumbnailProvider; // in newer idl?
 		interface IRunnableTask; // Not included in PlatformSDK of VS8, use Windows SDK v7.1 or later.
+		interface ISetPage4ThumbnailProvider;
 	};
 };

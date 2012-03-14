@@ -56,10 +56,6 @@ namespace EdMyFav {
             bwAD.RunWorkerAsync();
         }
 
-        private void bNewPC_Click(object sender, EventArgs e) {
-
-        }
-
         private void bSave_Click(object sender, EventArgs e) {
             RegistryKey rk = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\HIRAOKA HYPERS TOOLS, Inc.\MyFav\Favorites");
             foreach (String name in rk.GetValueNames()) {
@@ -187,6 +183,7 @@ namespace EdMyFav {
         }
 
         private void lvPC_ItemActivate(object sender, EventArgs e) {
+            if (!tbDirs.Text.EndsWith("\r\n")) tbDirs.AppendText("\r\n");
             foreach (ListViewItem lvi in lvPC.SelectedItems) {
                 tbDirs.AppendText("\\\\" + lvi.Text + "\r\n");
                 return;
@@ -321,6 +318,7 @@ namespace EdMyFav {
 
         private void tbDirs_DragDrop(object sender, DragEventArgs e) {
             String[] alfp = e.Data.GetData(DataFormats.FileDrop) as String[];
+            if (!tbDirs.Text.EndsWith("\r\n")) tbDirs.AppendText("\r\n");
             foreach (String fp in alfp) {
                 if (Directory.Exists(fp))
                     tbDirs.AppendText(fp + "\r\n");

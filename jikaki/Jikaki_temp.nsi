@@ -12,11 +12,12 @@
 ;--------------------------------
 ;General
   !define APP "Jikaki"
-  !define VER "1.1.0"
+  !define VER "1.2.0.0"
+  !define APV "1_2_0_0"
 
   ;Name and file
   Name "${APP} - ${VER}"
-  OutFile "${APP}_temp.exe"
+  OutFile "Setup_${APP}_${APV}.exe"
 
   ;Default installation folder
   InstallDir "$APPDATA\${APP}"
@@ -25,6 +26,8 @@
   InstallDirRegKey HKCU "Software\HIRAOKA HYPERS TOOLS, Inc.\${APP}" ""
   
   RequestExecutionLevel highest
+
+  !include "LogicLib.nsh"
 
 ;--------------------------------
 ;Interface Settings
@@ -42,7 +45,7 @@
 ;--------------------------------
 ;Languages
  
-  !insertmacro XPUI_LANGUAGE "English"
+  !insertmacro XPUI_LANGUAGE "Japanese"
 
 ;--------------------------------
 ;Installer Sections
@@ -60,12 +63,14 @@ Section ""
 
 SectionEnd
 
-Section "Add to Start menu"
+Section "ショートカットを作成：通常"
   CreateShortcut "$SMPROGRAMS\jikaki.lnk" "$INSTDIR\jikaki.exe"
-
-  Exec 'explorer.exe /select,"$SMPROGRAMS\jikaki.lnk"'
 SectionEnd
 
-Section "Launch"
+Section /o "ショートカットを作成：Ctrl+Alt+Qで起動"
+  CreateShortcut "$SMPROGRAMS\jikaki.lnk" "$INSTDIR\jikaki.exe" "" "" "" "" "ALT|CONTROL|Q"
+SectionEnd
+
+Section "起動する"
   Exec '"$INSTDIR\jikaki.exe"'
 SectionEnd

@@ -260,5 +260,6 @@ int JIKAKI() {
 		DispatchMessage(&wm);
 	}
 
+	ExitProcess(wm.wParam); // WM_QUIT's wParam
 	return 0;
 }

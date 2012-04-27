@@ -16,7 +16,9 @@
 
   !define APP "CheckMSVCrt"
   !define COM "HIRAOKA HYPERS TOOLS, Inc."
-  !define VER "1.1.0"
+  !define VER "1.2.0"
+
+  ; bin\release
 
   ;Name and file
   Name "${APP} ${VER}"

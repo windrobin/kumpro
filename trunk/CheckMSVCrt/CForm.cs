@@ -98,6 +98,10 @@ namespace CheckMSVCrt {
             T("{4B6C7001-C7D6-3710-913E-5BC23FCE91E6}", "9.0.30729.4148?", "VC 9.0 SP1 ATL (x64)", "http://www.microsoft.com/downloads/details.aspx?familyid=2051A0C1-C9B5-4B0A-A8F5-770A549FD78C");
             T("{977AD349-C2A8-39DD-9273-285C08987C7B}", "9.0.30729.4148?", "VC 9.0 SP1 ATL (ia64)", "http://www.microsoft.com/downloads/details.aspx?familyid=2051A0C1-C9B5-4B0A-A8F5-770A549FD78C");
 
+            T("{9BE518E6-ECC6-35A9-88E4-87755C07200F}", "9.0.30729.6161?", "VC 9.0 SP1 MFC (x86)", "http://www.microsoft.com/en-us/download/details.aspx?displaylang=en&id=26368");
+            T("{5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}", "9.0.30729.6161?", "VC 9.0 SP1 MFC (x64)", "http://www.microsoft.com/en-us/download/details.aspx?displaylang=en&id=26368");
+            T("{515643D1-4E9E-342F-A75A-D1F16448DC04}", "9.0.30729.6161?", "VC 9.0 SP1 MFC (ia64)", "http://www.microsoft.com/en-us/download/details.aspx?displaylang=en&id=26368");
+
             // http://blogs.msdn.com/b/astebner/archive/2009/01/29/9384143.aspx
 
 

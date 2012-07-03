@@ -465,7 +465,7 @@ public:
 				reinterpret_cast<DWORD_PTR>(static_cast<LPCTSTR>(strTempFile)),
 				cx,
 				cx,
-				0, // m_flags
+				IEIFLAG_ORIGSIZE, // m_flags
 				iCurPage,
 				0,
 				0,

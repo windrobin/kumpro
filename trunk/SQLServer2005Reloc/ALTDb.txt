@@ -1,0 +1,4 @@
+﻿ALTER DATABASE mssqlsystemresource 
+    MODIFY FILE (NAME=data, FILENAME= '{0}');
+ALTER DATABASE mssqlsystemresource 
+    MODIFY FILE (NAME=log, FILENAME= '{1}');

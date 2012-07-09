@@ -1,0 +1,75 @@
+        private void tbAltDB_TextChanged(object sender, EventArgs e) {
+            String s = String.Format(""
+                + ((tbAltName1.TextLength != 0 && tbAltFileName1.TextLength != 0) ? "ALTER DATABASE {0} MODIFY FILE (NAME={1}, FILENAME= '{2}');" : "")
+                + ((tbAltName2.TextLength != 0 && tbAltFileName2.TextLength != 0) ? "ALTER DATABASE {0} MODIFY FILE (NAME={3}, FILENAME= '{4}');" : "")
+                , tbAltDB.Text
+                , tbAltName1.Text
+                , tbAltFileName1.Text
+                , tbAltName2.Text
+                , tbAltFileName2.Text
+                );
+            tbRunAlt.Text = tbSQLCBase.Text + " -Q \"" + s + "\" ";
+        }
+
+
+            cbSQLReg.Items.Clear();
+            foreach (String kn in Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Microsoft SQL Server", false).GetSubKeyNames()) {
+                String fkn = @"SOFTWARE\Microsoft\Microsoft SQL Server\" + kn + @"\Tools\ClientSetup";
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(fkn, false);
+                if (rk != null) {
+                    cbSQLReg.Items.Add(fkn);
+                }
+            }
+        private void bUseSQLServer_Click(object sender, EventArgs e) {
+            String a = cbSQLServers.Text;
+            tbRunEmer2.Text = "START \"" + a + "\" /f /T3608";
+            RegistryKey rk = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\services\" + a, false);
+            if (rk != null) {
+                String ImagePath = Convert.ToString(rk.GetValue("ImagePath"));
+                String cwd = Path.GetDirectoryName(ImagePath.Split('"')[1].Split('"')[0]);
+                //tbSQLCWD.Text = cwd;
+                tbSQLCBase.Text = "SQLCMD.exe -S " + Environment.MachineName + "\\" + a.Split('$')[1];
+            }
+        }
+
+        private void bUseSQLReg_Click(object sender, EventArgs e) {
+            RegistryKey rk = Registry.LocalMachine.OpenSubKey(cbSQLReg.Text, false);
+            if (rk != null) {
+                tbSQLCWD.Text = Convert.ToString(rk.GetValue("Path"));
+            }
+        }
+
+        private void tbSQLCBase_TextChanged(object sender, EventArgs e) {
+            String s = " SELECT (SELECT name FROM sys.databases WHERE sys.databases.database_id = sys.master_files.database_id),name,physical_name FROM sys.master_files;";
+            tbEnumCmd.Text = tbSQLCBase.Text + " -Q \"" + s + "\" ";
+        }
+
+        private void bEnumExec_Click(object sender, EventArgs e) {
+        }
+
+        private void bExecEmer_Click(object sender, EventArgs e) {
+            ProcessStartInfo psi = new ProcessStartInfo(tbRunEmer.Text, tbRunEmer2.Text);
+            psi.UseShellExecute = true;
+            Process.Start(psi);
+        }
+
+        private void button1_Click(object sender, EventArgs e) {
+            using (SqlConnection db = new SqlConnection("Data Source=DD5\\KODB2007_05;Integrated Security=SSPI;")) {
+                db.Open();
+                using (SqlDataReader dr = new SqlCommand("SELECT (SELECT name FROM sys.databases WHERE sys.databases.database_id = sys.master_files.database_id),name,physical_name FROM sys.master_files;", db).ExecuteReader()) {
+                    DataTable dt = new DataTable();
+                    int cx = dr.FieldCount;
+                    for (int x = 0; x < cx; x++) {
+                        dt.Columns.Add(dr.GetName(x), dr.GetFieldType(x));
+                    }
+                    Object[] vals = new Object[cx];
+                    while (dr.Read()) {
+                        dr.GetValues(vals);
+                        dt.Rows.Add(vals);
+                    }
+                    gv.DataSource = dt;
+                }
+                db.Close();
+            }
+        }
+    }

@@ -13,7 +13,7 @@
 !define CLSID_AxTIF5  "{05936E26-30E9-4210-84A6-A059B4512D14}"
 
 ; The name of the installer
-Name "${APP} 0.1"
+Name "${APP} 0.2"
 
 ; The file to write
 OutFile "${APP}.exe"
@@ -37,6 +37,24 @@ Page instfiles
 
 ;--------------------------------
 
+!macro WriteMime MIME CLSID
+  ClearErrors
+  WriteRegStr HKCR "MIME\DataBase\Content Type\${MIME}" "CLSID" "${CLSID}"
+  ${IfNot} ${Errors}
+    DetailPrint "HKCR ${MIME} ‘‚«‚İ¬Œ÷"
+  ${Else}
+    DetailPrint "HKCR ${MIME} ‘‚«‚İ¸”s"
+
+    ClearErrors
+    WriteRegStr HKCU "Software\Classes\MIME\DataBase\Content Type\${MIME}" "CLSID" "${CLSID}"
+    ${IfNot} ${Errors}
+      DetailPrint "HKCU ${MIME} ‘‚«‚İ¬Œ÷"
+    ${Else}
+      DetailPrint "HKCU ${MIME} ‘‚«‚İ¸”s"
+    ${EndIf}
+  ${EndIf}
+!macroend
+
 ; The stuff to install
 Section /o "Alternatiff" AltTiff ;No components page, name is not important
 
@@ -44,19 +62,8 @@ Section /o "Alternatiff" AltTiff ;No components page, name is not important
   SetOutPath $INSTDIR
   
   ; Put file there
-  ClearErrors
-  WriteRegStr HKCR "MIME\DataBase\Content Type\image/tiff"   "CLSID" "${CLSID_AltTiff}"
-  IfErrors +3
-    DetailPrint "image/tiff ‘‚«‚İ¬Œ÷"
-    Goto +2
-    DetailPrint "image/tiff ‘‚«‚İ¸”s"
-
-  ClearErrors
-  WriteRegStr HKCR "MIME\DataBase\Content Type\image/x-tiff" "CLSID" "${CLSID_AltTiff}"
-  IfErrors +3
-    DetailPrint "image/x-tiff ‘‚«‚İ¬Œ÷"
-    Goto +2
-    DetailPrint "image/x-tiff ‘‚«‚İ¸”s"
+  !insertmacro WriteMime "image/tiff"   "${CLSID_AltTiff}"
+  !insertmacro WriteMime "image/x-tiff" "${CLSID_AltTiff}"
 
 SectionEnd ; end the section
 
@@ -66,19 +73,8 @@ Section /o "AxTIF5" AxTIF5 ;No components page, name is not important
   SetOutPath $INSTDIR
 
   ; Put file there
-  ClearErrors
-  WriteRegStr HKCR "MIME\DataBase\Content Type\image/tiff"   "CLSID" "${CLSID_AxTIF5}"
-  IfErrors +3
-    DetailPrint "image/tiff ‘‚«‚İ¬Œ÷"
-    Goto +2
-    DetailPrint "image/tiff ‘‚«‚İ¸”s"
-
-  ClearErrors
-  WriteRegStr HKCR "MIME\DataBase\Content Type\image/x-tiff" "CLSID" "${CLSID_AxTIF5}"
-  IfErrors +3
-    DetailPrint "image/x-tiff ‘‚«‚İ¬Œ÷"
-    Goto +2
-    DetailPrint "image/x-tiff ‘‚«‚İ¸”s"
+  !insertmacro WriteMime "image/tiff"   "${CLSID_AxTIF5}"
+  !insertmacro WriteMime "image/x-tiff" "${CLSID_AxTIF5}"
 
 SectionEnd ; end the section
 

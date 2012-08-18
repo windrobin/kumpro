@@ -10,7 +10,7 @@
 !define APP "Assoc_TIFF_Viewer"
 
 ; The name of the installer
-Name "Setup ${APP} 0.1"
+Name "Setup ${APP} 0.2"
 
 ; The file to write
 OutFile "Setup_${APP}.exe"

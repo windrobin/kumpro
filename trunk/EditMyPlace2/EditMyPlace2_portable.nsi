@@ -12,7 +12,7 @@
 ;--------------------------------
 ;General
   !define APP "EditMyPlace2"
-  !define VER "1.0.0"
+  !define VER "1.1.0"
 
   ;Name and file
   Name "${APP} - ${VER}"

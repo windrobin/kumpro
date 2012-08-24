@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(CW2kDlg, CPropertyPage)
 	ON_BN_CLICKED(IDC_COMMIT, &CW2kDlg::OnBnClickedCommit)
 	ON_BN_CLICKED(IDC_REMOVE, &CW2kDlg::OnBnClickedRemove)
 	ON_BN_CLICKED(IDC_PREVIEW, &CW2kDlg::OnBnClickedPreview)
+	ON_BN_CLICKED(IDC_RESETO, &CW2kDlg::OnBnClickedReset)
 END_MESSAGE_MAP()
 
 // CW2kDlg メッセージ ハンドラ
@@ -59,7 +60,7 @@ BOOL CW2kDlg::OnInitDialog() {
 	m_comboItems.Add(ComboItem(CITY_CSIDL     , CSIDL_DRIVES     , _T("マイコンピュータ")).ResolveName());
 	m_comboItems.Add(ComboItem(CITY_CSIDL     , CSIDL_NETWORK    , _T("マイネットワーク")).ResolveName());
 	m_comboItems.Add(ComboItem(CITY_CSIDL     , CSIDL_MYPICTURES , _T("マイピクチャ")).ResolveName());
-	m_comboItems.Add(ComboItem(CITY_CSIDL     , CSIDL_HISTORY    , _T("履歴")).ResolveName());
+//	m_comboItems.Add(ComboItem(CITY_CSIDL     , CSIDL_HISTORY    , _T("履歴")).ResolveName());
 	m_comboItems.Add(ComboItem(CITY_CSIDL     , CSIDL_RECENT     , _T("最近使ったファイル")).ResolveName());
 	m_comboItems.Add(ComboItem(CITY_CSIDL     , CSIDL_MYVIDEO    , _T("マイビデオ")).ResolveName());
 	m_comboItems.Add(ComboItem(CITY_CSIDL     , CSIDL_MYMUSIC    , _T("マイミュージック")).ResolveName());
@@ -88,11 +89,11 @@ BOOL CW2kDlg::OnInitDialog() {
 		ATLVERIFY(CBExUt(m_c5).Add(m_comboItems[x].dispName, iIco) >= 0);
 	}
 
-	m_c1.SetCurSel(0);
-	m_c2.SetCurSel(0);
-	m_c3.SetCurSel(0);
-	m_c4.SetCurSel(0);
-	m_c5.SetCurSel(0);
+	m_c1.SetCurSel(7);
+	m_c2.SetCurSel(11);
+	m_c3.SetCurSel(3);
+	m_c4.SetCurSel(4);
+	m_c5.SetCurSel(5);
 
 	Revert();
 
@@ -249,7 +250,7 @@ bool CW2kDlg::Commit() {
 
 			switch (m_comboItems[i].city) {
 				case CITY_HIDDEN:
-					VERIFY(0 == (r = rkPB.DeleteValue(s)));
+					VERIFY((r = rkPB.DeleteValue(s), r == 0 || r == 2));
 					break;
 				case CITY_REG_SZ:
 				case CITY_REG_ENVSZ:
@@ -289,4 +290,35 @@ void CW2kDlg::OnBnClickedPreview() {
 		this
 		);
 	wndDlg.DoModal();
+}
+
+void CW2kDlg::OnBnClickedReset() {
+	CRegKey rkComdlg32;
+	LONG r;
+	r = rkComdlg32.Open(
+		HKEY_CURRENT_USER, 
+		_T("Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Comdlg32"), 
+		DELETE|KEY_READ
+		);
+	if (r == 0) {
+		r = rkComdlg32.DeleteSubKey(_T("PlacesBar"));
+		if (r == 0) {
+			AfxMessageBox(IDS_DELETE_DONE, MB_ICONINFORMATION);
+			return;
+		}
+		else if (r == ERROR_FILE_NOT_FOUND) {
+			AfxMessageBox(IDS_DELETE_NOT, MB_ICONINFORMATION);
+			return;
+		}
+		else {
+			AfxMessageBox(IDS_DELETE_FAILED, MB_ICONEXCLAMATION);
+		}
+	}
+	else if (r == ERROR_FILE_NOT_FOUND) {
+		AfxMessageBox(IDS_DELETE_NOT, MB_ICONINFORMATION);
+		return;
+	}
+	else {
+		AfxMessageBox(IDS_DELETE_FAILED, MB_ICONEXCLAMATION);
+	}
 }

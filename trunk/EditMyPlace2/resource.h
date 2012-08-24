@@ -16,6 +16,11 @@
 #define IDS_SAVE_FAILED                 107
 #define IDD_O2K0                        108
 #define IDS_OSA_LAUNCH_FAILED           108
+#define IDS_DELETE_DONE                 109
+#define IDS_STRING110                   110
+#define IDS_DELETE_NOT                  110
+#define IDS_STRING111                   111
+#define IDS_DELETE_FAILED               111
 #define IDC_C1                          1001
 #define IDC_C2                          1002
 #define IDC_C3                          1003
@@ -74,6 +79,8 @@
 #define IDC_ORDER1                      1059
 #define IDC_ORDER101                    1159
 #define IDC_PREVIEW                     1160
+#define IDC_RESET                       1161
+#define IDC_RESETO                      1161
 
 // Next default values for new objects
 // 
@@ -81,7 +88,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        106
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1161
+#define _APS_NEXT_CONTROL_VALUE         1162
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

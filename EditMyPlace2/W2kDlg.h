@@ -62,4 +62,5 @@ public:
 	afx_msg void OnBnClickedRemove();
 	virtual BOOL OnSetActive();
 	afx_msg void OnBnClickedPreview();
+	afx_msg void OnBnClickedReset();
 };

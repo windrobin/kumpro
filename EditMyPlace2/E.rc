@@ -52,7 +52,7 @@ END
 // Dialog
 //
 
-IDD_W2K DIALOGEX 0, 0, 347, 224
+IDD_W2K DIALOGEX 0, 0, 347, 243
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Windows 2000/XP"
 FONT 9, "MS UI Gothic", 0, 0, 0x0
@@ -86,6 +86,7 @@ BEGIN
     PUSHBUTTON      "設定を保存する",IDC_COMMIT,94,201,78,18
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,5,195,342,1
     PUSHBUTTON      "保存して、表示 Alt+&T",IDC_PREVIEW,195,201,78,18
+    PUSHBUTTON      "設定を削除する",IDC_RESETO,94,223,78,18
 END
 
 IDD_OFFICE2K DIALOGEX 0, 0, 298, 198
@@ -179,8 +180,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION 1,1,0,0
+ PRODUCTVERSION 1,1,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -197,12 +198,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "HIRAOKA HYPERS TOOLS, Inc."
             VALUE "FileDescription", "マイプレースのカスタマイズを支援致します"
-            VALUE "FileVersion", "1, 0, 0, 0"
+            VALUE "FileVersion", "1, 1, 0, 0"
             VALUE "InternalName", "EditMyPl"
-            VALUE "LegalCopyright", "Copyright (C) 2010"
+            VALUE "LegalCopyright", "Copyright (C) 2010,2012"
             VALUE "OriginalFilename", "EditMyPlace2.exe"
             VALUE "ProductName", "EditMyPlace2"
-            VALUE "ProductVersion", "1, 0, 0, 0"
+            VALUE "ProductVersion", "1, 1, 0, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -227,6 +228,9 @@ BEGIN
     IDS_OFFVER_2003         "Office 2003"
     IDS_SAVE_FAILED         "保存に失敗しました。"
     IDS_OSA_LAUNCH_FAILED   "表示に失敗しました。"
+    IDS_DELETE_DONE         "削除しました。"
+    IDS_DELETE_NOT          "削除は必要ありません。"
+    IDS_DELETE_FAILED       "削除に失敗しました。"
 END
 
 #endif    // 日本語 resources

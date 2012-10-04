@@ -15,8 +15,8 @@
   !define APP "MyFav"
   !define TTL "MyFav"
   !define COM "HIRAOKA HYPERS TOOLS, Inc."
-  !define VER "0.2"
-  !define APV "0_2"
+  !define VER "0.3"
+  !define APV "0_3"
 
   ;Name and file
   Name "${APP} ${VER}"
@@ -60,7 +60,7 @@
 ;--------------------------------
 ;Languages
  
-  !insertmacro XPUI_LANGUAGE "Japanese"
+  !insertmacro XPUI_LANGUAGE "English"
 
 ;--------------------------------
 ;Installer Sections

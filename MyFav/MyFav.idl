@@ -40,7 +40,8 @@ library MyFavLib
 	{
 		[default] interface ISf;
 		//interface IStorage;
-		interface IShellFolder;
+		interface IShellFolder2;
+		interface IPersistIDList;
 	};
 	[
 		uuid(3F8AA1BB-C52A-4BAE-A635-744D7CECF9D4),

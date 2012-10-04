@@ -39,5 +39,8 @@
 
 #include <shobjidl.h>
 #include <shlobj.h>
+#include <propkey.h>
+#include <shlguid.h>
+#include <stgprop.h>
 
 using namespace ATL;

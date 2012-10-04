@@ -21,8 +21,9 @@ class ATL_NO_VTABLE CSf :
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CSf, &CLSID_Sf>,
 	public IStorage,
-	public IShellFolder,
+	public IShellFolder2,
 	public IPersistFolder2,
+	public IPersistIDList,
 	public ISf
 {
 protected:
@@ -37,7 +38,7 @@ protected:
 				return false;
 			for (int x = 0; x < cb; x++) {
 				TCHAR tc[3] = {s[5 +2*x], s[5 +2*x +1]};
-				reinterpret_cast<LPBYTE>(pidltar)[x] = _tcstol(tc, NULL, 16);
+				reinterpret_cast<LPBYTE>(pidltar)[x] = (BYTE)_tcstol(tc, NULL, 16);
 			}
 			return true;
 		}
@@ -235,6 +236,175 @@ public:
 		return E_ACCESSDENIED;
 	}
 
+	class SUt {
+	public:
+		static HRESULT Set(STRRET &r, LPCWSTR pwcs) {
+			r.uType = STRRET_WSTR;
+			size_t cch = wcslen(pwcs);
+			if (NULL == (r.pOleStr = reinterpret_cast<LPWSTR>(CoTaskMemAlloc(2 * (1 + cch)))))
+				return E_OUTOFMEMORY;
+			wcsncpy_s(r.pOleStr, cch + 1, pwcs, cch);
+			return S_OK;
+		}
+
+		static void Clear(STRRET &r) {
+			if (r.uType == STRRET_WSTR) {
+				CoTaskMemFree(r.pOleStr);
+			}
+			ZeroMemory(&r, sizeof(r));
+		}
+	};
+
+	// IShellFolder2 : public IShellFolder
+public:
+    virtual HRESULT STDMETHODCALLTYPE GetDefaultSearchGUID( 
+        /* [out] */ __RPC__out GUID *pguid)
+	{
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s \n", __FUNCTION__
+			, static_cast<LPCSTR>(CT2A(IDUt::FromIID(*pguid)))
+			);
+		return E_NOTIMPL;
+	}
+    
+    virtual HRESULT STDMETHODCALLTYPE EnumSearches( 
+        /* [out] */ __RPC__deref_out_opt IEnumExtraSearch **ppenum)
+	{
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s \n", __FUNCTION__);
+		return E_NOTIMPL;
+	}
+    
+    virtual HRESULT STDMETHODCALLTYPE GetDefaultColumn( 
+        /* [in] */ DWORD dwRes,
+        /* [out] */ __RPC__out ULONG *pSort,
+        /* [out] */ __RPC__out ULONG *pDisplay)
+	{
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s \n", __FUNCTION__);
+		return E_NOTIMPL;
+	}
+
+    
+    virtual HRESULT STDMETHODCALLTYPE GetDefaultColumnState( 
+        /* [in] */ UINT iColumn,
+        /* [out] */ __RPC__out SHCOLSTATEF *pcsFlags)
+	{
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %u \n", __FUNCTION__, iColumn);
+
+		if (pcsFlags == NULL)
+			return E_POINTER;
+
+		switch (iColumn) {
+		case 0:
+			*pcsFlags = SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT;
+			return S_OK;
+		case 1:
+			*pcsFlags = SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT;
+			return S_OK;
+		}
+
+		return E_INVALIDARG;
+	}
+
+    
+    virtual HRESULT STDMETHODCALLTYPE GetDetailsEx( 
+        /* [unique][in] */ __RPC__in_opt PCUITEMID_CHILD pidl,
+        /* [in] */ __RPC__in const SHCOLUMNID *p,
+        /* [out] */ __RPC__out VARIANT *pv)
+	{
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s ( %s %u ) \n", __FUNCTION__
+			, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(pidl)))
+			, static_cast<LPCSTR>(CT2A(IDUt::FromIID(p->fmtid)))
+			, p->pid
+			);
+
+		if (pidl == NULL)
+			return E_POINTER;
+		if (p == NULL)
+			return E_POINTER;
+		if (pv == NULL)
+			return E_POINTER;
+
+		static const GUID FMTID_Link = PSGUID_LINK;
+
+		HRESULT hr;
+
+		if (false) { }
+		else if (p->fmtid == FMTID_Storage && p->pid == PID_STG_NAME) {
+			STRRET str;
+			if (SUCCEEDED(hr = GetDisplayNameOf(pidl, SHGDN_NORMAL, &str))) {
+				CComBSTR bstr;
+				if (SUCCEEDED(hr = StrRetToBSTR(&str, pidl, &bstr))) {
+					hr = CComVariant(bstr).Detach(pv);
+					SUt::Clear(str);
+					return hr;
+				}
+			}
+		}
+		else if (p->fmtid == FMTID_Storage && p->pid == PID_STG_WRITETIME) {
+			return E_INVALIDARG;
+		}
+		else if (p->fmtid == FMTID_Link && p->pid == PID_LINK_TARGET) {
+			CString s = MUt::GetRealPath(pidl);
+			return CComVariant(s).Detach(pv);
+		}
+
+		return E_INVALIDARG;
+	}
+
+    
+    virtual HRESULT STDMETHODCALLTYPE GetDetailsOf( 
+        /* [unique][in] */ __RPC__in_opt PCUITEMID_CHILD pidl,
+        /* [in] */ UINT iColumn,
+        /* [out] */ __RPC__out SHELLDETAILS *psd)
+	{
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s %u \n", __FUNCTION__
+			, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(pidl)))
+			, iColumn
+			);
+
+		if (psd == NULL)
+			return E_POINTER;
+
+		switch (iColumn) {
+		case 0:
+			psd->fmt = LVCFMT_LEFT;
+			psd->cxChar = 15;
+			return SUt::Set(psd->str, L"–¼Ì");
+		case 1:
+			psd->fmt = LVCFMT_LEFT;
+			psd->cxChar = 30;
+			return SUt::Set(psd->str, L"ƒŠƒ“ƒNæ");
+		}
+
+		return E_INVALIDARG;
+	}
+
+    
+    virtual HRESULT STDMETHODCALLTYPE MapColumnToSCID( 
+        /* [in] */ UINT iColumn,
+        /* [out] */ __RPC__out SHCOLUMNID *p)
+	{
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %u \n", __FUNCTION__, iColumn);
+
+		if (p == NULL)
+			return E_POINTER;
+
+		static const GUID FMTID_Link = PSGUID_LINK;
+
+		switch (iColumn) {
+		case 0:
+			p->fmtid = FMTID_Storage;
+			p->pid = PID_STG_NAME;
+			return S_OK;
+		case 1:
+			p->fmtid = FMTID_Link;
+			p->pid = PID_LINK_TARGET;
+			return S_OK;
+		}
+
+		return E_INVALIDARG;
+	}
+
+    
 	// IShellFolder : public IUnknown
 public:
     virtual HRESULT STDMETHODCALLTYPE ParseDisplayName( 
@@ -261,7 +431,10 @@ public:
         /* [in] */ __RPC__in REFIID riid,
         /* [iid_is][out] */ __RPC__deref_out_opt void **ppv)
 	{
-		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s %s \n", __FUNCTION__, static_cast<LPCSTR>(CT2A(IDUt::WhatIID(riid))), static_cast<LPCSTR>(CT2A(MUt::GetRealPath(pidl))));
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s %s \n", __FUNCTION__
+			, static_cast<LPCSTR>(CT2A(IDUt::WhatIID(riid)))
+			, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(pidl)))
+			);
 
 		ATLASSERT(ppv != NULL);
 		*ppv = NULL;
@@ -272,7 +445,12 @@ public:
 		if (S_OK == (hr = ResolvePIDL(pidl, psfDesk, pidltar, pbc))) {
 			hr = psfDesk->BindToObject(pidltar, pbc, riid, ppv);
 			ILFree(pidltar);
-			ATLASSERT(!FAILED(hr));
+			//ATLASSERT(!FAILED(hr));
+			if (SUCCEEDED(hr)) {
+				ATLASSERT(riid != IID_IPropertyStoreCache);
+				ATLASSERT(riid != IID_IPropertyStoreFactory);
+				ATLASSERT(riid != IID_IPropertyStore);
+			}
 		}
 		else ATLASSERT(false);
 
@@ -294,7 +472,10 @@ public:
         /* [in] */ __RPC__in PCUIDLIST_RELATIVE pidl1,
         /* [in] */ __RPC__in PCUIDLIST_RELATIVE pidl2)
 	{
-		ATLTRACE2(atlTraceCOM, LevCallee, "# %s \n", __FUNCTION__);
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s %s \n", __FUNCTION__
+			, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(pidl1)))
+			, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(pidl2)))
+			);
 
 		short sResult = MUt::GetRealPath(pidl1).Compare(MUt::GetRealPath(pidl2));
 		return MAKE_HRESULT(SEVERITY_SUCCESS, 0, (unsigned short)sResult);
@@ -305,12 +486,30 @@ public:
         /* [in] */ __RPC__in REFIID riid,
         /* [iid_is][out] */ __RPC__deref_out_opt void **ppv)
 	{
-		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s \n", __FUNCTION__, static_cast<LPCSTR>(CT2A(IDUt::WhatIID(riid))));
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s \n", __FUNCTION__
+			, static_cast<LPCSTR>(CT2A(IDUt::WhatIID(riid)))
+			);
 
-		ATLASSERT(ppv != NULL);
+		HRESULT hr;
+
+		if (ppv == NULL)
+			return E_POINTER;
+
 		*ppv = NULL;
 
-		return E_NOINTERFACE;
+		if (false) { }
+		else if (riid == IID_IShellView) {
+			SFV_CREATE fv;
+			ZeroMemory(&fv, sizeof(fv));
+			fv.cbSize = sizeof(fv);
+			fv.pshf = this;
+			AddRef();
+			hr = SHCreateShellFolderView(&fv, reinterpret_cast<IShellView **>(ppv));
+			Release();
+		}
+		else hr = E_FAIL;
+
+		return hr;
 	}
     
     virtual HRESULT STDMETHODCALLTYPE GetAttributesOf( 
@@ -318,7 +517,11 @@ public:
         /* [unique][size_is][in] */ __RPC__in_ecount_full_opt(cidl) PCUITEMID_CHILD_ARRAY apidl,
         /* [out][in] */ __RPC__inout SFGAOF *rgfInOut)
 	{
-		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %u %s 0x%08x \n", __FUNCTION__, cidl, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(apidl[0]))), *rgfInOut);
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %u %s 0x%08x \n", __FUNCTION__
+			, cidl
+			, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(apidl[0])))
+			, *rgfInOut
+			);
 
 		if (cidl != 1)
 			return E_UNEXPECTED;
@@ -346,7 +549,10 @@ public:
         __reserved  UINT *rgfReserved,
         /* [iid_is][out] */ __RPC__deref_out_opt void **ppv)
 	{
-		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s %s \n", __FUNCTION__, static_cast<LPCSTR>(CT2A(IDUt::WhatIID(riid))), static_cast<LPCSTR>(CT2A(MUt::GetRealPath(apidl[0]))));
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s %s \n", __FUNCTION__
+			, static_cast<LPCSTR>(CT2A(IDUt::WhatIID(riid)))
+			, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(apidl[0])))
+			);
 
 		ATLASSERT(ppv != NULL);
 		*ppv = NULL;
@@ -371,7 +577,10 @@ public:
         /* [in] */ SHGDNF uFlags,
         /* [out] */ __RPC__out STRRET *pName)
     {
-		ATLTRACE2(atlTraceCOM, LevCallee, "# %s %s \n", __FUNCTION__, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(pidl))));
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s 0x%08x \n", __FUNCTION__
+			, static_cast<LPCSTR>(CT2A(MUt::GetRealPath(pidl)))
+			, uFlags
+			);
 
 		CComPtr<IShellFolder> psfDesk;
 		LPITEMIDLIST pidltar = NULL;
@@ -380,6 +589,7 @@ public:
 			hr = psfDesk->GetDisplayNameOf(pidltar, uFlags, pName);
 			ILFree(pidltar);
 		}
+		else ATLASSERT(false);
 
 		return hr;
 	}
@@ -487,6 +697,32 @@ public:
 		return S_OK;
 	}
 
+	// IPersistIDList : public IPersist
+public:
+    virtual HRESULT STDMETHODCALLTYPE SetIDList( 
+        /* [in] */ __RPC__in PCIDLIST_ABSOLUTE pidl)
+	{
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s \n", __FUNCTION__);
+
+		if (pidl == NULL)
+			return E_POINTER;
+
+		pidlView = ILClone(pidl);
+		return S_OK;
+	}
+    
+    virtual HRESULT STDMETHODCALLTYPE GetIDList( 
+        /* [out] */ __RPC__deref_out_opt PIDLIST_ABSOLUTE *ppidl)
+	{
+		ATLTRACE2(atlTraceCOM, LevCallee, "# %s \n", __FUNCTION__);
+
+		if (ppidl == NULL)
+			return E_POINTER;
+		
+		*ppidl = ILClone(pidlView);
+		return S_OK;
+	}
+
 public:
 	CSf()
 	{
@@ -500,15 +736,19 @@ BEGIN_COM_MAP(CSf)
 	COM_INTERFACE_ENTRY(ISf)
 //	COM_INTERFACE_ENTRY(IStorage)
 	COM_INTERFACE_ENTRY(IShellFolder)
-	COM_INTERFACE_ENTRY(IPersist)
+	COM_INTERFACE_ENTRY(IShellFolder2)
+	COM_INTERFACE_ENTRY2(IPersist, IPersistFolder)
 	COM_INTERFACE_ENTRY(IPersistFolder)
 	COM_INTERFACE_ENTRY(IPersistFolder2)
+	COM_INTERFACE_ENTRY(IPersistIDList)
 
 	COM_INTERFACE_ENTRY_FUNC_BLIND(0, TraceQueryInterafce)
 END_COM_MAP()
 
 	static HRESULT WINAPI TraceQueryInterafce(void* pv, REFIID riid, LPVOID* ppv, DWORD_PTR dw) {
-		ATLTRACE2(atlTraceQI, 1, "# %s %s \n", __FUNCTION__, static_cast<LPCSTR>(CT2A(IDUt::WhatIID(riid))));
+		ATLTRACE2(atlTraceQI, 0, "# %s %s \n", __FUNCTION__
+			, static_cast<LPCSTR>(CT2A(IDUt::WhatIID(riid)))
+			);
 		return S_FALSE;
 	}
 

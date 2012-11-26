@@ -37,6 +37,7 @@
 #include <atlcom.h>
 #include <atlstr.h>
 #include <atlfile.h>
+#include <atlcoll.h>
 #include <algorithm>
 
 #include <thumbcache.h>

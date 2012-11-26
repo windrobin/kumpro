@@ -14,6 +14,7 @@ class ATL_NO_VTABLE CGene :
 	public IExtractImage2,
 	public IRunnableTask,
 	public IInitializeWithFile,
+	public IInitializeWithStream,
 	//public IThumbnailProvider,
 	public IGene,
 	public ISetPage4ThumbnailProvider
@@ -31,6 +32,7 @@ BEGIN_COM_MAP(CGene)
 	COM_INTERFACE_ENTRY(IExtractImage)
 	COM_INTERFACE_ENTRY(IExtractImage2)
 	COM_INTERFACE_ENTRY(IInitializeWithFile)
+	COM_INTERFACE_ENTRY(IInitializeWithStream)
 	COM_INTERFACE_ENTRY(IThumbnailProvider)
 	COM_INTERFACE_ENTRY(IRunnableTask)
 	COM_INTERFACE_ENTRY(ISetPage4ThumbnailProvider)
@@ -43,6 +45,7 @@ END_COM_MAP()
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 	CComPtr<IUnknown> m_pFTM;
+	CAtlArray<CString> m_aryfptmp;
 
 	HRESULT FinalConstruct()
 	{
@@ -57,6 +60,11 @@ END_COM_MAP()
 	void FinalRelease()
 	{
 		m_pFTM.Release();
+
+		for (size_t x=0, cx=m_aryfptmp.GetCount(); x<cx; x++) {
+			DeleteFile(m_aryfptmp[x]);
+		}
+		m_aryfptmp.RemoveAll();
 	}
 
 protected:
@@ -145,6 +153,48 @@ public:
 
 		SIZE m_size;
 		DWORD m_flags;
+
+    // IInitializeWithStream : public IUnknown
+    public:
+        virtual /* [local] */ HRESULT STDMETHODCALLTYPE Initialize( 
+            /* [annotation][in] */ 
+            __in  IStream *pstream,
+            /* [annotation][in] */ 
+            __in  DWORD grfMode)
+		{
+			if (pstream == NULL)
+				return E_POINTER;
+
+			CString strTempFile;
+			HRESULT hr;
+			if (FAILED(hr = RUt2::GetTempFilePath3(strTempFile)))
+				return hr;
+
+			STATSTG ss;
+			if (FAILED(hr = pstream->Stat(&ss, STATFLAG_DEFAULT)))
+				return hr;
+
+			strTempFile += PathFindExtension(ss.pwcsName);
+
+			m_aryfptmp.Add(strTempFile);
+
+			BYTE buff[4096];
+			CAtlFile f;
+			if (SUCCEEDED(hr = f.Create(strTempFile, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS))) {
+				while (true) {
+					ULONG cbRead = 0;
+					if (FAILED(hr = pstream->Read(buff, 4096, &cbRead)))
+						break;
+					if (cbRead == 0)
+						break;
+					if (FAILED(hr = f.Write(buff, cbRead)))
+						return hr;
+				}
+				f.Close();
+				return Initialize(strTempFile, grfMode);
+			}
+			return hr;
+		}
 
 	// IInitializeWithFile : public IUnknown
 	public:
@@ -299,6 +349,28 @@ public:
 			}
 			~DelTmp() {
 				ATLVERIFY(DeleteFile(fpTmp));
+			}
+		};
+
+		class RUt2 {
+		public:
+			static HRESULT GetTempFilePath3(CString &pStr) {
+				int errc;
+				TCHAR szDir[MAX_PATH] = {0};
+				if (0 == GetTempPath(MAX_PATH, szDir))
+					return errc = GetLastError(), HRESULT_FROM_WIN32(errc);
+				GUID tmpId;
+				HRESULT hr;
+				if (FAILED(hr = CoCreateGuid(&tmpId)))
+					return hr;
+				CString strId;
+				for (int x = 0; x < 16; x++)
+					strId.AppendFormat(_T("%02x"), ((PBYTE)&tmpId)[x]);
+				TCHAR szPath[MAX_PATH] = {0};
+				PathCombine(szPath, szDir, CW2T(strId));
+
+				pStr = szPath;
+				return S_OK;
 			}
 		};
 

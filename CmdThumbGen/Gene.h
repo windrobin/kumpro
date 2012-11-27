@@ -15,6 +15,7 @@ class ATL_NO_VTABLE CGene :
 	public IRunnableTask,
 	public IInitializeWithFile,
 	public IInitializeWithStream,
+	public IInitializeWithItem,
 	//public IThumbnailProvider,
 	public IGene,
 	public ISetPage4ThumbnailProvider
@@ -32,7 +33,8 @@ BEGIN_COM_MAP(CGene)
 	COM_INTERFACE_ENTRY(IExtractImage)
 	COM_INTERFACE_ENTRY(IExtractImage2)
 	COM_INTERFACE_ENTRY(IInitializeWithFile)
-	COM_INTERFACE_ENTRY(IInitializeWithStream)
+	//COM_INTERFACE_ENTRY(IInitializeWithStream)
+	COM_INTERFACE_ENTRY(IInitializeWithItem)
 	COM_INTERFACE_ENTRY(IThumbnailProvider)
 	COM_INTERFACE_ENTRY(IRunnableTask)
 	COM_INTERFACE_ENTRY(ISetPage4ThumbnailProvider)
@@ -194,6 +196,27 @@ public:
 				return Initialize(strTempFile, grfMode);
 			}
 			return hr;
+		}
+
+    // IInitializeWithItem : public IUnknown
+    public:
+        virtual HRESULT STDMETHODCALLTYPE Initialize( 
+            /* [in] */ __RPC__in_opt IShellItem *psi,
+            /* [in] */ DWORD grfMode)
+		{
+			ObjectLock lck(this);
+
+			HRESULT hr;
+
+			LPWSTR pszName = NULL;
+			if (FAILED(hr = psi->GetDisplayName(SIGDN_FILESYSPATH, &pszName)))
+				return hr;
+
+			CString strName = pszName;
+
+			CoTaskMemFree(pszName);
+
+			return Initialize(strName, grfMode);
 		}
 
 	// IInitializeWithFile : public IUnknown

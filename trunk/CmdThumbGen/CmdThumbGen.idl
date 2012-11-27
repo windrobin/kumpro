@@ -50,6 +50,7 @@ library CmdThumbGenLib
 		interface IExtractImage2;
 		interface IInitializeWithFile; // in newer idl?
 		interface IInitializeWithStream; // in newer idl?
+		interface IInitializeWithItem; // in newer idl?
 		interface IThumbnailProvider; // in newer idl?
 		interface IRunnableTask; // Not included in PlatformSDK of VS8, use Windows SDK v7.1 or later.
 		interface ISetPage4ThumbnailProvider;

@@ -10,8 +10,8 @@
 
 !define COM   "HIRAOKA HYPERS TOOLS, Inc."
 
-!define VER    "1.2.0"
-!define APPVER "1_2_0"
+!define VER    "1.2.1"
+!define APPVER "1_2_1"
 
 !define MIME "image/tiff"
 

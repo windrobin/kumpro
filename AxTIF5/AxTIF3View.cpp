@@ -991,6 +991,19 @@ CSize CAxTIF3View::GetZoomedSize() {
 	CxImage *p = GetPic();
 	if (p != NULL) {
 		CSize size = CSize(p->GetWidth(), p->GetHeight());
+		int rx = p->GetXDPI();
+		int ry = p->GetYDPI();
+		if (rx == ry || rx < 1 || ry < 1) {
+
+		}
+		else if (rx > ry) {
+			size.cx = int(size.cx * (float(ry) / rx));
+			//size.cy = int(size.cy * (float(rx) / ry));
+		}
+		else {
+			size.cy = int(size.cy * (float(rx) / ry));
+			//size.cx = int(size.cx * (float(ry) / rx));
+		}
 		switch (m_fit) {
 		case FitNo:
 			return CSize((int)(size.cx * m_fZoom), (int)(size.cy * m_fZoom));

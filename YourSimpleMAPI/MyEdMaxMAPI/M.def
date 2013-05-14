@@ -1,0 +1,15 @@
+LIBRARY	"MyEdMaxMAPI"
+EXPORTS
+	MAPISendMail=MyMAPISendMail
+	MAPILogon=MyMAPILogon
+	MAPILogoff=MyMAPILogoff
+	MAPIAddress=MyMAPIAddress
+	MAPIDeleteMail=MyMAPIDeleteMail
+	MAPIDetails=MyMAPIDetails
+	MAPIFindNext=MyMAPIFindNext
+	MAPIFreeBuffer=MyMAPIFreeBuffer
+	MAPIReadMail=MyMAPIReadMail
+	MAPIResolveName=MyMAPIResolveName
+	MAPISaveMail=MyMAPISaveMail
+	MAPISendDocuments=MyMAPISendDocuments
+	

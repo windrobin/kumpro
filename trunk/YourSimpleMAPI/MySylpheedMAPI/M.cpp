@@ -35,6 +35,45 @@ ULONG FAR PASCAL MyMAPILogoff(
 	return SUCCESS_SUCCESS;
 }
 
+CStringA MyURLEnc(LPCSTR psz2) {
+	CStringA strUTF8 = CW2A(CA2W(psz2), 65001);
+	LPCSTR psz = strUTF8;
+	CStringA s;
+	while (psz != NULL && *psz != 0) {
+		int cb = _mbclen(reinterpret_cast<const BYTE *>(psz));
+		if (cb == 2) {
+			s.Append("%");
+			s.AppendFormat("%02x", (BYTE)psz[0]);
+			s.Append("%");
+			s.AppendFormat("%02x", (BYTE)psz[1]);
+			psz += 2;
+		}
+		else {
+			if (isalnum(psz[0]) || psz[0] == '_' || psz[0] == '-') {
+				s.Append(psz, 1);
+			}
+			else {
+				s.Append("%");
+				s.AppendFormat("%02x", (BYTE)psz[0]);
+			}
+			psz++;
+		}
+	}
+	return s;
+}
+CStringA EncName(LPCSTR psz) {
+	return MyURLEnc(psz);
+}
+CStringA EncAddr(LPCSTR psz) {
+	return MyURLEnc(psz);
+}
+CStringA EncSubj(LPCSTR psz) {
+	return MyURLEnc(psz);
+}
+CStringA EncBody(LPCSTR psz) {
+	return MyURLEnc(psz);
+}
+
 ULONG FAR PASCAL MyMAPISendMail(
 	LHANDLE lhSession,
 	ULONG_PTR ulUIParam,
@@ -45,8 +84,6 @@ ULONG FAR PASCAL MyMAPISendMail(
 	if (pM == NULL)
 		return MAPI_E_FAILURE;
 	UINT cx = pM->nFileCount;
-	if (cx == 0)
-		return SUCCESS_SUCCESS;
 
 	//MessageBoxA(NULL, "MySylpheedMAPI", "", MB_ICONSTOP);
 
@@ -79,37 +116,89 @@ ULONG FAR PASCAL MyMAPISendMail(
 		return MAPI_E_FAILURE;
 
 	CStringA s;
-	s.AppendFormat((" --attach"));
-	for (UINT x=0; x<cx; x++) {
-		CString fn1 = CA2T(pM->lpFiles[x].lpszFileName);
-		CString fp1 = CA2T(pM->lpFiles[x].lpszPathName);
-
-		for (size_t i=0; i<fn1.GetLength(); i++) {
-			switch (fn1.GetAt(i)) {
-				case _T(':'):
-				case _T('\\'):
-				case _T('/'):
-				case _T('*'):
-				case _T('?'):
-				case _T('"'):
-				case _T('<'):
-				case _T('>'):
-				case _T('|'):
-					fn1.SetAt(i, _T('_'));
-					break;
+	s.AppendFormat(" --compose \"mailto:");
+	for (UINT x=0, i=0; x<pM->nRecipCount; x++) {
+		if (pM->lpRecips[x].ulRecipClass == MAPI_TO) {
+			if (i != 0)
+				s.Append(", ");
+			if (pM->lpRecips[x].lpszName == NULL || strlen(pM->lpRecips[x].lpszName) == 0) {
+				s.AppendFormat("%s"
+					, static_cast<LPCSTR>(EncAddr(pM->lpRecips[x].lpszAddress))
+					);
 			}
+			else {
+				s.AppendFormat("%s <%s>"
+					, static_cast<LPCSTR>(EncName(pM->lpRecips[x].lpszName))
+					, static_cast<LPCSTR>(EncAddr(pM->lpRecips[x].lpszAddress))
+					);
+			}
+			i++;
 		}
-
-		if (fn1.GetLength() == 0) {
-			fn1 = PathFindFileName(fp1);
-		}
-
-		TCHAR tcfp1[MAX_PATH] = {0};
-		PathCombine(tcfp1, tcWorkdir, fn1);
-		if (!CopyFile(fp1, tcfp1, false))
-			return MAPI_E_FAILURE;			
-		s.AppendFormat((" \"%s\""), CT2A(tcfp1));
 	}
+	s.Append("?cc=");
+	for (UINT x=0, i=0; x<pM->nRecipCount; x++) {
+		if (pM->lpRecips[x].ulRecipClass == MAPI_CC) {
+			if (i != 0)
+				s.Append(", ");
+			if (pM->lpRecips[x].lpszName == NULL || strlen(pM->lpRecips[x].lpszName) == 0) {
+				s.AppendFormat("%s"
+					, static_cast<LPCSTR>(EncAddr(pM->lpRecips[x].lpszAddress))
+					);
+			}
+			else {
+				s.AppendFormat("%s <%s>"
+					, static_cast<LPCSTR>(EncName(pM->lpRecips[x].lpszName))
+					, static_cast<LPCSTR>(EncAddr(pM->lpRecips[x].lpszAddress))
+					);
+			}
+			i++;
+		}
+	}
+	s.Append("&subject=");
+	s.AppendFormat("%s"
+		, static_cast<LPCSTR>(EncSubj(pM->lpszSubject))
+		);
+	s.Append("&body=");
+	s.AppendFormat("%s"
+		, static_cast<LPCSTR>(EncBody(pM->lpszNoteText))
+		);
+	s.AppendFormat("\"");
+
+	if (cx > 0) {
+		s.AppendFormat(" --attach");
+		for (UINT x=0; x<cx; x++) {
+			CString fn1 = CA2T(pM->lpFiles[x].lpszFileName);
+			CString fp1 = CA2T(pM->lpFiles[x].lpszPathName);
+
+			for (size_t i=0; i<fn1.GetLength(); i++) {
+				switch (fn1.GetAt(i)) {
+					case _T(':'):
+					case _T('\\'):
+					case _T('/'):
+					case _T('*'):
+					case _T('?'):
+					case _T('"'):
+					case _T('<'):
+					case _T('>'):
+					case _T('|'):
+						fn1.SetAt(i, _T('_'));
+						break;
+				}
+			}
+
+			if (fn1.GetLength() == 0) {
+				fn1 = PathFindFileName(fp1);
+			}
+
+			TCHAR tcfp1[MAX_PATH] = {0};
+			PathCombine(tcfp1, tcWorkdir, fn1);
+			if (!CopyFile(fp1, tcfp1, false))
+				return MAPI_E_FAILURE;			
+			s.AppendFormat((" \"%s\""), CT2A(tcfp1));
+		}
+	}
+
+	//MessageBoxA(NULL, s, "s", MB_OK);
 
 	STARTUPINFO si = {0};
 	si.cb = sizeof(si);

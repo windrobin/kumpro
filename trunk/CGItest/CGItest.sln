@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrivePassThru", "DrivePassT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CGI4Ruby", "CGI4Ruby\CGI4Ruby.csproj", "{BBF368E2-E92B-4A2E-BA94-B866DDB925E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CGI4PHP5", "CGI4PHP5\CGI4PHP5.csproj", "{EE7F014F-80D0-4CE4-8EC3-B2B306A6FA7C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{BBF368E2-E92B-4A2E-BA94-B866DDB925E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBF368E2-E92B-4A2E-BA94-B866DDB925E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBF368E2-E92B-4A2E-BA94-B866DDB925E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE7F014F-80D0-4CE4-8EC3-B2B306A6FA7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE7F014F-80D0-4CE4-8EC3-B2B306A6FA7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE7F014F-80D0-4CE4-8EC3-B2B306A6FA7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE7F014F-80D0-4CE4-8EC3-B2B306A6FA7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

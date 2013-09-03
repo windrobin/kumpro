@@ -1,0 +1,65 @@
+通信は暗号化されていません.
+第三者にパスワードおよび内容を傍受される可能性があります.
+ホスト ftp.gnu.org を探しています. (TCP/IPv4)
+ホスト ftp.gnu.org (208.118.235.20 (21)) に接続しています. (TCP/IPv4)
+接続しました. (TCP/IPv4)
+220 GNU FTP server ready.
+>USER anonymous
+230-Due to U.S. Export Regulations, all cryptographic software on this
+230-site is subject to the following legal notice:
+230-
+230-    This site includes publicly available encryption source code
+230-    which, together with object code resulting from the compiling of
+230-    publicly available source code, may be exported from the United
+230-    States under License Exception "TSU" pursuant to 15 C.F.R. Section
+230-    740.13(e).
+230-
+230-This legal notice applies to cryptographic software only. Please see
+230-the Bureau of Industry and Security (www.bxa.doc.gov) for more
+230-information about current U.S. regulations.
+230 Login successful.
+>FEAT
+211-Features:
+ EPRT
+ EPSV
+ MDTM
+ PASV
+ REST STREAM
+ SIZE
+ TVFS
+ UTF8
+211 End
+>OPTS UTF8 ON
+200 Always in UTF8 mode.
+>XPWD
+257 "/"
+>TYPE A
+200 Switching to ASCII mode.
+>PASV
+227 Entering Passive Mode (208,118,235,20,94,57).
+ダウンロードのためにホスト 208.118.235.20 (24121) に接続しています. (TCP/IPv4)
+接続しました. (TCP/IPv4)
+>LIST
+150 Here comes the directory listing.
+226 Directory send OK.
+ファイル一覧の取得は正常終了しました. (1264 Bytes)
+>TYPE A
+200 Switching to ASCII mode.
+>PASV
+227 Entering Passive Mode (208,118,235,20,98,238).
+ダウンロードのためにホスト 208.118.235.20 (25326) に接続しています. (TCP/IPv4)
+接続しました. (TCP/IPv4)
+>LIST
+150 Here comes the directory listing.
+226 Directory send OK.
+ファイル一覧の取得は正常終了しました. (1264 Bytes)
+>TYPE A
+200 Switching to ASCII mode.
+>PASV
+227 Entering Passive Mode (208,118,235,20,102,204).
+ダウンロードのためにホスト 208.118.235.20 (26316) に接続しています. (TCP/IPv4)
+接続しました. (TCP/IPv4)
+>LIST
+150 Here comes the directory listing.
+226 Directory send OK.
+ファイル一覧の取得は正常終了しました. (1264 Bytes)

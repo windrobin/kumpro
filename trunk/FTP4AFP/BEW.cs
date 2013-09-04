@@ -40,5 +40,9 @@ namespace AFPt {
             wr.Write((byte)(qw >> 8));
             wr.Write((byte)(qw >> 0));
         }
+
+        public void Write(byte[] bin, int x, int cx) {
+            wr.Write(bin, x, cx);
+        }
     }
 }

@@ -251,6 +251,37 @@ namespace AFPt2 {
         }
     }
 
+
+    public class FPCreateFile : IFP {
+        public byte Flag; // (Hard ? 0x80 : 0)
+        public ushort VolumeID;
+        public uint DirectoryID;
+        public byte PathType = (byte)AfpPathType.kFPLongName;
+        public String Path;
+
+        public FPCreateFile WithFlag(byte Flag) { this.Flag = Flag; return this; }
+        public FPCreateFile WithVolumeID(ushort VolumeID) { this.VolumeID = VolumeID; return this; }
+        public FPCreateFile WithDirectoryID(uint DirectoryID) { this.DirectoryID = DirectoryID; return this; }
+        public FPCreateFile WithPathType(byte PathType) { this.PathType = PathType; return this; }
+        public FPCreateFile WithPath(String Path) { this.Path = Path; return this; }
+        public FPCreateFile WithPathType(AfpPathType PathType) { this.PathType = (byte)PathType; return this; }
+
+        public FPCreateFile WithSoftCreate() { Flag &= 0x7F; return this; }
+        public FPCreateFile WithHardCreate() { Flag |= 0x80; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)7); // FPCreateFile 
+            wr.Write((byte)Flag);
+            wr.Write((ushort)VolumeID);
+            wr.Write((uint)DirectoryID);
+            wr.Write((byte)PathType);
+            UtAfp.Write1Str(os, Path);
+            return os.ToArray();
+        }
+    }
+
     public class FPCloseVol : IFP {
         public ushort VolumeID;
 
@@ -313,6 +344,37 @@ namespace AFPt2 {
         }
     }
 
+    public class FPSetForkParms : IFP {
+        public byte Pad = 0;
+        public ushort OForkRefNum;
+        public ushort FileBitmap = (ushort)(AfpFileBitmap.DataForkLength);
+        public Int64 ForkLen64 = 0;
+
+        public FPSetForkParms WithOForkRefNum(ushort OForkRefNum) { this.OForkRefNum = OForkRefNum; return this; }
+        public FPSetForkParms WithFileBitmap(ushort FileBitmap) { this.FileBitmap = FileBitmap; return this; }
+        public FPSetForkParms WithFileBitmap(AfpFileBitmap FileBitmap) { this.FileBitmap = (ushort)FileBitmap; return this; }
+        public FPSetForkParms WithForkLen64(Int64 ForkLen) { this.ForkLen64 = ForkLen; return this; }
+
+        public FPSetForkParms WithDataForkLen32(int ForkLen) { this.FileBitmap = (ushort)AfpFileBitmap.DataForkLength; this.ForkLen64 = ForkLen; return this; }
+        public FPSetForkParms WithDataForkLen64(Int64 ForkLen) { this.FileBitmap = (ushort)AfpFileBitmap.ExtDataForkLength; this.ForkLen64 = ForkLen; return this; }
+        public FPSetForkParms WithResourceForkLen32(int ForkLen) { this.FileBitmap = (ushort)AfpFileBitmap.ResourceForkLength; this.ForkLen64 = ForkLen; return this; }
+        public FPSetForkParms WithResourceForkLen64(Int64 ForkLen) { this.FileBitmap = (ushort)AfpFileBitmap.ExtResourceForkLength; this.ForkLen64 = ForkLen; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)31); // kFPSetForkParms   
+            wr.Write((byte)Pad);
+            wr.Write((ushort)OForkRefNum);
+            wr.Write((ushort)FileBitmap);
+            if (0 != (FileBitmap & (uint)AfpFileBitmap.DataForkLength)) { wr.Write(Convert.ToUInt32(ForkLen64)); }
+            if (0 != (FileBitmap & (uint)AfpFileBitmap.ExtDataForkLength)) { wr.Write(Convert.ToUInt64(ForkLen64)); }
+            if (0 != (FileBitmap & (uint)AfpFileBitmap.ResourceForkLength)) { wr.Write(Convert.ToUInt32(ForkLen64)); }
+            if (0 != (FileBitmap & (uint)AfpFileBitmap.ExtResourceForkLength)) { wr.Write(Convert.ToUInt64(ForkLen64)); }
+            return os.ToArray();
+        }
+    }
+
     public class FPRead : IFP {
         public ushort OForkRefNum;
         public uint Offset = 0;
@@ -336,6 +398,33 @@ namespace AFPt2 {
             wr.Write((uint)ReqCount);
             wr.Write((byte)NewLineMask);
             wr.Write((byte)NewLineChar);
+            return os.ToArray();
+        }
+    }
+
+    public class FPWrite : IFP {
+        public byte Flag = 0;
+        public ushort OForkRefNum;
+        public int Offset = 0;
+        public int ReqCount = 0;
+        public byte[] ForkData;
+        public int x = 0;
+
+        public FPWrite WithStartEndFlag(bool fromEnd) { if (fromEnd) { this.Flag |= 0x80; } else { this.Flag &= 0x7F; } return this; }
+        public FPWrite WithOForkRefNum(ushort OForkRefNum) { this.OForkRefNum = OForkRefNum; return this; }
+        public FPWrite WithOffset(int Offset) { this.Offset = Offset; return this; }
+        public FPWrite WithReqCount(int ReqCount) { this.ReqCount = ReqCount; return this; }
+        public FPWrite WithForkData(byte[] ForkData, int x) { this.ForkData = ForkData; this.x = x; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)33); // kFPWrite     
+            wr.Write((byte)Flag);
+            wr.Write((ushort)OForkRefNum);
+            wr.Write((int)Offset);
+            wr.Write((int)ReqCount);
+            wr.Write(ForkData, x, ReqCount);
             return os.ToArray();
         }
     }
@@ -1004,6 +1093,27 @@ namespace AFPt2 {
             wr.Write((byte)2); // Command
             wr.Write((ushort)RequestID);
             wr.Write((uint)0); // off
+            wr.Write(Convert.ToUInt32(bin.Length)); // len
+            wr.Write((uint)0); // reserved
+            wr.Write(bin);
+            return os.ToArray();
+        }
+    }
+
+    public class DSIWrite : IDSI {
+        public IFP RequestPayload;
+
+        public DSIWrite WithRequestPayload(IFP RequestPayload) { this.RequestPayload = RequestPayload; return this; }
+
+        public byte[] ToArray(ushort RequestID) {
+            byte[] bin = RequestPayload.ToArray();
+
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)0);// REQ
+            wr.Write((byte)6); // Write
+            wr.Write((ushort)RequestID);
+            wr.Write((uint)12); // off
             wr.Write(Convert.ToUInt32(bin.Length)); // len
             wr.Write((uint)0); // reserved
             wr.Write(bin);

@@ -138,6 +138,33 @@ namespace FTP4AFP {
 
                 tcpep = new IPEndPoint(new IPAddress(new byte[] { byte.Parse(cols[0]), byte.Parse(cols[1]), byte.Parse(cols[2]), byte.Parse(cols[3]) }), int.Parse(cols[4]) * 256 + int.Parse(cols[5]));
             }
+
+            public void RecvSt(Stream os) {
+                if (tcpl != null) {
+                    using (TcpClient tcp = tcpl.AcceptTcpClient()) {
+                        Stream st = tcp.GetStream();
+                        byte[] bin = new byte[4000];
+                        while (true) {
+                            int r = st.Read(bin, 0, bin.Length);
+                            if (r < 1) break;
+                            os.Write(bin, 0, r);
+                        }
+                    }
+                }
+                else if (tcpep != null) {
+                    using (TcpClient tcp = new TcpClient()) {
+                        tcp.Connect(tcpep);
+                        Stream st = tcp.GetStream();
+                        byte[] bin = new byte[4000];
+                        while (true) {
+                            int r = st.Read(bin, 0, bin.Length);
+                            if (r < 1) break;
+                            os.Write(bin, 0, r);
+                        }
+                    }
+                }
+                else throw new ApplicationException("No PASV/PORT commands are issued.");
+            }
         }
 
         // https://developer.apple.com/library/mac/documentation/networking/Reference/AFP_Reference/Reference/reference.html#//apple_ref/c/func/FPOpenDir
@@ -242,6 +269,36 @@ namespace FTP4AFP {
                                 Ut.WriteRes(wr, 226, "Transfer complete");
                                 continue;
                             }
+                            M = Regex.Match(row, "^MLSD(\\s+(?<a>.+))?\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                            if (M.Success) {
+                                String cwd = M.Groups["a"].Value;
+                                try {
+                                    IDir newwd = (cwd.Length == 0) ? pwd : TravUt.Cwd(pwd, cwd);
+
+                                    StringWriter ww = new StringWriter();
+                                    foreach (IEnt o in newwd.GetEnts()) {
+                                        bool isDir = o is IDir;
+                                        ww.WriteLine("modify={0};perm={1};size={2};type={3}; {4}"
+                                            , o.Mt.HasValue ? String.Format("{0:yyyy}{0:MM}{0:dd}{0:HH}{0:mm}{0:ss}", o.Mt.Value) : ""
+                                            , isDir ? "cdelmp" : "dlrw"
+                                            , o.Size
+                                            , isDir ? "dir" : "file"
+                                            , o.Name
+                                            );
+                                    }
+
+                                    Ut.WriteRes(wr, 150, "Opening " + dc.Mode + " mode data connection for MLSD");
+
+                                    dc.SendData(wr.Encoding.GetBytes(ww.ToString()));
+
+                                    Ut.WriteRes(wr, 226, "Transfer complete");
+                                    continue;
+                                }
+                                catch (EntNotFoundException err) {
+                                    Ut.WriteRes(wr, 501, err.Message);
+                                    continue;
+                                }
+                            }
                             M = Regex.Match(row, "^CWD\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                             if (M.Success) {
                                 String cwd = M.Groups["a"].Value;
@@ -283,7 +340,7 @@ namespace FTP4AFP {
                                 continue;
                             }
                             if (row.TrimEnd() == "FEAT") {
-                                Ut.WriteRes(wr, 211, "Features:| UTF8| END".Replace("|", "\n"));
+                                Ut.WriteRes(wr, 211, "Features:| UTF8| MLST modify*;perm*;size*;type*;| END".Replace("|", "\n"));
                                 continue;
                             }
                             M = Regex.Match(row, "^RETR\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
@@ -311,11 +368,47 @@ namespace FTP4AFP {
                                     continue;
                                 }
                             }
+                            M = Regex.Match(row, "^STOR\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                            if (M.Success) {
+                                String cwd = M.Groups["a"].Value;
+                                try {
+                                    using (Stream os = TravUt.Createf(pwd, cwd, cc)) {
+                                        Ut.WriteRes(wr, 150, "Opening " + dc.Mode + " mode data connection for " + cwd);
+                                        os.SetLength(0);
+                                        dc.RecvSt(os);
+                                    }
+
+                                    Ut.WriteRes(wr, 226, "Transfer complete");
+                                    continue;
+                                }
+                                catch (EntNotFoundException err) {
+                                    Ut.WriteRes(wr, 550, err.Message);
+                                    continue;
+                                }
+                            }
+                            M = Regex.Match(row, "^APPE\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                            if (M.Success) {
+                                String cwd = M.Groups["a"].Value;
+                                try {
+                                    using (Stream os = TravUt.Createf(pwd, cwd, cc)) {
+                                        Ut.WriteRes(wr, 150, "Opening " + dc.Mode + " mode data connection for " + cwd);
+                                        os.Seek(0, SeekOrigin.End);
+                                        dc.RecvSt(os);
+                                    }
+
+                                    Ut.WriteRes(wr, 226, "Transfer complete");
+                                    continue;
+                                }
+                                catch (EntNotFoundException err) {
+                                    Ut.WriteRes(wr, 550, err.Message);
+                                    continue;
+                                }
+                            }
                             M = Regex.Match(row, "^MKD\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                             if (M.Success) {
                                 String cwd = M.Groups["a"].Value;
                                 try {
-                                    pwd.CreateDir(cwd);
+                                    TravUt.CreateDir(pwd, cwd);
 
                                     Ut.WriteRes(wr, 250, "\"" + cwd + "\" created successfully.");
                                     continue;
@@ -329,7 +422,21 @@ namespace FTP4AFP {
                             if (M.Success) {
                                 String cwd = M.Groups["a"].Value;
                                 try {
-                                    pwd.RMDir(cwd);
+                                    TravUt.RMDir(pwd, cwd);
+
+                                    Ut.WriteRes(wr, 250, "\"" + cwd + "\" removed successfully.");
+                                    continue;
+                                }
+                                catch (EntNotFoundException err) {
+                                    Ut.WriteRes(wr, 550, "\"" + cwd + "\": Unable to remove directory. \n" + err.Message);
+                                    continue;
+                                }
+                            }
+                            M = Regex.Match(row, "^DELE\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                            if (M.Success) {
+                                String cwd = M.Groups["a"].Value;
+                                try {
+                                    TravUt.Dele(pwd, cwd, cc);
 
                                     Ut.WriteRes(wr, 250, "\"" + cwd + "\" removed successfully.");
                                     continue;
@@ -355,13 +462,15 @@ namespace FTP4AFP {
         }
 
         class DUt {
+            static string[] Mons { get { return ",Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec".Split(','); } }
+
             public static string Format(DateTime? p) {
                 if (p.HasValue) {
                     DateTime dt = p.Value;
                     if (dt.Year == DateTime.Today.Year) {
-                        return String.Format("{0:MMM} {0:dd} {0:HH}:{0:mm}", dt);
+                        return String.Format("{1} {0:dd} {0:HH}:{0:mm}", dt, Mons[dt.Month]);
                     }
-                    return String.Format("{0:MMM} {0:dd} {0:yyyy}", dt);
+                    return String.Format("{1} {0:dd} {0:yyyy}", dt, Mons[dt.Month]);
                 }
                 return "Jan 01 1970";
             }
@@ -465,6 +574,40 @@ namespace FTP4AFP {
             if (ResPrefix) return "._" + fn;
             return fn + ".AFP_Resource";
         }
+
+        public MacfNam ParseName(String s1) {
+            MacfNam m = new MacfNam();
+            m.Name = s1;
+            m.IsRes = false;
+            if (EnumRes) {
+                if (ResPrefix) {
+                    if (s1.StartsWith("._")) {
+                        m.Name = s1.Substring(2);
+                        m.IsRes = true;
+                    }
+                    else {
+                        // data
+                    }
+                }
+                else {
+                    if (s1.EndsWith(".AFP_Resource")) {
+                        m.Name = s1.Substring(0, s1.Length - 13);
+                        m.IsRes = true;
+                    }
+                    else {
+                        // data
+                    }
+                }
+            }
+            else {
+                // data
+            }
+            return m;
+        }
+    }
+    public class MacfNam {
+        public String Name = String.Empty;
+        public bool IsRes = false;
     }
 
     public class MacVol : IDir {
@@ -530,10 +673,6 @@ namespace FTP4AFP {
 
         #region IDir メンバ
 
-        public void CreateDir(string unixPath) {
-            CUt.CreateDir(unixPath, comm, cc, this);
-        }
-
         #endregion
 
         #region IDir メンバ
@@ -548,8 +687,59 @@ namespace FTP4AFP {
         #region IDir メンバ
 
 
-        public void RMDir(string unixPath) {
-            CUt.RMDir(unixPath, comm, cc, this);
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void CreateDirHere(string loc) {
+            MLoc m = MLoc.Ut.Get(this);
+            TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPCreateDir()
+                .WithVolumeID(m.VolID)
+                .WithDirectoryID(m.DirID)
+                .WithPath(PUt.CombineRaw(m.RawPath, loc))
+            ));
+            if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
+
+            }
+            else throw new DSIException(res.pack.ErrorCode, res.pack);
+        }
+
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void RMDirMe() {
+            MLoc m = MLoc.Ut.Get(this);
+            TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPDelete()
+                .WithVolumeID(m.VolID)
+                .WithDirectoryID(m.DirID)
+                .WithPath(m.RawPath)
+            ));
+            if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
+
+            }
+            else throw new DSIException(res.pack.ErrorCode, res.pack);
+        }
+
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void CreatefHere(string loc) {
+            MLoc m = MLoc.Ut.Get(this);
+            TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPCreateFile()
+                .WithVolumeID(m.VolID)
+                .WithDirectoryID(m.DirID)
+                .WithPath(PUt.CombineRaw(m.RawPath, loc))
+                .WithSoftCreate()
+            ));
+            if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
+
+            }
+            else throw new DSIException(res.pack.ErrorCode, res.pack);
         }
 
         #endregion
@@ -569,7 +759,29 @@ namespace FTP4AFP {
         }
     }
 
-    public class MacEnt : IEnt, ICanDL {
+    public class StorException : ApplicationException {
+        public StorException(String message)
+            : base(message) {
+
+        }
+        public StorException(String message, Exception inner)
+            : base(message, inner) {
+
+        }
+    }
+
+    public class DeleException : ApplicationException {
+        public DeleException(String message)
+            : base(message) {
+
+        }
+        public DeleException(String message, Exception inner)
+            : base(message, inner) {
+
+        }
+    }
+
+    public class MacEnt : IEnt, ICanDL, ICanUP, ICanDele {
         FileParameters parm;
         MyDSI3 comm;
         ConConf cc;
@@ -636,6 +848,54 @@ namespace FTP4AFP {
             OpenForkPack pack = new OpenForkPack(res1.br);
 
             return new MacSt(comm, data, pack);
+        }
+
+        #endregion
+
+        #region ICanUP メンバ
+
+        public Stream OpenWrite(bool isRes) {
+            MLoc m = MLoc.Ut.Get(this);
+            TransmitRes res1 = comm.Transmit(new DSICommand().WithRequestPayload(new FPOpenFork()
+                .WithVolumeID(m.VolID)
+                .WithDirectoryID(m.DirID)
+                .WithFlag((byte)(!isRes ? 0x00 : 0x80))
+                .WithAccessMode(AfpAccessMode.Write)
+                .WithBitmap(!isRes ? AfpFileBitmap.DataForkLength : AfpFileBitmap.ResourceForkLength)
+                .WithPath(m.RawPath)
+            ));
+            if (res1.pack.IsResponse && res1.pack.ErrorCode == 0) {
+
+            }
+            else { throw new DSIException(res1.pack.ErrorCode, res1.pack); }
+
+            OpenForkPack pack = new OpenForkPack(res1.br);
+
+            return new MacSt(comm, !isRes, pack);
+        }
+
+        #endregion
+
+        #region ICanDele メンバ
+
+        public void DeletefMe(bool isRes) {
+            MLoc m = MLoc.Ut.Get(this);
+            if (isRes) {
+                using (Stream st = OpenWrite(true)) {
+                    st.SetLength(0);
+                }
+            }
+            else {
+                TransmitRes res1 = comm.Transmit(new DSICommand().WithRequestPayload(new FPDelete()
+                    .WithVolumeID(m.VolID)
+                    .WithDirectoryID(m.DirID)
+                    .WithPath(m.RawPath)
+                ));
+                if (res1.pack.IsResponse && res1.pack.ErrorCode == 0) {
+
+                }
+                else { throw new DSIException(res1.pack.ErrorCode, res1.pack); }
+            }
         }
 
         #endregion
@@ -712,11 +972,30 @@ namespace FTP4AFP {
         }
 
         public override void SetLength(long value) {
-            throw new Exception("The method or operation is not implemented.");
+            TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPSetForkParms()
+                .WithOForkRefNum(pack.Fork)
+                .WithForkLen64(value)
+                .WithFileBitmap(data ? AfpFileBitmap.DataForkLength : AfpFileBitmap.ResourceForkLength)
+            ));
+            if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
+
+            }
+            else throw new DSIException(res.pack.ErrorCode, res.pack);
         }
 
         public override void Write(byte[] buffer, int offset, int count) {
-            throw new Exception("The method or operation is not implemented.");
+            TransmitRes res = comm.Transmit(new DSIWrite().WithRequestPayload(new FPWrite()
+                .WithStartEndFlag(false)
+                .WithOForkRefNum(pack.Fork)
+                .WithOffset(Convert.ToInt32(pos))
+                .WithReqCount(count)
+                .WithForkData(buffer, offset)
+            ));
+            if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
+
+            }
+            else throw new DSIException(res.pack.ErrorCode, res.pack);
+            pos += count;
         }
 
         protected override void Dispose(bool disposing) {
@@ -795,8 +1074,8 @@ namespace FTP4AFP {
                     .WithStartIndex(Convert.ToUInt16(1U + x))
                     .WithVolumeID(m.VolID)
                     .WithDirectoryID(m.DirID)
-                    .WithFileBitmap(AfpFileBitmap.DataForkLength | AfpFileBitmap.ResourceForkLength | AfpFileBitmap.LongName | AfpFileBitmap.NodeID)
-                    .WithDirectoryBitmap(AfpDirectoryBitmap.NodeID | AfpDirectoryBitmap.LongName)
+                    .WithFileBitmap(AfpFileBitmap.DataForkLength | AfpFileBitmap.ResourceForkLength | AfpFileBitmap.LongName | AfpFileBitmap.NodeID | AfpFileBitmap.ModificationDate)
+                    .WithDirectoryBitmap(AfpDirectoryBitmap.NodeID | AfpDirectoryBitmap.LongName | AfpDirectoryBitmap.ModificationDate)
                     ));
                 if (res1.pack.ErrorCode == -5018) break;
                 if (res1.pack.IsResponse && res1.pack.ErrorCode == 0) {
@@ -819,88 +1098,6 @@ namespace FTP4AFP {
 
                 x += pack.ActualCount;
             }
-        }
-
-        public static void CreateDir(string unixPath, MyDSI3 comm, ConConf cc, IDir self) {
-            if (unixPath == null) return; // Already exists
-            if (unixPath.StartsWith("/")) {
-                TravUt.GetRoot(self).CreateDir(unixPath.Substring(1));
-                return;
-            }
-            int p = unixPath.IndexOf('/');
-            String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
-            String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
-            if (s1 == ".") {
-                self.CreateDir(s2);
-                return;
-            }
-            if (s1 == "..") {
-                self.ParentDir.CreateDir(s2);
-                return;
-            }
-            for (int t = 0; t < 2; t++) {
-                IEnt o = self.FindReal(s1);
-                if (o is IDir) {
-                    ((IDir)o).CreateDir(s2);
-                    return;
-                }
-                else if (o != null) {
-                    throw new MkdException("We knew \"" + o.Name + "\" is a file.");
-                }
-
-                MLoc m = MLoc.Ut.Get(self);
-                TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPCreateDir()
-                    .WithVolumeID(m.VolID)
-                    .WithDirectoryID(m.DirID)
-                    .WithPath(PUt.CombineRaw(m.RawPath, s1))
-                ));
-                if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
-
-                }
-                else throw new DSIException(res.pack.ErrorCode, res.pack);
-
-                if (s2 == null) return;
-            }
-            throw new MkdException("We can't create \"" + unixPath + "\".");
-        }
-        public static void RMDir(string unixPath, MyDSI3 comm, ConConf cc, IDir self) {
-            if (unixPath == null) {
-                MLoc m = MLoc.Ut.Get(self);
-                TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPDelete()
-                    .WithVolumeID(m.VolID)
-                    .WithDirectoryID(m.DirID)
-                    .WithPath(m.RawPath)
-                ));
-                if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
-
-                }
-                else throw new DSIException(res.pack.ErrorCode, res.pack);
-                return;
-            }
-            if (unixPath.StartsWith("/")) {
-                TravUt.GetRoot(self).RMDir(unixPath.Substring(1));
-                return;
-            }
-            int p = unixPath.IndexOf('/');
-            String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
-            String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
-            if (s1 == ".") {
-                self.RMDir(s2);
-                return;
-            }
-            if (s1 == "..") {
-                self.ParentDir.RMDir(s2);
-                return;
-            }
-            IEnt o = self.FindReal(s1);
-            if (o is IDir) {
-                ((IDir)o).RMDir(s2);
-                return;
-            }
-            else if (o != null) {
-                throw new RmdException("We knew \"" + o.Name + "\" is a file.");
-            }
-            throw new RmdException("We can't remove \"" + unixPath + "\".");
         }
 
         public static IEnt FindReal(string name, MyDSI3 comm, ConConf cc, IDir self) {
@@ -986,10 +1183,6 @@ namespace FTP4AFP {
         #region IDir メンバ
 
 
-        public void CreateDir(string unixPath) {
-            CUt.CreateDir(unixPath, comm, cc, this);
-        }
-
         #endregion
 
         #region IDir メンバ
@@ -1003,8 +1196,59 @@ namespace FTP4AFP {
         #region IDir メンバ
 
 
-        public void RMDir(string unixPath) {
-            CUt.RMDir(unixPath, comm, cc, this);
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void CreateDirHere(string loc) {
+            MLoc m = MLoc.Ut.Get(this);
+            TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPCreateDir()
+                .WithVolumeID(m.VolID)
+                .WithDirectoryID(m.DirID)
+                .WithPath(PUt.CombineRaw(m.RawPath, loc))
+            ));
+            if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
+
+            }
+            else throw new DSIException(res.pack.ErrorCode, res.pack);
+        }
+
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void RMDirMe() {
+            MLoc m = MLoc.Ut.Get(this);
+            TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPDelete()
+                .WithVolumeID(m.VolID)
+                .WithDirectoryID(m.DirID)
+                .WithPath(m.RawPath)
+            ));
+            if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
+
+            }
+            else throw new DSIException(res.pack.ErrorCode, res.pack);
+        }
+
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void CreatefHere(string loc) {
+            MLoc m = MLoc.Ut.Get(this);
+            TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPCreateFile()
+                .WithVolumeID(m.VolID)
+                .WithDirectoryID(m.DirID)
+                .WithPath(PUt.CombineRaw(m.RawPath, loc))
+                .WithSoftCreate()
+            ));
+            if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
+
+            }
+            else throw new DSIException(res.pack.ErrorCode, res.pack);
         }
 
         #endregion
@@ -1053,34 +1297,6 @@ namespace FTP4AFP {
 
         #region IDir メンバ
 
-        public void CreateDir(string unixPath) {
-            if (unixPath == null) return; // Already exists
-            if (unixPath.StartsWith("/")) {
-                TravUt.GetRoot(this).CreateDir(unixPath.Substring(1));
-                return;
-            }
-            int p = unixPath.IndexOf('/');
-            String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
-            String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
-            if (s1 == ".") {
-                CreateDir(s2);
-                return;
-            }
-            if (s1 == "..") {
-                CreateDir(s2);
-                return;
-            }
-            IEnt o = FindReal(s1);
-            if (o is IDir) {
-                ((IDir)o).CreateDir(s2);
-                return;
-            }
-            else if (o != null) {
-                throw new MkdException("We knew \"" + o.Name + "\" is a file.");
-            }
-            throw new MkdException("We can't make a volume.");
-        }
-
         #endregion
 
         #region IDir メンバ
@@ -1098,32 +1314,31 @@ namespace FTP4AFP {
         #region IDir メンバ
 
 
-        public void RMDir(string unixPath) {
-            if (unixPath == null) throw new RmdException("We can't remove root directory.");
-            if (unixPath.StartsWith("/")) {
-                TravUt.GetRoot(this).RMDir(unixPath.Substring(1));
-                return;
-            }
-            int p = unixPath.IndexOf('/');
-            String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
-            String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
-            if (s1 == ".") {
-                RMDir(s2);
-                return;
-            }
-            if (s1 == "..") {
-                RMDir(s2);
-                return;
-            }
-            IEnt o = FindReal(s1);
-            if (o is IDir) {
-                ((IDir)o).RMDir(s2);
-                return;
-            }
-            else if (o != null) {
-                throw new MkdException("We knew \"" + o.Name + "\" is a file.");
-            }
-            throw new MkdException("We can't find to remove \"" + unixPath + "\" volume.");
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void CreateDirHere(string loc) {
+            throw new MkdException("We can't make a volume.");
+        }
+
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void RMDirMe() {
+            throw new RmdException("We can't remove a volume.");
+        }
+
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void CreatefHere(string loc) {
+            throw new StorException("We can't write a volume.");
         }
 
         #endregion
@@ -1132,12 +1347,19 @@ namespace FTP4AFP {
     public interface IDir : IEnt {
         IEnumerable<IEnt> GetEnts();
         IEnt FindReal(String name);
-        void CreateDir(string unixPath);
-        void RMDir(string unixPath);
+        void CreateDirHere(String loc);
+        void RMDirMe();
+        void CreatefHere(String loc);
     }
 
     public interface ICanDL {
         Stream OpenRead();
+    }
+    public interface ICanUP {
+        Stream OpenWrite(bool isRes);
+    }
+    public interface ICanDele {
+        void DeletefMe(bool isRes);
     }
 
     public interface IEnt {
@@ -1183,10 +1405,6 @@ namespace FTP4AFP {
         #region IDir メンバ
 
 
-        public void CreateDir(string unixPath) {
-            throw new Exception("DisconnetedRoot can't create directory.");
-        }
-
         #endregion
 
         #region IDir メンバ
@@ -1201,8 +1419,31 @@ namespace FTP4AFP {
         #region IDir メンバ
 
 
-        public void RMDir(string unixPath) {
-            throw new Exception("The method or operation is not implemented.");
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void CreateDirHere(string loc) {
+            throw new MkdException("The method or operation is not implemented.");
+        }
+
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void RMDirMe() {
+            throw new RmdException("The method or operation is not implemented.");
+        }
+
+        #endregion
+
+        #region IDir メンバ
+
+
+        public void CreatefHere(string loc) {
+            throw new StorException("The method or operation is not implemented.");
         }
 
         #endregion
@@ -1302,6 +1543,144 @@ namespace FTP4AFP {
                 }
             }
             return parent;
+        }
+
+        public static void RMDir(IDir self, String unixPath) {
+            if (unixPath == null) {
+                self.RMDirMe();
+                return;
+            }
+            if (unixPath.StartsWith("/")) {
+                RMDir(TravUt.GetRoot(self), unixPath.Substring(1));
+                return;
+            }
+            int p = unixPath.IndexOf('/');
+            String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
+            String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
+            if (s1 == ".") {
+                RMDir(self, s2);
+                return;
+            }
+            if (s1 == "..") {
+                RMDir(self.ParentDir, s2);
+                return;
+            }
+            IEnt o = self.FindReal(s1);
+            if (o is IDir) {
+                RMDir((IDir)o, s2);
+                return;
+            }
+            else if (o != null) {
+                throw new RmdException("We knew \"" + o.Name + "\" is a file.");
+            }
+            throw new RmdException("We can't remove \"" + unixPath + "\".");
+        }
+
+        public static void CreateDir(IDir self, String unixPath) {
+            if (unixPath == null) return; // Already exists
+            if (unixPath.StartsWith("/")) {
+                CreateDir(GetRoot(self), unixPath.Substring(1));
+                return;
+            }
+            int p = unixPath.IndexOf('/');
+            String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
+            String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
+            if (s1 == ".") {
+                CreateDir(self, s2);
+                return;
+            }
+            if (s1 == "..") {
+                CreateDir(self.ParentDir, s2);
+                return;
+            }
+            for (int t = 0; t < 2; t++) {
+                IEnt o = self.FindReal(s1);
+                if (o is IDir) {
+                    CreateDir((IDir)o, s2);
+                    return;
+                }
+                else if (o != null) {
+                    throw new MkdException("We knew \"" + o.Name + "\" is a file.");
+                }
+
+                self.CreateDirHere(s1);
+
+                if (s2 == null) return;
+            }
+            throw new MkdException("We can't create \"" + unixPath + "\".");
+        }
+
+        public static Stream Createf(IDir self, String unixPath, ConConf cc) {
+            if (unixPath == null) throw new StorException("unixPath is null");
+            if (unixPath.StartsWith("/")) {
+                return Createf(GetRoot(self), unixPath.Substring(1), cc);
+            }
+            int p = unixPath.IndexOf('/');
+            String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
+            String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
+            if (s1 == ".") {
+                return Createf(self, s2, cc);
+            }
+            if (s1 == "..") {
+                return Createf(self.ParentDir, s2, cc);
+            }
+            if (s2 == null) {
+                MacfNam m2 = cc.ParseName(s1);
+                try {
+                    self.CreatefHere(m2.Name);
+                }
+                catch (DSIException err) {
+                    if (err.ErrorCode == (int)AFPt2.DSIException.ResultCode.kFPObjectExists) {
+                    }
+                    else throw new StorException("Failed", err);
+                }
+                IEnt o2 = self.FindReal(m2.Name);
+                if (o2 is ICanUP) {
+                    return ((ICanUP)o2).OpenWrite(m2.IsRes);
+                }
+                else throw new StorException("We can't write to \"" + o2.Name + "\".");
+            }
+            IEnt o = self.FindReal(s1);
+            if (o is IDir) {
+                return Createf((IDir)o, s2, cc);
+            }
+            else if (o != null) {
+                throw new StorException("We knew \"" + o.Name + "\" is a file.");
+            }
+            throw new StorException("We can't be here for \"" + o.Name + "\".");
+        }
+
+        public static Object Dele(IDir self, String unixPath, ConConf cc) {
+            if (unixPath == null) throw new DeleException("unixPath is null");
+            if (unixPath.StartsWith("/")) {
+                return Dele(GetRoot(self), unixPath.Substring(1), cc);
+            }
+            int p = unixPath.IndexOf('/');
+            String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
+            String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
+            if (s1 == ".") {
+                return Dele(self, s2, cc);
+            }
+            if (s1 == "..") {
+                return Dele(self.ParentDir, s2, cc);
+            }
+            if (s2 == null) {
+                MacfNam m2 = cc.ParseName(s1);
+                IEnt o2 = self.FindReal(m2.Name);
+                if (o2 is ICanDele) {
+                    ((ICanDele)o2).DeletefMe(m2.IsRes);
+                    return null;
+                }
+                else throw new DeleException("We can't delete \"" + o2.Name + "\".");
+            }
+            IEnt o = self.FindReal(s1);
+            if (o is IDir) {
+                return Dele((IDir)o, s2, cc);
+            }
+            else if (o != null) {
+                throw new DeleException("We knew \"" + o.Name + "\" is a file.");
+            }
+            throw new DeleException("We can't be here for \"" + o.Name + "\".");
         }
     }
 }

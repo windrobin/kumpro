@@ -85,7 +85,7 @@ namespace AFPt2 {
             }
         }
 
-        void DisconnecthServerDS(ServerDS serv) {
+        void DisconnectServerDS(ServerDS serv) {
             lock (servs) {
                 servs.Remove(serv);
             }
@@ -122,6 +122,32 @@ namespace AFPt2 {
             }
         }
 
+        public void Send(IDSI dsiReq) {
+            ServerDS sv;
+            try {
+                sv = NewServerDS(dsiReq);
+            }
+            catch (ExitShotException err) {
+                throw new TransmitFailureException(err);
+            }
+
+            try {
+                try {
+                    lock (Sock) {
+                        Sock.Send(dsiReq.ToArray(sv.RId));
+                    }
+                }
+                catch (SocketException err) {
+                    throw new TransmitFailureException(err);
+                }
+
+                return;
+            }
+            finally {
+                DisconnectServerDS(sv);
+            }
+        }
+
         public TransmitRes Transmit(IDSI dsiReq) {
             ServerDS sv;
             try {
@@ -148,7 +174,7 @@ namespace AFPt2 {
                 return new TransmitRes(sv.dsiRes);
             }
             finally {
-                DisconnecthServerDS(sv);
+                DisconnectServerDS(sv);
             }
         }
 

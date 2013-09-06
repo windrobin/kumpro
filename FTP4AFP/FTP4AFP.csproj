@@ -37,6 +37,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AFPComm2.cs" />
+    <Compile Include="AFPServ.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AFPServ.Designer.cs">
+      <DependentUpon>AFPServ.cs</DependentUpon>
+    </Compile>
     <Compile Include="BER.cs" />
     <Compile Include="BEW.cs" />
     <Compile Include="Form1.cs">
@@ -61,6 +67,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

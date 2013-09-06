@@ -612,6 +612,55 @@ namespace AFPt2 {
         public bool IsDirectory { get { return 0 != (0x80 & FileDir); } }
     }
 
+    public class FPSetFileParms : IFP {
+        public byte Pad;
+        public ushort VolumeID;
+        public uint DirectoryID;
+        public ushort Bitmap = (ushort)(AfpFileBitmap.None);
+        public byte PathType = (byte)AfpPathType.kFPLongName;
+        public String Path;
+        public FileParameters Parms = new FileParameters();
+
+        public FPSetFileParms WithVolumeID(ushort VolumeID) { this.VolumeID = VolumeID; return this; }
+        public FPSetFileParms WithDirectoryID(uint DirectoryID) { this.DirectoryID = DirectoryID; return this; }
+        public FPSetFileParms WithBitmap(ushort Bitmap) { this.Bitmap = Bitmap; return this; }
+        public FPSetFileParms WithBitmap(AfpFileBitmap Bitmap) { this.Bitmap = (ushort)Bitmap; return this; }
+        public FPSetFileParms WithPathType(byte PathType) { this.PathType = PathType; return this; }
+        public FPSetFileParms WithPath(String Path) { this.Path = Path; return this; }
+        public FPSetFileParms WithPathType(AfpPathType PathType) { this.PathType = (byte)PathType; return this; }
+
+        public FPSetFileParms WithAttributes(ushort Attributes) { Parms.Attributes = Attributes; Bitmap |= (ushort)AfpFileBitmap.Attributes; return this; }
+        public FPSetFileParms WithCreationDate(uint CreationDate) { Parms.CreationDate = CreationDate; Bitmap |= (ushort)AfpFileBitmap.CreationDate; return this; }
+        public FPSetFileParms WithModificationDate(uint ModificationDate) { Parms.ModificationDate = ModificationDate; Bitmap |= (ushort)AfpFileBitmap.ModificationDate; return this; }
+        public FPSetFileParms WithBackupDate(uint BackupDate) { Parms.BackupDate = BackupDate; Bitmap |= (ushort)AfpFileBitmap.BackupDate; return this; }
+        public FPSetFileParms WithFinderInfo(byte[] FinderInfo) { Parms.FinderInfo = FinderInfo; Bitmap |= (ushort)AfpFileBitmap.FinderInfo; return this; }
+        public FPSetFileParms WithUNIXPrivileges(FPUnixPrivs UnixPrivs) { Parms.UnixPrivs = UnixPrivs; Bitmap |= (ushort)AfpFileBitmap.UNIXPrivileges; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)30); // kFPSetFileParms  
+            wr.Write((byte)Pad);
+            wr.Write((ushort)VolumeID);
+            wr.Write((uint)DirectoryID);
+            wr.Write((ushort)Bitmap);
+            wr.Write((byte)PathType);
+            UtAfp.Write1Str(os, Path);
+            if (0 != (Bitmap & (1U))) wr.Write((ushort)Parms.Attributes.Value);
+            if (0 != (Bitmap & (4U))) wr.Write((uint)Parms.CreationDate.Value);
+            if (0 != (Bitmap & (8U))) wr.Write((uint)Parms.ModificationDate.Value);
+            if (0 != (Bitmap & (16U))) wr.Write((uint)Parms.CreationDate.Value);
+            if (0 != (Bitmap & (32U))) wr.Write(Parms.FinderInfo, 0, 32);
+            if (0 != (Bitmap & (0x8000U))) {
+                wr.Write((uint)Parms.UnixPrivs.uid);
+                wr.Write((uint)Parms.UnixPrivs.gid);
+                wr.Write((uint)Parms.UnixPrivs.permissions);
+                wr.Write((uint)Parms.UnixPrivs.ua_permissions);
+            }
+            return os.ToArray();
+        }
+    }
+
     public class VolumeParameters {
         public ushort? VolAttribute = null, VolID = null, VolSignature = null;
         public uint? CreateDate = null, ModDate = null, VolBackupDate = null, VolBytesFree = null, VolBytesTotal = null, VolBlockSize = null;
@@ -675,6 +724,8 @@ namespace AFPt2 {
         public uint? AccessRights;
 
         public bool IsDirectory;
+
+        public FileParameters() { }
 
         public FileParameters(BER br, bool IsFile, ushort Bitmap) {
             Stream si = br.BaseStream;
@@ -1071,6 +1122,20 @@ namespace AFPt2 {
             BEW wr = new BEW(os);
             wr.Write((byte)0);// REQ
             wr.Write((byte)4); // Command.OpenSession
+            wr.Write((ushort)RequestID);
+            wr.Write((uint)0); // off
+            wr.Write((uint)0); // len
+            wr.Write((uint)0); // reserved
+            return os.ToArray();
+        }
+    }
+
+    public class DSITickle : IDSI {
+        public byte[] ToArray(ushort RequestID) {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)0);// REQ
+            wr.Write((byte)5); // Command.Tickle
             wr.Write((ushort)RequestID);
             wr.Write((uint)0); // off
             wr.Write((uint)0); // len

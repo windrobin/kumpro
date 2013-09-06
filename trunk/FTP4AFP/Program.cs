@@ -8,10 +8,16 @@ namespace FTP4AFP {
         /// アプリケーションのメイン エントリ ポイントです。
         /// </summary>
         [STAThread]
-        static void Main() {
+        static void Main(String[]args) {
+            List<String> als = new List<string>();
+            foreach (String a in args) {
+                if (a.StartsWith("/s=")) {
+                    als.Add(a.Substring(3));
+                }
+            }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new Form1(als));
         }
     }
 }

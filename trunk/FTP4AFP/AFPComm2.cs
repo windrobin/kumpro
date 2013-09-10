@@ -213,6 +213,96 @@ namespace AFPt2 {
         }
     }
 
+    public class FPEnumerateExt : IFP {
+        public byte Pad = 0;
+        public ushort VolumeID;
+        public uint DirectoryID;
+        public ushort FileBitmap = (ushort)(AfpFileBitmap.NodeID | AfpFileBitmap.LongName);
+        public ushort DirectoryBitmap = (ushort)(AfpDirectoryBitmap.NodeID | AfpDirectoryBitmap.LongName);
+        public ushort ReqCount = 100;
+        public ushort StartIndex = 1;
+        public ushort MaxReplySize = 5000;
+        public byte PathType = (byte)AfpPathType.kFPLongName;
+        public String Path = String.Empty;
+
+        public FPEnumerateExt WithVolumeID(ushort VolumeID) { this.VolumeID = VolumeID; return this; }
+        public FPEnumerateExt WithDirectoryID(uint DirectoryID) { this.DirectoryID = DirectoryID; return this; }
+        public FPEnumerateExt WithFileBitmap(ushort FileBitmap) { this.FileBitmap = FileBitmap; return this; }
+        public FPEnumerateExt WithFileBitmap(AfpFileBitmap FileBitmap) { this.FileBitmap = (ushort)FileBitmap; return this; }
+        public FPEnumerateExt WithDirectoryBitmap(ushort DirectoryBitmap) { this.DirectoryBitmap = DirectoryBitmap; return this; }
+        public FPEnumerateExt WithDirectoryBitmap(AfpDirectoryBitmap DirectoryBitmap) { this.DirectoryBitmap = (ushort)DirectoryBitmap; return this; }
+        public FPEnumerateExt WithReqCount(ushort ReqCount) { this.ReqCount = ReqCount; return this; }
+        public FPEnumerateExt WithStartIndex(ushort StartIndex) { this.StartIndex = StartIndex; return this; }
+        public FPEnumerateExt WithMaxReplySize(ushort MaxReplySize) { this.MaxReplySize = MaxReplySize; return this; }
+        public FPEnumerateExt WithPathType(byte PathType) { this.PathType = PathType; return this; }
+        public FPEnumerateExt WithPathType(AfpPathType PathType) { this.PathType = (byte)PathType; return this; }
+        public FPEnumerateExt WithPath(String Path) { this.Path = Path; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)66); // kFPEnumerateExt   
+            wr.Write((byte)Pad);
+            wr.Write((ushort)VolumeID);
+            wr.Write((uint)DirectoryID);
+            wr.Write((ushort)FileBitmap);
+            wr.Write((ushort)DirectoryBitmap);
+            wr.Write((ushort)ReqCount);
+            wr.Write((ushort)StartIndex);
+            wr.Write((ushort)MaxReplySize);
+            wr.Write((byte)PathType);
+            UtAfp.Write1Str(os, Path);
+            UtPadding.Write2(os);
+            return os.ToArray();
+        }
+    }
+
+
+    public class FPEnumerateExt2 : IFP {
+        public byte Pad = 0;
+        public ushort VolumeID;
+        public uint DirectoryID;
+        public ushort FileBitmap = (ushort)(AfpFileBitmap.NodeID | AfpFileBitmap.LongName);
+        public ushort DirectoryBitmap = (ushort)(AfpDirectoryBitmap.NodeID | AfpDirectoryBitmap.LongName);
+        public ushort ReqCount = 100;
+        public uint StartIndex = 1;
+        public uint MaxReplySize = 5000;
+        public byte PathType = (byte)AfpPathType.kFPLongName;
+        public String Path = String.Empty;
+
+        public FPEnumerateExt2 WithVolumeID(ushort VolumeID) { this.VolumeID = VolumeID; return this; }
+        public FPEnumerateExt2 WithDirectoryID(uint DirectoryID) { this.DirectoryID = DirectoryID; return this; }
+        public FPEnumerateExt2 WithFileBitmap(ushort FileBitmap) { this.FileBitmap = FileBitmap; return this; }
+        public FPEnumerateExt2 WithFileBitmap(AfpFileBitmap FileBitmap) { this.FileBitmap = (ushort)FileBitmap; return this; }
+        public FPEnumerateExt2 WithDirectoryBitmap(ushort DirectoryBitmap) { this.DirectoryBitmap = DirectoryBitmap; return this; }
+        public FPEnumerateExt2 WithDirectoryBitmap(AfpDirectoryBitmap DirectoryBitmap) { this.DirectoryBitmap = (ushort)DirectoryBitmap; return this; }
+        public FPEnumerateExt2 WithReqCount(ushort ReqCount) { this.ReqCount = ReqCount; return this; }
+        public FPEnumerateExt2 WithStartIndex(uint StartIndex) { this.StartIndex = StartIndex; return this; }
+        public FPEnumerateExt2 WithMaxReplySize(uint MaxReplySize) { this.MaxReplySize = MaxReplySize; return this; }
+        public FPEnumerateExt2 WithPathType(byte PathType) { this.PathType = PathType; return this; }
+        public FPEnumerateExt2 WithPathType(AfpPathType PathType) { this.PathType = (byte)PathType; return this; }
+        public FPEnumerateExt2 WithPath(String Path) { this.Path = Path; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)68); // kFPEnumerateExt2    
+            wr.Write((byte)Pad);
+            wr.Write((ushort)VolumeID);
+            wr.Write((uint)DirectoryID);
+            wr.Write((ushort)FileBitmap);
+            wr.Write((ushort)DirectoryBitmap);
+            wr.Write((ushort)ReqCount);
+            wr.Write((uint)StartIndex);
+            wr.Write((uint)MaxReplySize);
+            wr.Write((byte)PathType);
+            UtAfp.Write1Str(os, Path);
+            UtPadding.Write2(os);
+            return os.ToArray();
+        }
+    }
+
+
     public class FPOpenFork : IFP {
         public byte Flag; // (ResFork ? 0x80 : 0)
         public ushort VolumeID;
@@ -719,6 +809,7 @@ namespace AFPt2 {
         public String LongName = null, ShortName = null;
         public uint? NodeID = null, DataForkSize = null, ResourceForkSize = null;
         public FPUnixPrivs UnixPrivs = null;
+        public Int64? ExtDataForkSize = null, ExtResourceForkSize = null;
 
         public ushort? OffspringCount;
         public uint? AccessRights;
@@ -748,10 +839,10 @@ namespace AFPt2 {
             if (IsFile) {
                 if (0 != (Bitmap & 512U)) DataForkSize = br.ReadUInt32();
                 if (0 != (Bitmap & 1024U)) ResourceForkSize = br.ReadUInt32();
-                if (0 != (Bitmap & 2048U)) throw new NotSupportedException("Extended data fork size");
+                if (0 != (Bitmap & 2048U)) ExtDataForkSize = br.ReadInt64();
                 if (0 != (Bitmap & 4096U)) throw new NotSupportedException("Launch limit");
                 if (0 != (Bitmap & 8192U)) throw new NotSupportedException("UTF-8 name");
-                if (0 != (Bitmap & 16384U)) throw new NotSupportedException("Extended resource fork size");
+                if (0 != (Bitmap & 16384U)) ExtResourceForkSize = br.ReadInt64();
                 if (0 != (Bitmap & 32768U)) UnixPrivs = new FPUnixPrivs(br);
             }
             else {
@@ -819,6 +910,29 @@ namespace AFPt2 {
                 BER brInner = new BER(new MemoryStream(br.ReadBytes(cb - 2), false));
 
                 bool isDir = ((fd & 0x80) != 0);
+
+                Ents.Add(new FileParameters(brInner, !isDir, isDir ? DirectoryBitmap : FileBitmap));
+
+                UtPadding.Read2(br.BaseStream);
+            }
+        }
+    }
+
+    public class EnumerateExtPack {
+        public ushort FileBitmap, DirectoryBitmap, ActualCount;
+        public List<FileParameters> Ents = new List<FileParameters>();
+
+        public EnumerateExtPack(BER br) {
+            FileBitmap = br.ReadUInt16();
+            DirectoryBitmap = br.ReadUInt16();
+            ActualCount = br.ReadUInt16();
+
+            for (int x = 0; x < ActualCount; x++) {
+                ushort cb = br.ReadUInt16();
+                ushort fd = br.ReadUInt16();
+                BER brInner = new BER(new MemoryStream(br.ReadBytes(cb - 4), false));
+
+                bool isDir = ((fd & 0x8000) != 0);
 
                 Ents.Add(new FileParameters(brInner, !isDir, isDir ? DirectoryBitmap : FileBitmap));
 

@@ -22,41 +22,5 @@ namespace FTP4AFP.Properties {
                 return defaultInstance;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string S1 {
-            get {
-                return ((string)(this["S1"]));
-            }
-            set {
-                this["S1"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string S2 {
-            get {
-                return ((string)(this["S2"]));
-            }
-            set {
-                this["S2"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string S3 {
-            get {
-                return ((string)(this["S3"]));
-            }
-            set {
-                this["S3"] = value;
-            }
-        }
     }
 }

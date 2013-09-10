@@ -62,11 +62,15 @@
             this.flowLayoutPanel6 = new System.Windows.Forms.FlowLayoutPanel();
             this.bStart3 = new System.Windows.Forms.Button();
             this.bStop3 = new System.Windows.Forms.Button();
+            this.tbCmdl = new System.Windows.Forms.TextBox();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cbA1 = new System.Windows.Forms.CheckBox();
+            this.cbA2 = new System.Windows.Forms.CheckBox();
+            this.cbA3 = new System.Windows.Forms.CheckBox();
             this.s1 = new FTP4AFP.AFPServ(this.components);
             this.s2 = new FTP4AFP.AFPServ(this.components);
             this.s3 = new FTP4AFP.AFPServ(this.components);
-            this.tbCmdl = new System.Windows.Forms.TextBox();
-            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.flowLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
@@ -89,7 +93,7 @@
             // tbAFPHost
             // 
             this.tbAFPHost.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbAFPHost.Location = new System.Drawing.Point(117, 41);
+            this.tbAFPHost.Location = new System.Drawing.Point(117, 55);
             this.tbAFPHost.Name = "tbAFPHost";
             this.tbAFPHost.Size = new System.Drawing.Size(100, 22);
             this.tbAFPHost.TabIndex = 6;
@@ -108,7 +112,7 @@
             // tbAFPPort
             // 
             this.tbAFPPort.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbAFPPort.Location = new System.Drawing.Point(225, 41);
+            this.tbAFPPort.Location = new System.Drawing.Point(225, 55);
             this.tbAFPPort.Name = "tbAFPPort";
             this.tbAFPPort.Size = new System.Drawing.Size(44, 22);
             this.tbAFPPort.TabIndex = 7;
@@ -126,7 +130,7 @@
             // tbFTPPort
             // 
             this.tbFTPPort.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbFTPPort.Location = new System.Drawing.Point(43, 41);
+            this.tbFTPPort.Location = new System.Drawing.Point(43, 55);
             this.tbFTPPort.Name = "tbFTPPort";
             this.tbFTPPort.Size = new System.Drawing.Size(44, 22);
             this.tbFTPPort.TabIndex = 5;
@@ -160,7 +164,7 @@
             this.flowLayoutPanel1.Controls.Add(this.rbNo);
             this.flowLayoutPanel1.Controls.Add(this.rbAppend);
             this.flowLayoutPanel1.Controls.Add(this.rbPrepend);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(277, 30);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(277, 44);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(244, 44);
             this.flowLayoutPanel1.TabIndex = 8;
@@ -208,13 +212,16 @@
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Inset;
-            this.tableLayoutPanel1.ColumnCount = 6;
+            this.tableLayoutPanel1.ColumnCount = 7;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.cbA3, 5, 3);
+            this.tableLayoutPanel1.Controls.Add(this.cbA2, 5, 2);
             this.tableLayoutPanel1.Controls.Add(this.label5, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel1, 4, 1);
             this.tableLayoutPanel1.Controls.Add(this.tbFTPPort, 1, 1);
@@ -234,9 +241,11 @@
             this.tableLayoutPanel1.Controls.Add(this.tbAFPHost3, 2, 3);
             this.tableLayoutPanel1.Controls.Add(this.tbAFPPort3, 3, 3);
             this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel3, 4, 3);
-            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel4, 5, 1);
-            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel5, 5, 2);
-            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel6, 5, 3);
+            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel4, 6, 1);
+            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel5, 6, 2);
+            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel6, 6, 3);
+            this.tableLayoutPanel1.Controls.Add(this.label2, 5, 0);
+            this.tableLayoutPanel1.Controls.Add(this.cbA1, 5, 1);
             this.tableLayoutPanel1.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -245,7 +254,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(736, 217);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(790, 217);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // label5
@@ -261,7 +270,7 @@
             // 
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(5, 44);
+            this.label6.Location = new System.Drawing.Point(5, 58);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(25, 17);
             this.label6.TabIndex = 4;
@@ -271,7 +280,7 @@
             // 
             this.label7.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(5, 109);
+            this.label7.Location = new System.Drawing.Point(5, 117);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(30, 17);
             this.label7.TabIndex = 10;
@@ -280,7 +289,7 @@
             // tbAFPHost2
             // 
             this.tbAFPHost2.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbAFPHost2.Location = new System.Drawing.Point(117, 106);
+            this.tbAFPHost2.Location = new System.Drawing.Point(117, 114);
             this.tbAFPHost2.Name = "tbAFPHost2";
             this.tbAFPHost2.Size = new System.Drawing.Size(100, 22);
             this.tbAFPHost2.TabIndex = 12;
@@ -289,7 +298,7 @@
             // tbFTPPort2
             // 
             this.tbFTPPort2.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbFTPPort2.Location = new System.Drawing.Point(43, 106);
+            this.tbFTPPort2.Location = new System.Drawing.Point(43, 114);
             this.tbFTPPort2.Name = "tbFTPPort2";
             this.tbFTPPort2.Size = new System.Drawing.Size(44, 22);
             this.tbFTPPort2.TabIndex = 11;
@@ -298,7 +307,7 @@
             // tbAFPPort2
             // 
             this.tbAFPPort2.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbAFPPort2.Location = new System.Drawing.Point(225, 106);
+            this.tbAFPPort2.Location = new System.Drawing.Point(225, 114);
             this.tbAFPPort2.Name = "tbAFPPort2";
             this.tbAFPPort2.Size = new System.Drawing.Size(44, 22);
             this.tbAFPPort2.TabIndex = 13;
@@ -312,7 +321,7 @@
             this.flowLayoutPanel2.Controls.Add(this.rbNo2);
             this.flowLayoutPanel2.Controls.Add(this.rbAppend2);
             this.flowLayoutPanel2.Controls.Add(this.rbPrepend2);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(277, 95);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(277, 103);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Size = new System.Drawing.Size(244, 44);
             this.flowLayoutPanel2.TabIndex = 14;
@@ -361,7 +370,7 @@
             // 
             this.label8.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(5, 174);
+            this.label8.Location = new System.Drawing.Point(5, 177);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(27, 17);
             this.label8.TabIndex = 16;
@@ -370,7 +379,7 @@
             // tbFTPPort3
             // 
             this.tbFTPPort3.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbFTPPort3.Location = new System.Drawing.Point(43, 172);
+            this.tbFTPPort3.Location = new System.Drawing.Point(43, 174);
             this.tbFTPPort3.Name = "tbFTPPort3";
             this.tbFTPPort3.Size = new System.Drawing.Size(44, 22);
             this.tbFTPPort3.TabIndex = 17;
@@ -378,7 +387,7 @@
             // tbAFPHost3
             // 
             this.tbAFPHost3.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbAFPHost3.Location = new System.Drawing.Point(117, 172);
+            this.tbAFPHost3.Location = new System.Drawing.Point(117, 174);
             this.tbAFPHost3.Name = "tbAFPHost3";
             this.tbAFPHost3.Size = new System.Drawing.Size(100, 22);
             this.tbAFPHost3.TabIndex = 18;
@@ -386,7 +395,7 @@
             // tbAFPPort3
             // 
             this.tbAFPPort3.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbAFPPort3.Location = new System.Drawing.Point(225, 172);
+            this.tbAFPPort3.Location = new System.Drawing.Point(225, 174);
             this.tbAFPPort3.Name = "tbAFPPort3";
             this.tbAFPPort3.Size = new System.Drawing.Size(44, 22);
             this.tbAFPPort3.TabIndex = 19;
@@ -399,7 +408,7 @@
             this.flowLayoutPanel3.Controls.Add(this.rbNo3);
             this.flowLayoutPanel3.Controls.Add(this.rbAppend3);
             this.flowLayoutPanel3.Controls.Add(this.rbPrepend3);
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(277, 161);
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(277, 163);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
             this.flowLayoutPanel3.Size = new System.Drawing.Size(244, 44);
             this.flowLayoutPanel3.TabIndex = 20;
@@ -451,7 +460,7 @@
             this.flowLayoutPanel4.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel4.Controls.Add(this.bStart);
             this.flowLayoutPanel4.Controls.Add(this.bStop);
-            this.flowLayoutPanel4.Location = new System.Drawing.Point(529, 38);
+            this.flowLayoutPanel4.Location = new System.Drawing.Point(574, 52);
             this.flowLayoutPanel4.Name = "flowLayoutPanel4";
             this.flowLayoutPanel4.Size = new System.Drawing.Size(162, 29);
             this.flowLayoutPanel4.TabIndex = 9;
@@ -463,7 +472,7 @@
             this.flowLayoutPanel5.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel5.Controls.Add(this.bStart2);
             this.flowLayoutPanel5.Controls.Add(this.bStop2);
-            this.flowLayoutPanel5.Location = new System.Drawing.Point(529, 103);
+            this.flowLayoutPanel5.Location = new System.Drawing.Point(574, 111);
             this.flowLayoutPanel5.Name = "flowLayoutPanel5";
             this.flowLayoutPanel5.Size = new System.Drawing.Size(162, 29);
             this.flowLayoutPanel5.TabIndex = 15;
@@ -496,7 +505,7 @@
             this.flowLayoutPanel6.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel6.Controls.Add(this.bStart3);
             this.flowLayoutPanel6.Controls.Add(this.bStop3);
-            this.flowLayoutPanel6.Location = new System.Drawing.Point(529, 168);
+            this.flowLayoutPanel6.Location = new System.Drawing.Point(574, 171);
             this.flowLayoutPanel6.Name = "flowLayoutPanel6";
             this.flowLayoutPanel6.Size = new System.Drawing.Size(162, 29);
             this.flowLayoutPanel6.TabIndex = 21;
@@ -540,11 +549,53 @@
             this.linkLabel1.Text = "Command line:";
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(529, 2);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(37, 34);
+            this.label2.TabIndex = 22;
+            this.label2.Text = "Auto\r\nstart";
+            // 
+            // cbA1
+            // 
+            this.cbA1.AutoSize = true;
+            this.cbA1.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.cbA1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cbA1.Location = new System.Drawing.Point(529, 41);
+            this.cbA1.Name = "cbA1";
+            this.cbA1.Size = new System.Drawing.Size(37, 51);
+            this.cbA1.TabIndex = 23;
+            this.cbA1.UseVisualStyleBackColor = true;
+            // 
+            // cbA2
+            // 
+            this.cbA2.AutoSize = true;
+            this.cbA2.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.cbA2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cbA2.Location = new System.Drawing.Point(529, 100);
+            this.cbA2.Name = "cbA2";
+            this.cbA2.Size = new System.Drawing.Size(37, 51);
+            this.cbA2.TabIndex = 24;
+            this.cbA2.UseVisualStyleBackColor = true;
+            // 
+            // cbA3
+            // 
+            this.cbA3.AutoSize = true;
+            this.cbA3.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.cbA3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cbA3.Location = new System.Drawing.Point(529, 159);
+            this.cbA3.Name = "cbA3";
+            this.cbA3.Size = new System.Drawing.Size(37, 53);
+            this.cbA3.TabIndex = 25;
+            this.cbA3.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(760, 295);
+            this.ClientSize = new System.Drawing.Size(814, 295);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.tbCmdl);
             this.Controls.Add(this.tableLayoutPanel1);
@@ -614,6 +665,10 @@
         private AFPServ s3;
         private System.Windows.Forms.TextBox tbCmdl;
         private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.CheckBox cbA2;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox cbA1;
+        private System.Windows.Forms.CheckBox cbA3;
     }
 }
 

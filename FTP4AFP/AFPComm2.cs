@@ -1088,6 +1088,87 @@ namespace AFPt2 {
         }
     }
 
+    public class FPRename : IFP {
+        public byte Pad = 0;
+        public ushort VolumeID;
+        public uint DirectoryID;
+        public byte PathType = (byte)AfpPathType.kFPLongName;
+        public String Path;
+        public byte NewNameType = (byte)AfpPathType.kFPLongName;
+        public String NewName;
+
+        public FPRename WithVolumeID(ushort VolumeID) { this.VolumeID = VolumeID; return this; }
+        public FPRename WithDirectoryID(uint DirectoryID) { this.DirectoryID = DirectoryID; return this; }
+        public FPRename WithPathType(byte PathType) { this.PathType = PathType; return this; }
+        public FPRename WithPath(String Path) { this.Path = Path; return this; }
+        public FPRename WithPathType(AfpPathType PathType) { this.PathType = (byte)PathType; return this; }
+
+        public FPRename WithNewNameType(byte NewNameType) { this.NewNameType = NewNameType; return this; }
+        public FPRename WithNewName(String NewName) { this.NewName = NewName; return this; }
+        public FPRename WithNewNameType(AfpPathType NewNameType) { this.NewNameType = (byte)NewNameType; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)28); // kFPRename 
+            wr.Write((byte)Pad);
+            wr.Write((ushort)VolumeID);
+            wr.Write((uint)DirectoryID);
+            wr.Write((byte)PathType);
+            UtAfp.Write1Str(os, Path);
+            wr.Write((byte)NewNameType);
+            UtAfp.Write1Str(os, NewName);
+            return os.ToArray();
+        }
+    }
+
+
+    public class FPMoveAndRename : IFP {
+        public byte Pad = 0;
+        public ushort VolumeID;
+        public uint SourceDirectoryID;
+        public uint DestDirectoryID;
+        public byte SourcePathType = (byte)AfpPathType.kFPLongName;
+        public String SourcePath;
+        public byte DestPathType = (byte)AfpPathType.kFPLongName;
+        public String DestPath;
+        public byte NewNameType = (byte)AfpPathType.kFPLongName;
+        public String NewName;
+
+        public FPMoveAndRename WithVolumeID(ushort VolumeID) { this.VolumeID = VolumeID; return this; }
+
+        public FPMoveAndRename WithSourceDirectoryID(uint SourceDirectoryID) { this.SourceDirectoryID = SourceDirectoryID; return this; }
+        public FPMoveAndRename WithSourcePathType(byte SourcePathType) { this.SourcePathType = SourcePathType; return this; }
+        public FPMoveAndRename WithSourcePath(String SourcePath) { this.SourcePath = SourcePath; return this; }
+        public FPMoveAndRename WithSourcePathType(AfpPathType SourcePathType) { this.SourcePathType = (byte)SourcePathType; return this; }
+
+        public FPMoveAndRename WithDestDirectoryID(uint DestDirectoryID) { this.DestDirectoryID = DestDirectoryID; return this; }
+        public FPMoveAndRename WithDestPathType(byte DestPathType) { this.DestPathType = DestPathType; return this; }
+        public FPMoveAndRename WithDestPath(String DestPath) { this.DestPath = DestPath; return this; }
+        public FPMoveAndRename WithDestPathType(AfpPathType DestPathType) { this.DestPathType = (byte)DestPathType; return this; }
+
+        public FPMoveAndRename WithNewNameType(byte NewNameType) { this.NewNameType = NewNameType; return this; }
+        public FPMoveAndRename WithNewName(String NewName) { this.NewName = NewName; return this; }
+        public FPMoveAndRename WithNewNameType(AfpPathType NewNameType) { this.NewNameType = (byte)NewNameType; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)23); // kFPMoveAndRename  
+            wr.Write((byte)Pad);
+            wr.Write((ushort)VolumeID);
+            wr.Write((uint)SourceDirectoryID);
+            wr.Write((uint)DestDirectoryID);
+            wr.Write((byte)SourcePathType);
+            UtAfp.Write1Str(os, SourcePath);
+            wr.Write((byte)DestPathType);
+            UtAfp.Write1Str(os, DestPath);
+            wr.Write((byte)NewNameType);
+            UtAfp.Write1Str(os, NewName);
+            return os.ToArray();
+        }
+    }
+
     class UtAfp {
         public static string Read1Str(Stream si) {
             BER br = new BER(si);

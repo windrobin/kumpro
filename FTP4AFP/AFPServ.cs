@@ -227,6 +227,7 @@ namespace FTP4AFP {
                     IDir pwd = root;
                     DataConn dc = new DataConn();
                     Int64 ftpRest = 0;
+                    IEnt rnfr = null;
                     using (MyDSI3 comm = new MyDSI3(afp)) {
                         Ticker ti = new Ticker(comm, evExit);
                         Ut.WriteRes(wr, 220, "FTP4AFP in UTF-8" + "\n" + fyi);
@@ -487,6 +488,56 @@ namespace FTP4AFP {
                                     Ut.WriteRes(wr, 200, "Ok.");
                                     continue;
                                 }
+                                M = Regex.Match(row, "^RNFR\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
+                                    String cwd = M.Groups["a"].Value;
+                                    try {
+                                        rnfr = TravUt.Find(pwd, cwd, false);
+
+                                        Ut.WriteRes(wr, 350, "The file exists, continue with RNTO.");
+                                        continue;
+                                    }
+                                    catch (EntNotFoundException err) {
+                                        Ut.WriteRes(wr, 550, err.Message);
+                                        continue;
+                                    }
+                                }
+                                M = Regex.Match(row, "^RNTO\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
+                                    String cwd = M.Groups["a"].Value;
+                                    try {
+                                        MLoc mfrm = MLoc.Ut.Get(rnfr);
+                                        String fpfrm = mfrm.UnixPath;
+
+                                        MLoc m = MLoc.Ut.Get(pwd);
+                                        String fp2 = UtPLoc.Getfp(m.UnixPath, cwd, cd);
+
+                                        PLoc p1 = new PLoc(fpfrm);
+                                        PLoc p2 = new PLoc(fp2);
+
+                                        if (!p1.volume.Equals(p2.volume)) throw new ApplicationException("We have different volumes.");
+
+                                        if (!p1.dir.Equals(p2.dir)) {
+                                            MLoc m2 = new MLoc();
+                                            m2.VolID = mfrm.VolID;
+                                            m2.DirID = mfrm.DirID;
+                                            m2.MacVol = mfrm.MacVol;
+                                            m2.MacPath = p2.dir.Replace("/", "\0");
+                                            Utcmd.Move(comm, mfrm, m2, p2.fname);
+                                        }
+                                        else {
+                                            Utcmd.Rename(comm, mfrm, p2.fname);
+                                        }
+
+                                        Ut.WriteRes(wr, 200, "Ok.");
+
+                                        continue;
+                                    }
+                                    catch (EntNotFoundException err) {
+                                        Ut.WriteRes(wr, 550, err.Message);
+                                        continue;
+                                    }
+                                }
 
                                 Ut.WriteRes(wr, 500, "NotImpl Error.");
                             }
@@ -511,6 +562,34 @@ namespace FTP4AFP {
 
         private void LOG(string p) {
             Debug.WriteLine(p);
+        }
+
+        class UtPLoc {
+            public static string Getfp(String pwd, String unixPath, ConDyn cd) {
+                if (unixPath == null)
+                    return pwd;
+                if (unixPath.StartsWith("/")) {
+                    return Getfp("/", unixPath.Substring(1), cd);
+                }
+                int p = unixPath.IndexOf('/');
+                String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
+                String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
+                if (s1 == ".") {
+                    return Getfp(pwd, s2, cd);
+                }
+                if (s1 == "..") {
+                    return Getfp(GetParent(pwd), s2, cd);
+                }
+                return Getfp(pwd.TrimEnd('/') + "/" + s1, s2, cd);
+            }
+
+            public static string GetParent(String unixPath) {
+                int p = unixPath.LastIndexOf('/');
+                if (p < 0) {
+                    return "";
+                }
+                return unixPath.Substring(0, p);
+            }
         }
 
         class Ticker {
@@ -934,6 +1013,17 @@ namespace FTP4AFP {
 
         }
         public DeleException(String message, Exception inner)
+            : base(message, inner) {
+
+        }
+    }
+
+    public class RenException : ApplicationException {
+        public RenException(String message)
+            : base(message) {
+
+        }
+        public RenException(String message, Exception inner)
             : base(message, inner) {
 
         }
@@ -1429,6 +1519,37 @@ namespace FTP4AFP {
                 return m;
             }
         }
+    }
+
+    public class PLoc {
+        public String volume, dir, fname;
+
+        public PLoc(String unixPath) {
+            if (unixPath.StartsWith("/")) {
+                unixPath = unixPath.Substring(1);
+                int i = unixPath.IndexOf('/');
+                if (i < 0) {
+                    volume = unixPath;
+                    unixPath = "";
+                }
+                else {
+                    volume = unixPath.Substring(0, i);
+                    unixPath = unixPath.Substring(i + 1);
+                }
+            }
+            if (unixPath.Length != 0) {
+                int i = unixPath.LastIndexOf('/');
+                if (i < 0) {
+                    dir = String.Empty;
+                }
+                else {
+                    dir = unixPath.Substring(0, i);
+                    unixPath = unixPath.Substring(i + 1);
+                }
+            }
+            fname = unixPath;
+        }
+
     }
 
     public class CUt {
@@ -2120,6 +2241,7 @@ namespace FTP4AFP {
                 else if (m2.Ty == Forkty.Res && o2 is ICanDele) ((ICanDele)o2).DeletefMe(true);
                 else if (m2.Ty == Forkty.Finder && o2 is ICanDeleFi) ((ICanDeleFi)o2).DeletefMeFinder();
                 else throw new DeleException("We can't delete \"" + o2.Name + "\".");
+                return null;
             }
             IEnt o = self.FindReal(s1);
             if (o is IDir) {
@@ -2128,7 +2250,39 @@ namespace FTP4AFP {
             else if (o != null) {
                 throw new DeleException("We knew \"" + o.Name + "\" is a file.");
             }
-            throw new DeleException("We can't be here for \"" + o.Name + "\".");
+            throw new DeleException("We can't be here for \"" + s1 + "\".");
+        }
+    }
+
+    public class Utcmd {
+        public static void Rename(MyDSI3 comm, MLoc mfrm, String nam) {
+            TransmitRes res1 = comm.Transmit(new DSICommand().WithRequestPayload(new FPRename()
+                .WithVolumeID(mfrm.VolID)
+                .WithDirectoryID(mfrm.DirID)
+                .WithPath(mfrm.RawPath)
+                .WithNewName(nam)
+            ));
+            if (res1.pack.IsResponse && res1.pack.ErrorCode == 0) {
+
+            }
+            else { throw new DSIException(res1.pack.ErrorCode, res1.pack); }
+
+        }
+
+        public static void Move(MyDSI3 comm, MLoc mfrm, MLoc m2, String nam) {
+            TransmitRes res1 = comm.Transmit(new DSICommand().WithRequestPayload(new FPMoveAndRename()
+                .WithVolumeID(mfrm.VolID)
+                .WithSourceDirectoryID(mfrm.DirID)
+                .WithSourcePath(mfrm.RawPath)
+                .WithDestDirectoryID(m2.DirID)
+                .WithDestPath(m2.RawPath)
+                .WithNewName(nam)
+            ));
+            if (res1.pack.IsResponse && res1.pack.ErrorCode == 0) {
+
+            }
+            else { throw new DSIException(res1.pack.ErrorCode, res1.pack); }
+
         }
     }
 

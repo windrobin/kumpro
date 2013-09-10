@@ -194,6 +194,7 @@ namespace FTP4AFP {
                     StreamWriter wr = new StreamWriter(st, Encoding.UTF8);
                     StreamReader rr = new StreamReader(st, Encoding.UTF8, false);
 
+                    ConDyn cd = new ConDyn(cc);
                     String fyi = "";
                     using (MyDSI3 comm = new MyDSI3(afp)) {
                         TransmitRes res = comm.Transmit(new DSIGetStatus());
@@ -201,6 +202,12 @@ namespace FTP4AFP {
                             GetSrvrInfoPack pack = new GetSrvrInfoPack(res.br);
                             if (pack.AFPVersionsList.Contains("AFP2.2")) {
 
+                            }
+                            if (pack.AFPVersionsList.Contains("AFPX03")) {
+                                cd.AFP30 = true;
+                            }
+                            if (pack.AFPVersionsList.Contains("AFP3.1")) {
+                                cd.AFP31 = true;
                             }
                             fyi += " Server: " + pack.ServerName + "\n";
                             fyi += " AFPVer:";
@@ -238,7 +245,7 @@ namespace FTP4AFP {
                                 if (M.Success) {
                                     P = M.Groups["a"].Value;
                                     Uta a = new Uta();
-                                    root = pwd = a.Login(comm, cc, U, P);
+                                    root = pwd = a.Login(comm, cd, U, P);
                                     Ut.WriteRes(wr, 230, "User logged in, proceed.");
                                     continue;
                                 }
@@ -398,7 +405,7 @@ namespace FTP4AFP {
                                 if (M.Success) {
                                     String cwd = M.Groups["a"].Value;
                                     try {
-                                        using (Stream os = TravUt.Createf(pwd, cwd, cc)) {
+                                        using (Stream os = TravUt.Createf(pwd, cwd, cd)) {
                                             Ut.WriteRes(wr, 150, "Opening " + dc.Mode + " mode data connection for " + cwd);
                                             os.SetLength(ftpRest);
                                             os.Position = ftpRest;
@@ -418,7 +425,7 @@ namespace FTP4AFP {
                                 if (M.Success) {
                                     String cwd = M.Groups["a"].Value;
                                     try {
-                                        using (Stream os = TravUt.Createf(pwd, cwd, cc)) {
+                                        using (Stream os = TravUt.Createf(pwd, cwd, cd)) {
                                             Ut.WriteRes(wr, 150, "Opening " + dc.Mode + " mode data connection for " + cwd);
                                             os.Seek(0, SeekOrigin.End);
                                             dc.RecvSt(os);
@@ -464,7 +471,7 @@ namespace FTP4AFP {
                                 if (M.Success) {
                                     String cwd = M.Groups["a"].Value;
                                     try {
-                                        TravUt.Dele(pwd, cwd, cc);
+                                        TravUt.Dele(pwd, cwd, cd);
 
                                         Ut.WriteRes(wr, 250, "\"" + cwd + "\" removed successfully.");
                                         continue;
@@ -547,7 +554,7 @@ namespace FTP4AFP {
         }
 
         class Uta {
-            public MacRoot Login(MyDSI3 comm, ConConf cc, String U, String P) {
+            public MacRoot Login(MyDSI3 comm, ConDyn cd, String U, String P) {
                 {
                     TransmitRes res = comm.Transmit(new DSIOpenSession());
                     if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
@@ -575,7 +582,7 @@ namespace FTP4AFP {
 
                     GetSrvrParmsPack pack = new GetSrvrParmsPack(res1.br);
 
-                    return new MacRoot(pack, comm, cc);
+                    return new MacRoot(pack, comm, cd);
                 }
             }
         }
@@ -667,16 +674,14 @@ namespace FTP4AFP {
         String _AFPHost = "";
         int _AFPPort = 548;
         int _ForkMode = 0;
+        bool _AutoStart = false;
 
-        public bool EnumRes { get { return ForkMode == 1 || ForkMode == 2; } }
         public bool IfAvail { get { return _IfAvail; } set { _IfAvail = value; OnPropertyChanged("IfAvail"); OnPropertyChanged("Setting"); } }
-        public bool ResPrefix { get { return ForkMode == 1; } }
         public int FTPPort { get { return _FTPPort; } set { _FTPPort = value; OnPropertyChanged("FTPPort"); OnPropertyChanged("Setting"); } }
         public String AFPHost { get { return _AFPHost; } set { _AFPHost = value; OnPropertyChanged("AFPHost"); OnPropertyChanged("Setting"); } }
         public int AFPPort { get { return _AFPPort; } set { _AFPPort = value; OnPropertyChanged("AFPPort"); OnPropertyChanged("Setting"); } }
-        public int ForkMode { get { return _ForkMode; } set { _ForkMode = value; OnPropertyChanged("EnumRes"); OnPropertyChanged("ResPrefix"); OnPropertyChanged("EnumFi"); } }
-
-        public bool EnumFi { get { return EnumRes && !ResPrefix; } }
+        public int ForkMode { get { return _ForkMode; } set { _ForkMode = value; OnPropertyChanged("ForkMode"); } }
+        public bool AutoStart { get { return _AutoStart; } set { _AutoStart = value; OnPropertyChanged("AutoStart"); OnPropertyChanged("Setting"); } }
 
         public String Setting {
             get {
@@ -686,6 +691,7 @@ namespace FTP4AFP {
                 s += "AFPHost" + "=" + Utco.Enc(AFPHost) + "&";
                 s += "AFPPort" + "=" + Utco.Enc(AFPPort) + "&";
                 s += "ForkMode" + "=" + Utco.Enc(ForkMode) + "&";
+                s += "AutoStart" + "=" + Utco.Enc(AutoStart) + "&";
                 return s.TrimEnd('&');
             }
             set {
@@ -697,9 +703,11 @@ namespace FTP4AFP {
                     if (cols[0] == "AFPHost") AFPHost = Utco.Dec(cols[1]);
                     if (cols[0] == "AFPPort") AFPPort = Utco.Int32(cols[1]);
                     if (cols[0] == "ForkMode") ForkMode = Utco.Int32(cols[1]);
+                    if (cols[0] == "AutoStart") AutoStart = Utco.Bool(cols[1]);
                 }
             }
         }
+
         class Utco {
             internal static bool Bool(String p) {
                 p = Dec(p);
@@ -743,49 +751,6 @@ namespace FTP4AFP {
             }
         }
 
-        public string GetResName(string fn) {
-            if (ResPrefix) return "._" + fn;
-            return fn + ".AFP_Resource";
-        }
-        public string GetFinderName(string fn) {
-            if (ResPrefix) return null;
-            return fn + ".AFP_AfpInfo";
-        }
-
-        public MacfNam ParseName(String s1) {
-            MacfNam m = new MacfNam();
-            m.Name = s1;
-            m.Ty = Forkty.Data;
-            if (EnumRes) {
-                if (ResPrefix) {
-                    if (s1.StartsWith("._")) {
-                        m.Name = s1.Substring(2);
-                        m.Ty = Forkty.Res;
-                    }
-                    else {
-                        // data
-                    }
-                }
-                else {
-                    if (s1.EndsWith(".AFP_Resource")) {
-                        m.Name = s1.Substring(0, s1.Length - 13);
-                        m.Ty = Forkty.Res;
-                    }
-                    else if (s1.EndsWith(".AFP_AfpInfo")) {
-                        m.Name = s1.Substring(0, s1.Length - 12);
-                        m.Ty = Forkty.Finder;
-                    }
-                    else {
-                        // data
-                    }
-                }
-            }
-            else {
-                // data
-            }
-            return m;
-        }
-
         #region INotifyPropertyChanged ÉÅÉìÉo
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -808,12 +773,12 @@ namespace FTP4AFP {
         MyDSI3 comm;
         OpenVolPack pack2;
         IDir parentDir;
-        ConConf cc;
+        ConDyn cd;
 
-        public MacVol(VolStruc vol, MyDSI3 comm, ConConf cc, IDir parentDir) {
+        public MacVol(VolStruc vol, MyDSI3 comm, ConDyn cd, IDir parentDir) {
             this.vol = vol;
             this.comm = comm;
-            this.cc = cc;
+            this.cd = cd;
             this.parentDir = parentDir;
         }
 
@@ -825,7 +790,7 @@ namespace FTP4AFP {
         public IEnumerable<IEnt> GetEnts() {
             OpenIt();
 
-            return CUt.GetEnts(MLoc.Ut.GetVol(this), comm, cc, this);
+            return CUt.GetEnts(MLoc.Ut.GetVol(this), comm, cd, this);
         }
 
         #endregion
@@ -872,7 +837,7 @@ namespace FTP4AFP {
 
 
         public IEnt FindReal(string name) {
-            return CUt.FindReal(name, comm, cc, this);
+            return CUt.FindReal(name, comm, cd, this);
         }
 
         #endregion
@@ -974,18 +939,32 @@ namespace FTP4AFP {
         }
     }
 
+    public class Utfs {
+        public static Int64 DataFork(FileParameters parm) {
+            if (parm.ExtDataForkSize.HasValue) return parm.ExtDataForkSize.Value;
+            if (parm.DataForkSize.HasValue) return parm.DataForkSize.Value;
+            return -1L;
+        }
+
+        public static Int64 ResFork(FileParameters parm) {
+            if (parm.ExtResourceForkSize.HasValue) return parm.ExtResourceForkSize.Value;
+            if (parm.ResourceForkSize.HasValue) return parm.ResourceForkSize.Value;
+            return -1L;
+        }
+    }
+
     public class MacEnt : IEnt, ICanDL, ICanUP, ICanDele, ICanDeleFi, ICanUPFi {
         FileParameters parm;
         MyDSI3 comm;
-        ConConf cc;
+        ConDyn cd;
         IDir parentDir;
         Forkty ty;
 
-        public MacEnt(FileParameters parm, Forkty ty, MyDSI3 comm, ConConf cc, IDir parentDir) {
+        public MacEnt(FileParameters parm, Forkty ty, MyDSI3 comm, ConDyn cd, IDir parentDir) {
             this.parm = parm;
             this.ty = ty;
             this.comm = comm;
-            this.cc = cc;
+            this.cd = cd;
             this.parentDir = parentDir;
         }
 
@@ -994,8 +973,8 @@ namespace FTP4AFP {
         public string Name {
             get {
                 if (ty == Forkty.Data) return parm.LongName;
-                if (ty == Forkty.Res) return cc.GetResName(parm.LongName);
-                if (ty == Forkty.Finder) return cc.GetFinderName(parm.LongName);
+                if (ty == Forkty.Res) return cd.GetResName(parm.LongName);
+                if (ty == Forkty.Finder) return cd.GetFinderName(parm.LongName);
                 throw new NotSupportedException();
             }
         }
@@ -1005,8 +984,8 @@ namespace FTP4AFP {
 
         public long Size {
             get {
-                if (ty == Forkty.Data) return (parm.DataForkSize.HasValue ? parm.DataForkSize.Value : -1L);
-                if (ty == Forkty.Res) return (parm.ResourceForkSize.HasValue ? parm.ResourceForkSize.Value : -1L);
+                if (ty == Forkty.Data) return Utfs.DataFork(parm);
+                if (ty == Forkty.Res) return Utfs.ResFork(parm);
                 if (ty == Forkty.Finder) return 32;
                 throw new NotSupportedException();
             }
@@ -1291,7 +1270,7 @@ namespace FTP4AFP {
         }
 
         public override long Length {
-            get { return data ? pack.Parms.DataForkSize.Value : pack.Parms.ResourceForkSize.Value; }
+            get { return data ? Utfs.DataFork(pack.Parms) : Utfs.ResFork(pack.Parms); }
         }
 
         public override long Position {
@@ -1427,7 +1406,13 @@ namespace FTP4AFP {
     }
 
     public class CUt {
-        public static IEnumerable<IEnt> GetEnts(MLoc m, MyDSI3 comm, ConConf cc, IDir self) {
+        public static IEnumerable<IEnt> GetEnts(MLoc m, MyDSI3 comm, ConDyn cd, IDir self) {
+            if (cd.AFP31) return GetEnts310(m, comm, cd, self);
+            if (cd.AFP30) return GetEnts300(m, comm, cd, self);
+            return GetEnts220(m, comm, cd, self);
+        }
+
+        public static IEnumerable<IEnt> GetEnts220(MLoc m, MyDSI3 comm, ConDyn cd, IDir self) {
             for (uint x = 0; ; ) {
                 TransmitRes res1 = comm.Transmit(new DSICommand().WithRequestPayload(new FPEnumerate()
                     .WithPath(m.RawPath)
@@ -1446,12 +1431,12 @@ namespace FTP4AFP {
 
                 foreach (FileParameters ent in pack.Ents) {
                     if (ent.IsDirectory) {
-                        yield return new MacDir(ent, comm, cc, self);
+                        yield return new MacDir(ent, comm, cd, self);
                     }
                     else {
-                        yield return new MacEnt(ent, Forkty.Data, comm, cc, self);
-                        if (cc.EnumRes && ((ent.ResourceForkSize.HasValue && ent.ResourceForkSize.Value > 0) || !cc.IfAvail)) yield return new MacEnt(ent, Forkty.Res, comm, cc, self);
-                        if (cc.EnumFi) yield return new MacEnt(ent, Forkty.Finder, comm, cc, self);
+                        yield return new MacEnt(ent, Forkty.Data, comm, cd, self);
+                        if (cd.EnumRes && ((Utfs.ResFork(ent) > 0) || !cd.IfAvail)) yield return new MacEnt(ent, Forkty.Res, comm, cd, self);
+                        if (cd.EnumFi) yield return new MacEnt(ent, Forkty.Finder, comm, cd, self);
                     }
                 }
 
@@ -1461,7 +1446,76 @@ namespace FTP4AFP {
             }
         }
 
-        public static IEnt FindReal(string name, MyDSI3 comm, ConConf cc, IDir self) {
+        public static IEnumerable<IEnt> GetEnts300(MLoc m, MyDSI3 comm, ConDyn cd, IDir self) {
+            for (uint x = 0; ; ) {
+                TransmitRes res1 = comm.Transmit(new DSICommand().WithRequestPayload(new FPEnumerateExt()
+                    .WithPath(m.RawPath)
+                    .WithStartIndex(Convert.ToUInt16(1U + x))
+                    .WithVolumeID(m.VolID)
+                    .WithDirectoryID(m.DirID)
+                    .WithFileBitmap(AfpFileBitmap.ExtDataForkLength | AfpFileBitmap.ExtResourceForkLength | AfpFileBitmap.LongName | AfpFileBitmap.NodeID | AfpFileBitmap.ModificationDate)
+                    .WithDirectoryBitmap(AfpDirectoryBitmap.NodeID | AfpDirectoryBitmap.LongName | AfpDirectoryBitmap.ModificationDate)
+                    ));
+                if (res1.pack.ErrorCode == -5018) break;
+                if (res1.pack.IsResponse && res1.pack.ErrorCode == 0) {
+                }
+                else { throw new DSIException(res1.pack.ErrorCode, res1.pack); }
+
+                EnumerateExtPack pack = new EnumerateExtPack(res1.br);
+
+                foreach (FileParameters ent in pack.Ents) {
+                    if (ent.IsDirectory) {
+                        yield return new MacDir(ent, comm, cd, self);
+                    }
+                    else {
+                        yield return new MacEnt(ent, Forkty.Data, comm, cd, self);
+                        if (cd.EnumRes && ((Utfs.ResFork(ent) > 0) || !cd.IfAvail)) yield return new MacEnt(ent, Forkty.Res, comm, cd, self);
+                        if (cd.EnumFi) yield return new MacEnt(ent, Forkty.Finder, comm, cd, self);
+                    }
+                }
+
+                if (pack.ActualCount == 0) break;
+
+                x += pack.ActualCount;
+            }
+        }
+
+
+        public static IEnumerable<IEnt> GetEnts310(MLoc m, MyDSI3 comm, ConDyn cd, IDir self) {
+            for (uint x = 0; ; ) {
+                TransmitRes res1 = comm.Transmit(new DSICommand().WithRequestPayload(new FPEnumerateExt2()
+                    .WithPath(m.RawPath)
+                    .WithStartIndex(Convert.ToUInt32(1U + x))
+                    .WithVolumeID(m.VolID)
+                    .WithDirectoryID(m.DirID)
+                    .WithFileBitmap(AfpFileBitmap.ExtDataForkLength | AfpFileBitmap.ExtResourceForkLength | AfpFileBitmap.LongName | AfpFileBitmap.NodeID | AfpFileBitmap.ModificationDate)
+                    .WithDirectoryBitmap(AfpDirectoryBitmap.NodeID | AfpDirectoryBitmap.LongName | AfpDirectoryBitmap.ModificationDate)
+                    ));
+                if (res1.pack.ErrorCode == -5018) break;
+                if (res1.pack.IsResponse && res1.pack.ErrorCode == 0) {
+                }
+                else { throw new DSIException(res1.pack.ErrorCode, res1.pack); }
+
+                EnumerateExtPack pack = new EnumerateExtPack(res1.br);
+
+                foreach (FileParameters ent in pack.Ents) {
+                    if (ent.IsDirectory) {
+                        yield return new MacDir(ent, comm, cd, self);
+                    }
+                    else {
+                        yield return new MacEnt(ent, Forkty.Data, comm, cd, self);
+                        if (cd.EnumRes && ((Utfs.ResFork(ent) > 0) || !cd.IfAvail)) yield return new MacEnt(ent, Forkty.Res, comm, cd, self);
+                        if (cd.EnumFi) yield return new MacEnt(ent, Forkty.Finder, comm, cd, self);
+                    }
+                }
+
+                if (pack.ActualCount == 0) break;
+
+                x += pack.ActualCount;
+            }
+        }
+
+        public static IEnt FindReal(string name, MyDSI3 comm, ConDyn cd, IDir self) {
             MLoc m = MLoc.Ut.Get(self);
             TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPGetFileDirParms()
                 .WithVolumeID(m.VolID)
@@ -1483,10 +1537,10 @@ namespace FTP4AFP {
             FileParameters ent = pack.Parms;
 
             if (ent.IsDirectory) {
-                return new MacDir(ent, comm, cc, self);
+                return new MacDir(ent, comm, cd, self);
             }
             else {
-                return new MacEnt(ent, Forkty.Data, comm, cc, self);
+                return new MacEnt(ent, Forkty.Data, comm, cd, self);
             }
         }
     }
@@ -1495,12 +1549,12 @@ namespace FTP4AFP {
         FileParameters parm;
         MyDSI3 comm;
         IDir parentDir;
-        ConConf cc;
+        ConDyn cd;
 
-        public MacDir(FileParameters parm, MyDSI3 comm, ConConf cc, IDir parentDir) {
+        public MacDir(FileParameters parm, MyDSI3 comm, ConDyn cd, IDir parentDir) {
             this.parm = parm;
             this.comm = comm;
-            this.cc = cc;
+            this.cd = cd;
             this.parentDir = parentDir;
         }
 
@@ -1508,7 +1562,7 @@ namespace FTP4AFP {
 
         public IEnumerable<IEnt> GetEnts() {
             MLoc m = MLoc.Ut.Get(this);
-            return CUt.GetEnts(m, comm, cc, this);
+            return CUt.GetEnts(m, comm, cd, this);
         }
 
         #endregion
@@ -1549,7 +1603,7 @@ namespace FTP4AFP {
         #region IDir ÉÅÉìÉo
 
         public IEnt FindReal(string name) {
-            return CUt.FindReal(name, comm, cc, this);
+            return CUt.FindReal(name, comm, cd, this);
         }
 
         #endregion
@@ -1618,19 +1672,19 @@ namespace FTP4AFP {
     public class MacRoot : IDir {
         GetSrvrParmsPack pack;
         MyDSI3 comm;
-        ConConf cc;
+        ConDyn cd;
 
-        public MacRoot(GetSrvrParmsPack pack, MyDSI3 comm, ConConf cc) {
+        public MacRoot(GetSrvrParmsPack pack, MyDSI3 comm, ConDyn cd) {
             this.pack = pack;
             this.comm = comm;
-            this.cc = cc;
+            this.cd = cd;
         }
 
         #region IDir ÉÅÉìÉo
 
         public IEnumerable<IEnt> GetEnts() {
             foreach (VolStruc vol in pack.Volumes) {
-                yield return new MacVol(vol, comm, cc, this);
+                yield return new MacVol(vol, comm, cd, this);
             }
         }
 
@@ -1977,22 +2031,22 @@ namespace FTP4AFP {
             throw new MkdException("We can't create \"" + unixPath + "\".");
         }
 
-        public static Stream Createf(IDir self, String unixPath, ConConf cc) {
+        public static Stream Createf(IDir self, String unixPath, ConDyn cd) {
             if (unixPath == null) throw new StorException("unixPath is null");
             if (unixPath.StartsWith("/")) {
-                return Createf(GetRoot(self), unixPath.Substring(1), cc);
+                return Createf(GetRoot(self), unixPath.Substring(1), cd);
             }
             int p = unixPath.IndexOf('/');
             String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
             String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
             if (s1 == ".") {
-                return Createf(self, s2, cc);
+                return Createf(self, s2, cd);
             }
             if (s1 == "..") {
-                return Createf(self.ParentDir, s2, cc);
+                return Createf(self.ParentDir, s2, cd);
             }
             if (s2 == null) {
-                MacfNam m2 = cc.ParseName(s1);
+                MacfNam m2 = cd.ParseName(s1);
                 try {
                     self.CreatefHere(m2.Name);
                 }
@@ -2010,7 +2064,7 @@ namespace FTP4AFP {
             }
             IEnt o = self.FindReal(s1);
             if (o is IDir) {
-                return Createf((IDir)o, s2, cc);
+                return Createf((IDir)o, s2, cd);
             }
             else if (o != null) {
                 throw new StorException("We knew \"" + o.Name + "\" is a file.");
@@ -2018,22 +2072,22 @@ namespace FTP4AFP {
             throw new StorException("We can't be here for \"" + o.Name + "\".");
         }
 
-        public static Object Dele(IDir self, String unixPath, ConConf cc) {
+        public static Object Dele(IDir self, String unixPath, ConDyn cd) {
             if (unixPath == null) throw new DeleException("unixPath is null");
             if (unixPath.StartsWith("/")) {
-                return Dele(GetRoot(self), unixPath.Substring(1), cc);
+                return Dele(GetRoot(self), unixPath.Substring(1), cd);
             }
             int p = unixPath.IndexOf('/');
             String s1 = (p < 0) ? unixPath : unixPath.Substring(0, p);
             String s2 = (p < 0) ? null : unixPath.Substring(1 + p);
             if (s1 == ".") {
-                return Dele(self, s2, cc);
+                return Dele(self, s2, cd);
             }
             if (s1 == "..") {
-                return Dele(self.ParentDir, s2, cc);
+                return Dele(self.ParentDir, s2, cd);
             }
             if (s2 == null) {
-                MacfNam m2 = cc.ParseName(s1);
+                MacfNam m2 = cd.ParseName(s1);
                 IEnt o2 = self.FindReal(m2.Name);
                 if (false) { }
                 else if (m2.Ty == Forkty.Data && o2 is ICanDele) ((ICanDele)o2).DeletefMe(false);
@@ -2043,12 +2097,70 @@ namespace FTP4AFP {
             }
             IEnt o = self.FindReal(s1);
             if (o is IDir) {
-                return Dele((IDir)o, s2, cc);
+                return Dele((IDir)o, s2, cd);
             }
             else if (o != null) {
                 throw new DeleException("We knew \"" + o.Name + "\" is a file.");
             }
             throw new DeleException("We can't be here for \"" + o.Name + "\".");
         }
+    }
+
+    public class ConDyn {
+        public ConConf cc;
+        public bool AFP30 = false, AFP31 = false;
+
+        public ConDyn(ConConf cc) {
+            this.cc = cc;
+        }
+
+        public string GetResName(string fn) {
+            if (ResPrefix) return "._" + fn;
+            return fn + ".AFP_Resource";
+        }
+        public string GetFinderName(string fn) {
+            if (ResPrefix) return null;
+            return fn + ".AFP_AfpInfo";
+        }
+
+        public bool EnumRes { get { return cc.ForkMode == 1 || cc.ForkMode == 2; } }
+        public bool ResPrefix { get { return cc.ForkMode == 1; } }
+        public bool EnumFi { get { return EnumRes && !ResPrefix; } }
+        public bool IfAvail { get { return cc.IfAvail; } }
+
+        public MacfNam ParseName(String s1) {
+            MacfNam m = new MacfNam();
+            m.Name = s1;
+            m.Ty = Forkty.Data;
+            if (EnumRes) {
+                if (ResPrefix) {
+                    if (s1.StartsWith("._")) {
+                        m.Name = s1.Substring(2);
+                        m.Ty = Forkty.Res;
+                    }
+                    else {
+                        // data
+                    }
+                }
+                else {
+                    if (s1.EndsWith(".AFP_Resource")) {
+                        m.Name = s1.Substring(0, s1.Length - 13);
+                        m.Ty = Forkty.Res;
+                    }
+                    else if (s1.EndsWith(".AFP_AfpInfo")) {
+                        m.Name = s1.Substring(0, s1.Length - 12);
+                        m.Ty = Forkty.Finder;
+                    }
+                    else {
+                        // data
+                    }
+                }
+            }
+            else {
+                // data
+            }
+            return m;
+        }
+
     }
 }

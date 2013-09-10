@@ -1030,7 +1030,7 @@ namespace FTP4AFP {
 
                 OpenForkPack pack = new OpenForkPack(res1.br);
 
-                return new MacSt(comm, data, pack);
+                return new MacSt(comm, data, pack, cd.ExtRW);
             }
         }
 
@@ -1055,7 +1055,7 @@ namespace FTP4AFP {
 
             OpenForkPack pack = new OpenForkPack(res1.br);
 
-            return new MacSt(comm, !isRes, pack);
+            return new MacSt(comm, !isRes, pack, cd.ExtRW);
         }
 
         #endregion
@@ -1246,12 +1246,18 @@ namespace FTP4AFP {
         MyDSI3 comm;
         bool open;
         Int64 pos;
+        bool extrw = false;
+        Int64 LocalLength = -1;
 
-        public MacSt(MyDSI3 comm, bool data, OpenForkPack pack) {
+        public MacSt(MyDSI3 comm, bool data, OpenForkPack pack, bool extrw) {
             this.comm = comm;
             this.data = data;
             this.pack = pack;
+            this.extrw = extrw;
+
             this.open = true;
+
+            this.LocalLength = data ? Utfs.DataFork(pack.Parms) : Utfs.ResFork(pack.Parms);
         }
 
         public override bool CanRead {
@@ -1270,7 +1276,9 @@ namespace FTP4AFP {
         }
 
         public override long Length {
-            get { return data ? Utfs.DataFork(pack.Parms) : Utfs.ResFork(pack.Parms); }
+            get {
+                return LocalLength;
+            }
         }
 
         public override long Position {
@@ -1283,11 +1291,17 @@ namespace FTP4AFP {
         }
 
         public override int Read(byte[] buffer, int offset, int count) {
-            TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPRead()
-                .WithOForkRefNum(pack.Fork)
-                .WithOffset(Convert.ToUInt32(pos))
-                .WithReqCount(Convert.ToUInt32(count))
-            ));
+            TransmitRes res = extrw
+                ? comm.Transmit(new DSICommand().WithRequestPayload(new FPReadExt()
+                 .WithOForkRefNum(pack.Fork)
+                 .WithOffset((pos))
+                 .WithReqCount((count))
+                ))
+                : comm.Transmit(new DSICommand().WithRequestPayload(new FPRead()
+                 .WithOForkRefNum(pack.Fork)
+                 .WithOffset(Convert.ToUInt32(pos))
+                 .WithReqCount(Convert.ToUInt32(count))
+                ));
             if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
 
             }
@@ -1314,27 +1328,39 @@ namespace FTP4AFP {
             TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPSetForkParms()
                 .WithOForkRefNum(pack.Fork)
                 .WithForkLen64(value)
-                .WithFileBitmap(data ? AfpFileBitmap.DataForkLength : AfpFileBitmap.ResourceForkLength)
+                .WithFileBitmap(data
+                    ? (extrw ? AfpFileBitmap.ExtDataForkLength : AfpFileBitmap.DataForkLength)
+                    : (extrw ? AfpFileBitmap.ExtResourceForkLength : AfpFileBitmap.ResourceForkLength)
+                    )
             ));
             if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
-
+                LocalLength = value;
             }
             else throw new DSIException(res.pack.ErrorCode, res.pack);
         }
 
         public override void Write(byte[] buffer, int offset, int count) {
-            TransmitRes res = comm.Transmit(new DSIWrite().WithRequestPayload(new FPWrite()
-                .WithStartEndFlag(false)
-                .WithOForkRefNum(pack.Fork)
-                .WithOffset(Convert.ToInt32(pos))
-                .WithReqCount(count)
-                .WithForkData(buffer, offset)
-            ));
+            TransmitRes res = extrw
+                ? comm.Transmit(new DSIWrite().WithWriteOffset(20).WithRequestPayload(new FPWriteExt()
+                 .WithStartEndFlag(false)
+                 .WithOForkRefNum(pack.Fork)
+                 .WithOffset((pos))
+                 .WithReqCount(count)
+                 .WithForkData(buffer, offset)
+                ))
+                : comm.Transmit(new DSIWrite().WithRequestPayload(new FPWrite()
+                 .WithStartEndFlag(false)
+                 .WithOForkRefNum(pack.Fork)
+                 .WithOffset(Convert.ToInt32(pos))
+                 .WithReqCount(count)
+                 .WithForkData(buffer, offset)
+                ));
             if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
 
             }
             else throw new DSIException(res.pack.ErrorCode, res.pack);
             pos += count;
+            LocalLength = Math.Max(LocalLength, pos);
         }
 
         protected override void Dispose(bool disposing) {
@@ -2127,6 +2153,8 @@ namespace FTP4AFP {
         public bool ResPrefix { get { return cc.ForkMode == 1; } }
         public bool EnumFi { get { return EnumRes && !ResPrefix; } }
         public bool IfAvail { get { return cc.IfAvail; } }
+
+        public bool ExtRW { get { return AFP30; } }
 
         public MacfNam ParseName(String s1) {
             MacfNam m = new MacfNam();

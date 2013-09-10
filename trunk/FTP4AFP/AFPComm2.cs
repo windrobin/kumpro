@@ -492,6 +492,27 @@ namespace AFPt2 {
         }
     }
 
+    public class FPReadExt : IFP {
+        public ushort OForkRefNum;
+        public Int64 Offset = 0;
+        public Int64 ReqCount = 10000;
+
+        public FPReadExt WithOForkRefNum(ushort OForkRefNum) { this.OForkRefNum = OForkRefNum; return this; }
+        public FPReadExt WithOffset(Int64 Offset) { this.Offset = Offset; return this; }
+        public FPReadExt WithReqCount(Int64 ReqCount) { this.ReqCount = ReqCount; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)60); // kFPReadExt     
+            wr.Write((byte)0);
+            wr.Write((ushort)OForkRefNum);
+            wr.Write((Int64)Offset);
+            wr.Write((Int64)ReqCount);
+            return os.ToArray();
+        }
+    }
+
     public class FPWrite : IFP {
         public byte Flag = 0;
         public ushort OForkRefNum;
@@ -515,6 +536,33 @@ namespace AFPt2 {
             wr.Write((int)Offset);
             wr.Write((int)ReqCount);
             wr.Write(ForkData, x, ReqCount);
+            return os.ToArray();
+        }
+    }
+
+    public class FPWriteExt : IFP {
+        public byte Flag = 0;
+        public ushort OForkRefNum;
+        public Int64 Offset = 0;
+        public Int64 ReqCount = 0;
+        public byte[] ForkData;
+        public int x = 0;
+
+        public FPWriteExt WithStartEndFlag(bool fromEnd) { if (fromEnd) { this.Flag |= 0x80; } else { this.Flag &= 0x7F; } return this; }
+        public FPWriteExt WithOForkRefNum(ushort OForkRefNum) { this.OForkRefNum = OForkRefNum; return this; }
+        public FPWriteExt WithOffset(Int64 Offset) { this.Offset = Offset; return this; }
+        public FPWriteExt WithReqCount(Int64 ReqCount) { this.ReqCount = ReqCount; return this; }
+        public FPWriteExt WithForkData(byte[] ForkData, int x) { this.ForkData = ForkData; this.x = x; return this; }
+
+        public byte[] ToArray() {
+            MemoryStream os = new MemoryStream();
+            BEW wr = new BEW(os);
+            wr.Write((byte)61); // kFPWriteExt      
+            wr.Write((byte)Flag);
+            wr.Write((ushort)OForkRefNum);
+            wr.Write((Int64)Offset);
+            wr.Write((Int64)ReqCount);
+            wr.Write(ForkData, x, Convert.ToInt32(ReqCount));
             return os.ToArray();
         }
     }
@@ -1281,8 +1329,10 @@ namespace AFPt2 {
 
     public class DSIWrite : IDSI {
         public IFP RequestPayload;
+        public uint WriteOffset = 12;
 
         public DSIWrite WithRequestPayload(IFP RequestPayload) { this.RequestPayload = RequestPayload; return this; }
+        public DSIWrite WithWriteOffset(uint WriteOffset) { this.WriteOffset = WriteOffset; return this; }
 
         public byte[] ToArray(ushort RequestID) {
             byte[] bin = RequestPayload.ToArray();
@@ -1292,7 +1342,7 @@ namespace AFPt2 {
             wr.Write((byte)0);// REQ
             wr.Write((byte)6); // Write
             wr.Write((ushort)RequestID);
-            wr.Write((uint)12); // off
+            wr.Write((uint)WriteOffset); // off
             wr.Write(Convert.ToUInt32(bin.Length)); // len
             wr.Write((uint)0); // reserved
             wr.Write(bin);

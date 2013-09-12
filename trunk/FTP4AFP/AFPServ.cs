@@ -116,15 +116,20 @@ namespace FTP4AFP {
 
             public String Mode { get { return isBin ? "BINARY" : "ASCII"; } }
 
+            const int BUFSIZ = 30000;
+
+            int bufSiz = 4000;
+
             public void SendSt(Stream si) {
                 if (tcpl != null) {
                     using (TcpClient tcp = tcpl.AcceptTcpClient()) {
                         Stream st = tcp.GetStream();
-                        byte[] bin = new byte[4000];
+                        byte[] bin = new byte[BUFSIZ];
                         while (true) {
-                            int r = si.Read(bin, 0, bin.Length);
+                            int r = si.Read(bin, 0, bufSiz);
                             if (r < 1) break;
                             st.Write(bin, 0, r);
+                            IncBufSiz();
                         }
                     }
                 }
@@ -132,15 +137,20 @@ namespace FTP4AFP {
                     using (TcpClient tcp = new TcpClient()) {
                         tcp.Connect(tcpep);
                         Stream st = tcp.GetStream();
-                        byte[] bin = new byte[4000];
+                        byte[] bin = new byte[BUFSIZ];
                         while (true) {
-                            int r = si.Read(bin, 0, bin.Length);
+                            int r = si.Read(bin, 0, bufSiz);
                             if (r < 1) break;
                             st.Write(bin, 0, r);
+                            IncBufSiz();
                         }
                     }
                 }
                 else throw new ApplicationException("No PASV/PORT commands are issued.");
+            }
+
+            private void IncBufSiz() {
+                bufSiz = Math.Min(BUFSIZ, bufSiz + bufSiz / 8);
             }
 
             public void Port(string p) {
@@ -155,11 +165,12 @@ namespace FTP4AFP {
                 if (tcpl != null) {
                     using (TcpClient tcp = tcpl.AcceptTcpClient()) {
                         Stream st = tcp.GetStream();
-                        byte[] bin = new byte[4000];
+                        byte[] bin = new byte[BUFSIZ];
                         while (true) {
-                            int r = st.Read(bin, 0, bin.Length);
+                            int r = st.Read(bin, 0, bufSiz);
                             if (r < 1) break;
                             os.Write(bin, 0, r);
+                            IncBufSiz();
                         }
                     }
                 }
@@ -167,11 +178,12 @@ namespace FTP4AFP {
                     using (TcpClient tcp = new TcpClient()) {
                         tcp.Connect(tcpep);
                         Stream st = tcp.GetStream();
-                        byte[] bin = new byte[4000];
+                        byte[] bin = new byte[BUFSIZ];
                         while (true) {
-                            int r = st.Read(bin, 0, bin.Length);
+                            int r = st.Read(bin, 0, bufSiz);
                             if (r < 1) break;
                             os.Write(bin, 0, r);
+                            IncBufSiz();
                         }
                     }
                 }
@@ -195,7 +207,7 @@ namespace FTP4AFP {
                     StreamReader rr = new StreamReader(st, Encoding.UTF8, false);
 
                     ConDyn cd = new ConDyn(cc);
-                    String fyi = "";
+                    String syst = "";
                     using (MyDSI3 comm = new MyDSI3(afp)) {
                         TransmitRes res = comm.Transmit(new DSIGetStatus());
                         if (res.pack.IsResponse && res.pack.ErrorCode == 0) {
@@ -209,12 +221,12 @@ namespace FTP4AFP {
                             if (pack.AFPVersionsList.Contains("AFP3.1")) {
                                 cd.AFP31 = true;
                             }
-                            fyi += " Server: " + pack.ServerName + "\n";
-                            fyi += " AFPVer:";
-                            foreach (String ver in pack.AFPVersionsList) fyi += " <" + ver + ">";
-                            fyi += "\n";
-                            fyi += "    UAM:";
-                            foreach (String ver in pack.UAMsList) fyi += " <" + ver + ">";
+                            syst += " Server: " + pack.ServerName + "\n";
+                            syst += " AFPVer:";
+                            foreach (String ver in pack.AFPVersionsList) syst += " <" + ver + ">";
+                            syst += "\n";
+                            syst += "    UAM:";
+                            foreach (String ver in pack.UAMsList) syst += " <" + ver + ">";
                         }
                         else {
                             Ut.WriteRes(wr, 500, "AFP server failed: " + new DSIException(res.pack.ErrorCode, res.pack));
@@ -230,12 +242,17 @@ namespace FTP4AFP {
                     IEnt rnfr = null;
                     using (MyDSI3 comm = new MyDSI3(afp)) {
                         Ticker ti = new Ticker(comm, evExit);
-                        Ut.WriteRes(wr, 220, "FTP4AFP in UTF-8" + "\n" + fyi);
+                        Ut.WriteRes(wr, 220, "FTP4AFP in UTF-8");
                         while (true) {
                             try {
                                 String row = rr.ReadLine();
                                 if (row == null) break;
                                 Match M;
+                                M = Regex.Match(row, "^QUIT", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
+                                    Ut.WriteRes(wr, 221, "Goodbye!");
+                                    break;
+                                }
                                 M = Regex.Match(row, "^USER\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                                 if (M.Success) {
                                     U = M.Groups["a"].Value;
@@ -250,7 +267,12 @@ namespace FTP4AFP {
                                     Ut.WriteRes(wr, 230, "User logged in, proceed.");
                                     continue;
                                 }
-                                if (row.TrimEnd() == "PWD") {
+                                M = Regex.Match(row, "^SYST", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
+                                    Ut.WriteRes(wr, 215, typeof(AFPServ).AssemblyQualifiedName + "\n" + Environment.OSVersion + "\n" + "\n" + syst);
+                                }
+                                M = Regex.Match(row, "^(XPWD|PWD)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
                                     MLoc m = MLoc.Ut.Get(pwd);
                                     Ut.WriteRes(wr, 257, "\"" + m.UnixPath + "\" is current directory.");
                                     continue;
@@ -263,7 +285,8 @@ namespace FTP4AFP {
                                     Ut.WriteRes(wr, 200, "Ok.");
                                     continue;
                                 }
-                                if (row.TrimEnd() == "PASV") {
+                                M = Regex.Match(row, "^PASV", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
                                     dc.Pasv(tcp.Client.LocalEndPoint);
 
                                     Ut.WriteRes(wr, 227, "Entering Passive Mode (" + dc.GetPasv() + ")");
@@ -275,31 +298,41 @@ namespace FTP4AFP {
                                     Ut.WriteRes(wr, 200, "PORT command successful.");
                                     continue;
                                 }
-                                if (row.TrimEnd() == "LIST") {
-                                    StringWriter ww = new StringWriter();
-                                    foreach (IEnt o in pwd.GetEnts()) {
-                                        bool isDir = o is IDir;
-                                        ww.WriteLine("{0}rw-r--r--    1 0        0      {1,10} {2,-12} {3}"
-                                            , isDir ? "d" : "-"
-                                            , isDir ? "0" : o.Size.ToString()
-                                            , DUt.Format(o.Mt)
-                                            , o.Name
-                                            );
+                                M = Regex.Match(row, "^LIST(\\s+(?<a>.+))?\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
+                                    String cwd = M.Groups["a"].Value;
+                                    try {
+                                        IDir newwd = (cwd.Length == 0) ? pwd : TravUt.Cwd(pwd, cwd);
+
+                                        StringWriter ww = new StringWriter();
+                                        foreach (IEnt o in newwd.GetEnts()) {
+                                            bool isDir = o is IDir;
+                                            ww.WriteLine("{0}rw-r--r--    1 0        0      {1,10} {2,-12} {3}"
+                                                , isDir ? "d" : "-"
+                                                , isDir ? "0" : o.Size.ToString()
+                                                , DUt.Format(o.Mt)
+                                                , o.Name
+                                                );
+                                        }
+                                        // http://blog.livedoor.jp/kumagai_nori/archives/51660940.html
+                                        // http://ash.jp/net/ftp_command.htm
+                                        // http://www.atmarkit.co.jp/ait/articles/0307/11/news001.html
+
+                                        // http://www.atmarkit.co.jp/fnetwork/rensai/netpro10/ftp-responsecode.html
+
+                                        // http://maruo.dyndns.org:81/hidesoft/hidesoft_2/x17565.html
+                                        // http://www.nsftools.com/tips/MSFTP.htm#dir
+                                        Ut.WriteRes(wr, 150, "Opening " + dc.Mode + " mode data connection for LIST");
+
+                                        dc.SendData(wr.Encoding.GetBytes(ww.ToString()));
+
+                                        Ut.WriteRes(wr, 226, "Transfer complete");
+                                        continue;
                                     }
-                                    // http://blog.livedoor.jp/kumagai_nori/archives/51660940.html
-                                    // http://ash.jp/net/ftp_command.htm
-                                    // http://www.atmarkit.co.jp/ait/articles/0307/11/news001.html
-
-                                    // http://www.atmarkit.co.jp/fnetwork/rensai/netpro10/ftp-responsecode.html
-
-                                    // http://maruo.dyndns.org:81/hidesoft/hidesoft_2/x17565.html
-                                    // http://www.nsftools.com/tips/MSFTP.htm#dir
-                                    Ut.WriteRes(wr, 150, "Opening " + dc.Mode + " mode data connection for LIST");
-
-                                    dc.SendData(wr.Encoding.GetBytes(ww.ToString()));
-
-                                    Ut.WriteRes(wr, 226, "Transfer complete");
-                                    continue;
+                                    catch (EntNotFoundException err) {
+                                        Ut.WriteRes(wr, 501, err.Message);
+                                        continue;
+                                    }
                                 }
                                 M = Regex.Match(row, "^MLSD(\\s+(?<a>.+))?\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                                 if (M.Success) {
@@ -313,7 +346,7 @@ namespace FTP4AFP {
                                             ww.WriteLine("modify={0};perm={1};size={2};type={3}; {4}"
                                                 , o.Mt.HasValue ? String.Format("{0:yyyy}{0:MM}{0:dd}{0:HH}{0:mm}{0:ss}", o.Mt.Value) : ""
                                                 , isDir ? "cdelmp" : "dlrw"
-                                                , o.Size
+                                                , Math.Max(o.Size, 0)
                                                 , isDir ? "dir" : "file"
                                                 , o.Name
                                                 );
@@ -345,7 +378,8 @@ namespace FTP4AFP {
                                         continue;
                                     }
                                 }
-                                if (row.TrimEnd() == "CDUP") {
+                                M = Regex.Match(row, "^CDUP", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
                                     IDir newwd = pwd.ParentDir;
                                     if (newwd == null) {
                                         Ut.WriteRes(wr, 250, "We are already at root directory.");
@@ -371,8 +405,16 @@ namespace FTP4AFP {
                                     rr = new StreamReader(st, enc, false);
                                     continue;
                                 }
-                                if (row.TrimEnd() == "FEAT") {
-                                    Ut.WriteRes(wr, 211, "Features:| UTF8| MLST modify*;perm*;size*;type*;| END".Replace("|", "\n"));
+                                M = Regex.Match(row, "^OPTS\\s+FORKMODE\\s+(?<a>\\d+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
+                                    int i = int.Parse(M.Groups["a"].Value);
+                                    cd.ForkMode = i;
+                                    Ut.WriteRes(wr, 200, "It is in fork mode " + i + ".");
+                                    continue;
+                                }
+                                M = Regex.Match(row, "^FEAT", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (M.Success) {
+                                    Ut.WriteRes(wr, 211, "Features:| UTF8| MLST modify*;perm*;size*;type*;| FORKMODE| END".Replace("|", "\n"));
                                     continue;
                                 }
                                 M = Regex.Match(row, "^RETR\\s+(?<a>.+)\\s*$", RegexOptions.Singleline | RegexOptions.IgnoreCase);
@@ -1110,7 +1152,9 @@ namespace FTP4AFP {
                     .WithDirectoryID(m.DirID)
                     .WithFlag((byte)(data ? 0x00 : 0x80))
                     .WithAccessMode(AfpAccessMode.Read)
-                    .WithBitmap(data ? AfpFileBitmap.DataForkLength : AfpFileBitmap.ResourceForkLength)
+                    .WithBitmap(data
+                        ? (cd.ExtRW ? AfpFileBitmap.ExtDataForkLength : AfpFileBitmap.DataForkLength)
+                        : (cd.ExtRW ? AfpFileBitmap.ExtResourceForkLength : AfpFileBitmap.ResourceForkLength))
                     .WithPath(m.RawPath)
                 ));
                 if (res1.pack.IsResponse && res1.pack.ErrorCode == 0) {
@@ -1135,7 +1179,9 @@ namespace FTP4AFP {
                 .WithDirectoryID(m.DirID)
                 .WithFlag((byte)(!isRes ? 0x00 : 0x80))
                 .WithAccessMode(AfpAccessMode.Write)
-                .WithBitmap(!isRes ? AfpFileBitmap.DataForkLength : AfpFileBitmap.ResourceForkLength)
+                .WithBitmap(!isRes
+                    ? (cd.ExtRW ? AfpFileBitmap.ExtDataForkLength : AfpFileBitmap.DataForkLength)
+                    : (cd.ExtRW ? AfpFileBitmap.ExtResourceForkLength : AfpFileBitmap.ResourceForkLength))
                 .WithPath(m.RawPath)
             ));
             if (res1.pack.IsResponse && res1.pack.ErrorCode == 0) {
@@ -1667,7 +1713,8 @@ namespace FTP4AFP {
             TransmitRes res = comm.Transmit(new DSICommand().WithRequestPayload(new FPGetFileDirParms()
                 .WithVolumeID(m.VolID)
                 .WithDirectoryID(m.DirID)
-                .WithFileBitmap(AfpFileBitmap.DataForkLength | AfpFileBitmap.ResourceForkLength | AfpFileBitmap.LongName | AfpFileBitmap.NodeID)
+                .WithFileBitmap(AfpFileBitmap.LongName | AfpFileBitmap.NodeID
+                    | (cd.ExtRW ? (AfpFileBitmap.ExtDataForkLength | AfpFileBitmap.ExtResourceForkLength) : AfpFileBitmap.DataForkLength | AfpFileBitmap.ResourceForkLength))
                 .WithDirectoryBitmap(AfpDirectoryBitmap.NodeID | AfpDirectoryBitmap.LongName)
                 .WithPath(PUt.CombineRaw(m.RawPath, name))
             ));
@@ -2289,9 +2336,11 @@ namespace FTP4AFP {
     public class ConDyn {
         public ConConf cc;
         public bool AFP30 = false, AFP31 = false;
+        public int ForkMode;
 
         public ConDyn(ConConf cc) {
             this.cc = cc;
+            this.ForkMode = cc.ForkMode;
         }
 
         public string GetResName(string fn) {
@@ -2303,8 +2352,8 @@ namespace FTP4AFP {
             return fn + ".AFP_AfpInfo";
         }
 
-        public bool EnumRes { get { return cc.ForkMode == 1 || cc.ForkMode == 2; } }
-        public bool ResPrefix { get { return cc.ForkMode == 1; } }
+        public bool EnumRes { get { return ForkMode == 1 || ForkMode == 2; } }
+        public bool ResPrefix { get { return ForkMode == 1; } }
         public bool EnumFi { get { return EnumRes && !ResPrefix; } }
         public bool IfAvail { get { return cc.IfAvail; } }
 

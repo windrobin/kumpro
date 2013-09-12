@@ -34,15 +34,9 @@ namespace AFPt {
 
         public ulong ReadUInt64() { return (ulong)ReadInt64(); }
         public long ReadInt64() {
-            int v = br.ReadByte() << 24;
-            v |= br.ReadByte() << 16;
-            v |= br.ReadByte() << 8;
-            v |= br.ReadByte();
-            int w = br.ReadByte() << 24;
-            w |= br.ReadByte() << 16;
-            w |= br.ReadByte() << 8;
-            w |= br.ReadByte();
-            return (long)(v << 32) | (long)w;
+            Int64 v = ReadInt32();
+            uint w = ReadUInt32();
+            return (v << 32) | w;
         }
     }
 }

@@ -270,6 +270,7 @@ namespace FTP4AFP {
                                 M = Regex.Match(row, "^SYST", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                                 if (M.Success) {
                                     Ut.WriteRes(wr, 215, typeof(AFPServ).AssemblyQualifiedName + "\n" + Environment.OSVersion + "\n" + "\n" + syst);
+                                    continue;
                                 }
                                 M = Regex.Match(row, "^(XPWD|PWD)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                                 if (M.Success) {
@@ -2336,11 +2337,10 @@ namespace FTP4AFP {
     public class ConDyn {
         public ConConf cc;
         public bool AFP30 = false, AFP31 = false;
-        public int ForkMode;
+        public int _ForkMode = -1;
 
         public ConDyn(ConConf cc) {
             this.cc = cc;
-            this.ForkMode = cc.ForkMode;
         }
 
         public string GetResName(string fn) {
@@ -2352,8 +2352,10 @@ namespace FTP4AFP {
             return fn + ".AFP_AfpInfo";
         }
 
+        public int ForkMode { get { return (_ForkMode < 0) ? cc.ForkMode : _ForkMode; } set { _ForkMode = value; } }
+
         public bool EnumRes { get { return ForkMode == 1 || ForkMode == 2; } }
-        public bool ResPrefix { get { return ForkMode == 1; } }
+        public bool ResPrefix { get { return ForkMode == 2; } }
         public bool EnumFi { get { return EnumRes && !ResPrefix; } }
         public bool IfAvail { get { return cc.IfAvail; } }
 

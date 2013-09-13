@@ -1,9 +1,0 @@
-﻿; Noime4ntr.def : モジュール パラメータを宣言します。
-
-LIBRARY      "Noime4ntr.DLL"
-
-EXPORTS
-	DllCanUnloadNow		PRIVATE
-	DllGetClassObject	PRIVATE
-	DllRegisterServer	PRIVATE
-	DllUnregisterServer	PRIVATE

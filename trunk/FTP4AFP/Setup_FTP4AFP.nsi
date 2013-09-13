@@ -44,10 +44,13 @@ RequestExecutionLevel admin
 
 ; Pages
 
+Page license
 Page components
 Page directory
 Page custom nsDialogsPage nsDialogsPageLeave
 Page instfiles
+
+LicenseData "License.rtf"
 
 UninstPage uninstConfirm
 UninstPage instfiles

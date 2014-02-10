@@ -10,8 +10,8 @@
 
 !define COM   "HIRAOKA HYPERS TOOLS, Inc."
 
-!define VER    "1.2.1"
-!define APPVER "1_2_1"
+!define VER    "1.2.1'"
+!define APPVER "1_2_1'"
 
 !define MIME "image/tiff"
 
@@ -141,7 +141,7 @@ Section "${APP}" ;No components page, name is not important
   
 SectionEnd ; end the section
 
-Section /o "${APP} for NPAPI(Firefox/Chrome)"
+Section /o "${APP} for NPAPI(Firefox/Chrome) 通常版"
   ; Required
   WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "Path" "$INSTDIR\npaxtif5.dll"
 
@@ -150,6 +150,17 @@ Section /o "${APP} for NPAPI(Firefox/Chrome)"
   WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "Vendor" "HIRAOKA HYPERS TOOLS, Inc."
 
   File "/oname=$INSTDIR\npaxtif5.dll" "release\AxTIF5.ocx"
+SectionEnd
+
+Section /o "${APP} for NPAPI(Firefox/Chrome) 優先版 npzzzaxtif5"
+  ; Required
+  WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "Path" "$INSTDIR\npzzzaxtif5.dll"
+
+  ; Optional
+  WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "ProductName" "Ax TIFF Viewer five"
+  WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "Vendor" "HIRAOKA HYPERS TOOLS, Inc."
+
+  File "/oname=$INSTDIR\npzzzaxtif5.dll" "release\AxTIF5.ocx"
 SectionEnd
 
 Section "関連付け追加(コンピュータ全体の設定)"
@@ -284,6 +295,7 @@ Section "Uninstall"
   ; Remove files and uninstaller
   Delete "$INSTDIR\AxTIF5.ocx"
   Delete "$INSTDIR\npaxtif5.dll"
+  Delete "$INSTDIR\npzzzaxtif5.dll"
 
   Delete "$INSTDIR\uninstall.exe"
 

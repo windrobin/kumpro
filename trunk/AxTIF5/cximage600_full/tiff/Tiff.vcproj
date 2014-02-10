@@ -483,6 +483,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tif_color.c"
+				>
+			</File>
+			<File
 				RelativePath="tif_compress.c"
 				>
 				<FileConfiguration
@@ -761,6 +765,10 @@
 						PreprocessorDefinitions="_LIB;WIN32;_DEBUG;_UNICODE;UNICODE;_CRT_SECURE_NO_DEPRECATE;$(NoInherit)"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\tif_extension.c"
+				>
 			</File>
 			<File
 				RelativePath="tif_fax3.c"
@@ -1323,6 +1331,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tif_stream.cxx"
+				>
+			</File>
+			<File
 				RelativePath="tif_strip.c"
 				>
 				<FileConfiguration
@@ -1563,6 +1575,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tif_win32.c"
+				>
+			</File>
+			<File
 				RelativePath="tif_write.c"
 				>
 				<FileConfiguration
@@ -1652,6 +1668,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\tif_config.h"
+				>
+			</File>
+			<File
 				RelativePath="tif_dir.h"
 				>
 			</File>
@@ -1680,7 +1700,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\tiffio.hxx"
+				>
+			</File>
+			<File
 				RelativePath="tiffiop.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tiffvers.h"
 				>
 			</File>
 			<File

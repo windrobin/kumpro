@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/osrs/libtiff/libtiff/tif_codec.c,v 1.2 1999/12/07 17:11:38 mwelles Exp $ */
+/* $Id: tif_codec.c,v 1.10.2.2 2010-06-08 18:50:41 bfriesen Exp $ */
 
 /*
  * Copyright (c) 1988-1997 Sam Leffler
@@ -37,7 +37,7 @@ static	int NotConfigured(TIFF*, int);
 #define	TIFFInitLZW		NotConfigured
 #endif
 #ifndef	PACKBITS_SUPPORT
-#define	TIFFInitPackbits	NotConfigured
+#define	TIFFInitPackBits	NotConfigured
 #endif
 #ifndef	THUNDER_SUPPORT
 #define	TIFFInitThunderScan	NotConfigured
@@ -95,23 +95,66 @@ TIFFCodec _TIFFBuiltinCODECS[] = {
     { "PixarLog",	COMPRESSION_PIXARLOG,	TIFFInitPixarLog },
     { "SGILog",		COMPRESSION_SGILOG,	TIFFInitSGILog },
     { "SGILog24",	COMPRESSION_SGILOG24,	TIFFInitSGILog },
-    { NULL }
+    { NULL,             0,                      NULL }
 };
 
 static int
 _notConfigured(TIFF* tif)
 {
 	const TIFFCodec* c = TIFFFindCODEC(tif->tif_dir.td_compression);
-
-	TIFFError(tif->tif_name,
-	    "%s compression support is not configured", c->name);
+        char compression_code[20];
+        
+        sprintf( compression_code, "%d", tif->tif_dir.td_compression );
+	TIFFErrorExt(tif->tif_clientdata, tif->tif_name,
+                     "%s compression support is not configured", 
+                     c ? c->name : compression_code );
 	return (0);
 }
 
 static int
 NotConfigured(TIFF* tif, int scheme)
 {
-	tif->tif_setupdecode = _notConfigured;
-	tif->tif_setupencode = _notConfigured;
-	return (1);
+    (void) scheme;
+    
+    tif->tif_decodestatus = FALSE;
+    tif->tif_setupdecode = _notConfigured;
+    tif->tif_encodestatus = FALSE;
+    tif->tif_setupencode = _notConfigured;
+    return (1);
 }
+
+/************************************************************************/
+/*                       TIFFIsCODECConfigured()                        */
+/************************************************************************/
+
+/**
+ * Check whether we have working codec for the specific coding scheme.
+ * 
+ * @return returns 1 if the codec is configured and working. Otherwise
+ * 0 will be returned.
+ */
+
+int
+TIFFIsCODECConfigured(uint16 scheme)
+{
+	const TIFFCodec* codec = TIFFFindCODEC(scheme);
+
+	if(codec == NULL) {
+            return 0;
+        }
+        if(codec->init == NULL) {
+            return 0;
+        }
+	if(codec->init != NotConfigured){
+            return 1;
+        }
+	return 0;
+}
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 8
+ * fill-column: 78
+ * End:
+ */

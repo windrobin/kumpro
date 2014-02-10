@@ -10,8 +10,8 @@
 
 !define COM   "HIRAOKA HYPERS TOOLS, Inc."
 
-!define VER    "1.2.1'"
-!define APPVER "1_2_1'"
+!define VER    "1.3.0"
+!define APPVER "1_3_0"
 
 !define MIME "image/tiff"
 
@@ -149,6 +149,9 @@ Section /o "${APP} for NPAPI(Firefox/Chrome) í èÌî≈"
   WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "ProductName" "Ax TIFF Viewer five"
   WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "Vendor" "HIRAOKA HYPERS TOOLS, Inc."
 
+  Delete "$INSTDIR\npaxtif5.dll"
+  Delete "$INSTDIR\npzzzaxtif5.dll"
+  
   File "/oname=$INSTDIR\npaxtif5.dll" "release\AxTIF5.ocx"
 SectionEnd
 
@@ -159,6 +162,9 @@ Section /o "${APP} for NPAPI(Firefox/Chrome) óDêÊî≈ npzzzaxtif5"
   ; Optional
   WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "ProductName" "Ax TIFF Viewer five"
   WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "Vendor" "HIRAOKA HYPERS TOOLS, Inc."
+
+  Delete "$INSTDIR\npaxtif5.dll"
+  Delete "$INSTDIR\npzzzaxtif5.dll"
 
   File "/oname=$INSTDIR\npzzzaxtif5.dll" "release\AxTIF5.ocx"
 SectionEnd

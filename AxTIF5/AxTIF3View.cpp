@@ -339,6 +339,22 @@ void CAxTIF3View::OnDraw(CDC* pDC)
 		dc.SelectObject(pOrg);
 		pDC->ExcludeClipRect(m_rcNext);
 	}
+	if (pDC->RectVisible(m_rcRotl)) {
+		CDC dc;
+		dc.CreateCompatibleDC(pDC);
+		CBitmap* pOrg = dc.SelectObject(&m_bmRotl);
+		pDC->BitBlt(m_rcRotl.left, m_rcRotl.top, m_rcRotl.Width(), m_rcRotl.Height(), &dc, 0, 0, SRCCOPY);
+		dc.SelectObject(pOrg);
+		pDC->ExcludeClipRect(m_rcRotl);
+	}
+	if (pDC->RectVisible(m_rcRotr)) {
+		CDC dc;
+		dc.CreateCompatibleDC(pDC);
+		CBitmap* pOrg = dc.SelectObject(&m_bmRotr);
+		pDC->BitBlt(m_rcRotr.left, m_rcRotr.top, m_rcRotr.Width(), m_rcRotr.Height(), &dc, 0, 0, SRCCOPY);
+		dc.SelectObject(pOrg);
+		pDC->ExcludeClipRect(m_rcRotr);
+	}
 	if (pDC->RectVisible(m_rcDisp)) {
 		pDC->SelectStockObject(DEFAULT_GUI_FONT);
 		CString str; //str.Format(_T("%u"), 1+m_iPage);
@@ -472,6 +488,8 @@ int CAxTIF3View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		|| !m_bmMagBtn.LoadBitmap(IDB_MAGBTN)
 		|| !m_bmMoveBtn.LoadBitmap(IDB_MOVEBTN)
 		|| !m_bmZoomVal.LoadBitmap(IDB_ZOOMVAL)
+		|| !m_bmRotl.LoadBitmap(IDB_ROTL)
+		|| !m_bmRotr.LoadBitmap(IDB_ROTR)
 		)
 		return -1;
 
@@ -645,6 +663,12 @@ void CAxTIF3View::OnLButtonDown(UINT nFlags, CPoint point) {
 				InvalidateRect(m_rcDisp,false);
 			}
 		}
+		else if (m_rcRotl.PtInRect(point)) {
+			RotPic(-1);
+		}
+		else if (m_rcRotr.PtInRect(point)) {
+			RotPic(1);
+		}
 		else if (m_rcAbout.PtInRect(point)) {
 			AfxGetApp()->OnCmdMsg(ID_APP_ABOUT, 0, NULL, NULL);
 		}
@@ -739,6 +763,8 @@ void CAxTIF3View::LayoutClient() {
 		m_rcAbout = 
 		m_rcMMSel =
 		m_rcZoomVal =
+		m_rcRotl = 
+		m_rcRotr = 
 			CRect();
 	}
 	CRect rc;
@@ -820,6 +846,20 @@ void CAxTIF3View::LayoutClient() {
 		m_rcNext.bottom = rc.bottom;
 		m_rcNext.right = curx = (curx += cxBMNext);
 		m_rcNext.top = rc.bottom - cyBar;
+
+		curx += 8;
+
+		m_rcRotl.left = curx;
+		m_rcRotl.bottom = rc.bottom;
+		m_rcRotl.right = curx = (curx += 32);
+		m_rcRotl.top = rc.bottom - cyBar;
+
+		m_rcRotr.left = curx;
+		m_rcRotr.bottom = rc.bottom;
+		m_rcRotr.right = curx = (curx += 32);
+		m_rcRotr.top = rc.bottom - cyBar;
+
+		curx += 8;
 
 		m_rcAbout.left = curx;
 		m_rcAbout.bottom = rc.bottom;
@@ -1095,5 +1135,25 @@ void CAxTIF3View::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
 		case UPHINT_LOADED:
 			LayoutClient();
 			break;
+	}
+}
+
+void CAxTIF3View::RotPic(int a) {
+	CxImage *p = GetPic();
+	if (p != NULL) {
+		while (a < 0) {
+			p->RotateLeft();
+			a++;
+		}
+		while (a > 0) {
+			p->RotateRight();
+			a--;
+		}
+
+		SetFit(FitWH);
+
+		DoFit();
+		LayoutClient();
+		InvalidateRect(m_rcPaint,false);
 	}
 }

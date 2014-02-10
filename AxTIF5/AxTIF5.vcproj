@@ -400,6 +400,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\rotl.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\rotr.bmp"
+				>
+			</File>
+			<File
 				RelativePath=".\res\trick.bmp"
 				>
 			</File>

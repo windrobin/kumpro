@@ -3,7 +3,7 @@
 
 = Introduction =
 
-入手はこちらから： http://code.google.com/p/kumpro/downloads/list?can=2&q=Ax+TIFF+Viewer+five
+入手はこちらから： https://drive.google.com/file/d/0Bygl-em20CSKM2VRTWxJNE5ackU/edit?usp=sharing
 
 http://kumpro.googlecode.com/svn-history/trunk/AxTIF5/ss.jpg
 

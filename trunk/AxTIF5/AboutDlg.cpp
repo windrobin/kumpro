@@ -74,19 +74,26 @@ BOOL CAboutDlg::OnInitDialog()
 			PVOID pvVeri = LockResource(LoadResource(hMod, hVeri));
 			DWORD cbVeri = SizeofResource(hMod, hVeri);
 			if (pvVeri != NULL && cbVeri != 0) {
-				VS_FIXEDFILEINFO *pffi = NULL;
-				UINT cb = 0;
-				if (VerQueryValue(pvVeri, _T("\\"), reinterpret_cast<LPVOID *>(&pffi), &cb)) {
-					if (pffi->dwSignature == 0xFEEF04BD) {
-						strVer.Format(_T("%u.%u.%u")
-							, 0U +(WORD)(pffi->dwFileVersionMS >> 16)
-							, 0U +(WORD)(pffi->dwFileVersionMS >> 0)
-							, 0U +(WORD)(pffi->dwFileVersionLS >> 16)
-							, 0U +(WORD)(pffi->dwFileVersionLS >> 0)
-							);
+				CHeapPtr<BYTE> tmp;
+				if (tmp.Allocate(cbVeri)) {
+					memcpy(tmp, pvVeri, cbVeri);
+					pvVeri = tmp;
+
+					VS_FIXEDFILEINFO *pffi = NULL;
+					UINT cb = 0;
+					if (VerQueryValue(pvVeri, _T("\\"), reinterpret_cast<LPVOID *>(&pffi), &cb)) {
+						if (pffi->dwSignature == 0xFEEF04BD) {
+							strVer.Format(_T("%u.%u.%u")
+								, 0U +(WORD)(pffi->dwFileVersionMS >> 16)
+								, 0U +(WORD)(pffi->dwFileVersionMS >> 0)
+								, 0U +(WORD)(pffi->dwFileVersionLS >> 16)
+								, 0U +(WORD)(pffi->dwFileVersionLS >> 0)
+								);
+						}
 					}
 				}
 			}
+			if (pvVeri != NULL) UnlockResource(hVeri);
 		}
 
 		{

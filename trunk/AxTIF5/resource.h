@@ -25,6 +25,8 @@
 #define IDB_MOVEBTN                     208
 #define IDR_MENU_P                      209
 #define IDB_ZOOMVAL                     210
+#define IDB_ROTR                        211
+#define IDB_ROTL                        212
 #define IDC_P6                          987
 #define IDC_P12                         988
 #define IDC_P25                         989
@@ -43,7 +45,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        211
+#define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         32795
 #define _APS_NEXT_CONTROL_VALUE         203
 #define _APS_NEXT_SYMED_VALUE           101

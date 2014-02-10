@@ -93,7 +93,7 @@ _TIFFFdOpen(void* fd, const char* name, const char* mode)
 	    _tiffReadProcEx, _tiffWriteProcEx, _tiffSeekProcEx, _tiffCloseProcEx,
 	    _tiffSizeProcEx, _tiffMapProcEx, _tiffUnmapProcEx);
 	if (tif)
-		tif->tif_fd = fd;
+		tif->tif_fd = reinterpret_cast<int>(fd);
 	return (tif);
 }
 

@@ -14,7 +14,7 @@
 
   !define APP "ExplodeICO"
   !define COM "HIRAOKA HYPERS TOOLS, Inc."
-  !define VER "0.1"
+  !define VER "0.1'"
 
   ;Name and file
   Name "${APP} ${VER}"
@@ -43,6 +43,7 @@
 
   ${LicensePage} "License.rtf"
   ${Page} Directory
+  ${Page} Components
   ${Page} InstFiles
   
 ;--------------------------------
@@ -74,7 +75,20 @@ Section "" SecDummy
 
 SectionEnd
 
-Section ""
+Section "Add to start menu"
+  StrCpy $1 "$STARTMENU\ExplodeICO"
+  StrCpy $2 "$INSTDIR\${APP}.exe"
+  StrCpy $3 ""
+  StrCpy $4 "$INSTDIR\1.ico"
+  
+  CreateDirectory "$1"
+  CreateShortCut  "$1\ExplodeICO.lnk" "$2" "$3" "$4"
+  CreateShortCut  "$1\Explode Icons.lnk" "$2" "$3" "$4"
+  CreateShortCut  "$1\アイコン解体.lnk" "$2" "$3" "$4"
+  CreateShortCut  "$1\アイコン素材.lnk" "$2" "$3" "$4"
+SectionEnd
+
+Section "Run ${APP}"
   Exec "$INSTDIR\${APP}.exe"
 SectionEnd
 

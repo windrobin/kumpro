@@ -10,8 +10,8 @@
 
 !define COM   "HIRAOKA HYPERS TOOLS, Inc."
 
-!define VER    "1.3.0"
-!define APPVER "1_3_0"
+!define VER    "1.3.1"
+!define APPVER "1_3_1"
 
 !define MIME "image/tiff"
 
@@ -155,7 +155,7 @@ Section /o "${APP} for NPAPI(Firefox/Chrome) í èÌî≈"
   File "/oname=$INSTDIR\npaxtif5.dll" "release\AxTIF5.ocx"
 SectionEnd
 
-Section /o "${APP} for NPAPI(Firefox/Chrome) óDêÊî≈ npzzzaxtif5"
+Section "${APP} for NPAPI(Firefox/Chrome) óDêÊî≈ npzzzaxtif5"
   ; Required
   WriteRegStr HKLM "SOFTWARE\MozillaPlugins\@digitaldolphins.jp/AxTIF5" "Path" "$INSTDIR\npzzzaxtif5.dll"
 

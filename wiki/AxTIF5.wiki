@@ -3,7 +3,7 @@
 
 = Introduction =
 
-入手はこちらから： https://drive.google.com/file/d/0Bygl-em20CSKM2VRTWxJNE5ackU/edit?usp=sharing
+入手はこちらから： https://drive.google.com/file/d/0Bygl-em20CSKQVRwRnFEZWdGV3M/edit?usp=sharing
 
 http://kumpro.googlecode.com/svn-history/trunk/AxTIF5/ss.jpg
 

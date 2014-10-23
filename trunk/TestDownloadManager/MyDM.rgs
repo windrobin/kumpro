@@ -1,0 +1,27 @@
+HKCR
+{
+	TestDownloadManager.MyDM.1 = s 'MyDM Class'
+	{
+		CLSID = s '{F87D60B2-27E1-48EC-A32D-D4F5AC6E62F8}'
+	}
+	TestDownloadManager.MyDM = s 'MyDM Class'
+	{
+		CLSID = s '{F87D60B2-27E1-48EC-A32D-D4F5AC6E62F8}'
+		CurVer = s 'TestDownloadManager.MyDM.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {F87D60B2-27E1-48EC-A32D-D4F5AC6E62F8} = s 'MyDM Class'
+		{
+			ProgID = s 'TestDownloadManager.MyDM.1'
+			VersionIndependentProgID = s 'TestDownloadManager.MyDM'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{EF1FE730-C5EB-4F51-8DE6-5D15636580FC}'
+		}
+	}
+}

@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestDownloadManager", "TestDownloadManager.vcproj", "{E17F2A57-DAEF-4E1F-A9A1-A3F940A672F7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestDownloadManagerPS", "TestDownloadManagerPS.vcproj", "{1FCF897A-BD49-4E57-9F0B-EAA08028132A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E17F2A57-DAEF-4E1F-A9A1-A3F940A672F7} = {E17F2A57-DAEF-4E1F-A9A1-A3F940A672F7}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E17F2A57-DAEF-4E1F-A9A1-A3F940A672F7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E17F2A57-DAEF-4E1F-A9A1-A3F940A672F7}.Debug|Win32.Build.0 = Debug|Win32
+		{E17F2A57-DAEF-4E1F-A9A1-A3F940A672F7}.Release|Win32.ActiveCfg = Release|Win32
+		{E17F2A57-DAEF-4E1F-A9A1-A3F940A672F7}.Release|Win32.Build.0 = Release|Win32
+		{1FCF897A-BD49-4E57-9F0B-EAA08028132A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1FCF897A-BD49-4E57-9F0B-EAA08028132A}.Release|Win32.ActiveCfg = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,37 @@
+// TestDownloadManager.idl : TestDownloadManager の IDL ソース
+//
+
+// このファイルは、タイプ ライブラリ (TestDownloadManager.tlb) およびマーシャリング コードを
+// 作成するために MIDL ツールによって処理されます。
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(14823EDC-4BB2-4374-A7D7-31CDC22E0146),
+	dual,
+	nonextensible,
+	helpstring("IMyDM インターフェイス"),
+	pointer_default(unique)
+]
+interface IMyDM : IDispatch {
+
+};
+[
+	uuid(EF1FE730-C5EB-4F51-8DE6-5D15636580FC),
+	version(1.0),
+	helpstring("TestDownloadManager 1.0 タイプ ライブラリ")
+]
+library TestDownloadManagerLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(F87D60B2-27E1-48EC-A32D-D4F5AC6E62F8),
+		helpstring("MyDM Class")
+	]
+	coclass MyDM
+	{
+		[default] interface IMyDM;
+	};
+};

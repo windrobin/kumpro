@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		'%APPID%' = s 'TestDownloadManager'
+		'TestDownloadManager.DLL'
+		{
+			val AppID = s '%APPID%'
+		}
+	}
+}

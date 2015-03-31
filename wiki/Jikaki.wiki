@@ -3,7 +3,9 @@
 
 = Introduction =
 
-入手: http://code.google.com/p/kumpro/downloads/list?can=2&q=Jikaki
+入手: https://github.com/HiraokaHyperTools/jikaki/releases
+
+移転しました。https://github.com/HiraokaHyperTools/jikaki
 
 http://kumpro.googlecode.com/svn/trunk/jikaki/ss.jpg
 

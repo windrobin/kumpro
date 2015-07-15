@@ -3,7 +3,9 @@
 
 = Introduction =
 
-入手はこちらから： https://drive.google.com/file/d/0Bygl-em20CSKQVRwRnFEZWdGV3M/edit?usp=sharing
+移転しました： https://github.com/HiraokaHyperTools/AxTIF5
+
+入手はこちらから： https://github.com/HiraokaHyperTools/AxTIF5/releases
 
 http://kumpro.googlecode.com/svn-history/trunk/AxTIF5/ss.jpg
 
